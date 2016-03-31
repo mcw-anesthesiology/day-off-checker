@@ -1,0 +1,50 @@
+<template name="main">
+	<div class="container">
+		<header>
+			<h1>Need a day off?</h1>
+			{{dayOffType}}
+		</header>
+
+		{{> Template.dynamic template=main}}
+	</div>
+</template>
+
+<template name="home">
+	<section class="completed-entries">
+		<ul>
+			{{#each completed}}
+				<li>{{name}}: {{value}}</li>
+			{{/each}}
+		</ul>
+	</section>
+
+	<section class="day-off-buttons">
+		{{#each dayOffButtons}}
+			{{> app_dayOffButton}}
+		{{/each}}
+	</section>
+</template>
+
+<template name="app_dayOffButton">
+	<button class="day-off-button" id="{{id}}">{{text}}</button>
+</template>
+
+<template name="app_name">
+	<input type="text" id="name" />
+</template>
+
+<template name="app_date">
+	<input type="date" id="date" />
+</template>
+
+<template name="app_location">
+	<input type="text" id="location" />
+</template>
+
+<template name="app_call">
+	<div>
+		<p>
+			Call {{number}}.
+		</p>
+	</div>
+</template>
