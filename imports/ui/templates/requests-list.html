@@ -1,0 +1,27 @@
+<template name="requestsList">
+	<a href="/">Back home</a>
+	<table>
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Type</th>
+				<th>Date</th>
+				<th>Location</th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each requests }}
+				{{> request}}
+			{{/each}}
+		</tbody>
+	</table>
+</template>
+
+<template name="request">
+	<tr>
+		<td>{{requestorName}}</td>
+		<td>{{dayOffType}}</td>
+		<td>{{requestedDate}}</td>
+		<td>{{requestedLocation.name}}</td>
+	</tr>
+</template>

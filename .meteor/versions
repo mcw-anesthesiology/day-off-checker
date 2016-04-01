@@ -24,6 +24,7 @@ ecmascript-runtime@0.2.8
 ejson@1.0.9
 es5-shim@4.5.8
 fastclick@1.0.9
+fourseven:scss@3.4.1
 geojson-utils@1.0.6
 hot-code-push@1.0.2
 html-tools@1.0.7
@@ -51,6 +52,7 @@ mongo-id@1.0.2
 npm-mongo@1.4.41
 observe-sequence@1.0.9
 ordered-dict@1.0.5
+percolate:migrations@0.9.8
 promise@0.6.5
 random@1.0.7
 reactive-dict@1.1.5
