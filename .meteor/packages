@@ -18,9 +18,15 @@ es5-shim                # ECMAScript 5 compatibility for older browsers.
 ecmascript              # Enable ECMAScript2015+ syntax in app code
 
 autopublish             # Publish all data to the clients (for prototyping)
-insecure                # Allow all DB writes from clients (for prototyping)
 kadira:flow-router
 kadira:blaze-layout
 session
 fourseven:scss
 percolate:migrations
+aldeed:simple-schema
+accounts-ui
+accounts-password
+useraccounts:core
+useraccounts:unstyled
+aldeed:template-extension
+useraccounts:flow-routing

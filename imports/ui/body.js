@@ -1,3 +1,4 @@
+import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { Session } from 'meteor/session';
 import { ReactiveDict } from 'meteor/reactive-dict';
@@ -6,11 +7,10 @@ import { BlazeLayout } from 'meteor/kadira:blaze-layout';
 import { DayOffRequests } from '../api/day-off-requests.js';
 import { Locations } from '../api/locations.js';
 
+import moment from 'moment';
+
 import './body.html';
 
-Template.main.helpers({
-
-});
 
 const entries = [
 	"dayOffType",
@@ -18,6 +18,19 @@ const entries = [
 	"requestedDate",
 	"requestedLocation"
 ];
+
+const entryNames = {
+	dayOffType: "Type",
+	requestorName: "Name",
+	requestedDate: "Date",
+	requestedLocation: "Location"
+};
+
+const dayOffButtons = [
+	{ text: "Sick day", value: "sick" },
+	{ text: "I-Day", value: "iDay" }
+];
+
 
 function insertEntries(){
 	let request = {};
@@ -29,7 +42,10 @@ function insertEntries(){
 		}
 		request[entry] = value;
 	}
-	DayOffRequests.insert(request);
+	Meteor.call('dayOffRequests.insert', request, (err, res) => {
+		if(err)
+			alert(err);
+	});
 }
 
 Template.home.helpers({
@@ -37,9 +53,31 @@ Template.home.helpers({
 	getEntry(id){
 		const entry = Session.get(id);
 
-		if(id == "requestedLocation" && Session.get(id))
-			return entry.name;
-		return entry;
+		if(entry){
+			switch(id){
+				case "requestedLocation":
+				return entry.name;
+				break;
+				case "requestedDate":
+				return moment(entry).calendar();
+				break;
+				default:
+				return entry;
+				break;
+			}
+		}
+	},
+	entryName(entry){
+		return entryNames[entry];
+	}
+});
+
+Template.home.events({
+	'click .completed-entry'(event, instance) {
+		event.preventDefault();
+		const target = event.target;
+		const entry = target.dataset.id;
+		Session.set(entry, undefined);
 	}
 });
 
@@ -50,7 +88,9 @@ Template.dayOffEntry.helpers({
 				return entry;
 			}
 		}
-		insertEntries();
+		if(!Session.get("confirmation"))
+			return "confirmation";
+
 		return "numberToCall";
 	}
 });
@@ -72,26 +112,43 @@ Template.dayOffEntry.events({
 		const form = event.target;
 		const input = form.children[0];
 
-		if(entries.indexOf(input.name) !== -1){
-			let value;
-			if(input.name == "requestedLocation")
-				value = Locations.findOne(input.value);
-			else
+		let value;
+		switch(input.name){
+			case "dayOffType":
+				if(["sick", "iDay"].indexOf(input.value) !== -1)
+				break;
+			case "requestorName":
+				// TODO: Validation
 				value = input.value;
+				break;
+			case "requestedDate":
+				let time = moment(input.value, "YYYY-MM-DD");
+				if(!time.isValid())
+					alert("Invalid date. Please make sure it is formatted correctly (YYYY-MM-DD).");
+				else if(time.isBefore(moment().startOf("day")))
+					alert("You cannot request a day off for a date in the past.");
+				else
+					value = time.toDate();
+				break;
+			case "requestedLocation":
+				value = Locations.findOne(input.value);
+				break;
+			case "confirmation":
+				insertEntries();
+				value = input.value;
+				break;
+			default:
+				alert("Unknown attribute name");
+				break;
+		}
 
-				Session.set(input.name, value);
-		}
-		else {
-			alert("Unknown attribute name");
-		}
+		if(value)
+			Session.set(input.name, value);
 	}
 });
 
 Template.dayOffType.helpers({
-	dayOffButtons: [
-		{ text: "Sick day", value: "sick" },
-		{ text: "I-Day", value: "iDay" }
-	]
+	dayOffButtons: dayOffButtons
 });
 
 Template.requestedLocation.helpers({

@@ -6,6 +6,8 @@
 		</header>
 
 		{{> Template.dynamic template=main}}
+
+		<a href="/list">Lists</a>
 	</div>
 </template>
 
@@ -14,7 +16,7 @@
 		<ul>
 			{{#each entry in entries}}
 				{{#if getEntry entry}}
-				<li>{{entry}}: {{getEntry entry}}</li>
+					<li><a href="#" class="completed-entry" data-id="{{entry}}">{{entryName entry}}: {{getEntry entry}}</a></li>
 				{{/if}}
 			{{/each}}
 		</ul>
@@ -42,28 +44,37 @@
 </template>
 
 <template name="requestorName">
-	<input type="text" name="requestorName" id="name" placeholder="Your name" />
-	<button type="submit">Submit</button>
+	<input type="text" name="requestorName" id="name" placeholder="Your name" required />
+	<button type="submit">Next</button>
 </template>
 
 <template name="requestedDate">
-	<input type="date" name="requestedDate" id="date" />
-	<button type="submit">Submit</button>
+	<input type="date" name="requestedDate" id="date" required />
+	<button type="submit">Next</button>
 </template>
 
 <template name="requestedLocation">
-	<select name="requestedLocation" id="location">
+	<select name="requestedLocation" id="location" required>
+		<option value="">Select location</option>
 		{{#each location in locations}}
 			<option value="{{location._id}}">{{location.name}}</option>
 		{{/each}}
 	</select>
-	<button type="submit">Submit</button>
+	<button type="submit">Next</button>
+</template>
+
+<template name="confirmation">
+	<input type="hidden" name="confirmation" value="confirmed" />
+	<p>
+		Does everything look right? Click an entry to change it.
+	</p>
+	<button type="submit">Submit request</button>
 </template>
 
 <template name="numberToCall">
 	<div>
 		<p>
-			Call {{getNumber}}.
+			Call {{number}}.
 		</p>
 	</div>
 </template>
