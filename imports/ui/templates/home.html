@@ -1,0 +1,73 @@
+<template name="home">
+	<header>
+		<h1>Need a day off?</h1>
+	</header>
+
+	<section class="completed-entries">
+		<ul>
+			{{#each entry in entries}}
+				{{#if getEntry entry}}
+					<li><a href="#" class="completed-entry" data-id="{{entry}}">{{entryName entry}}: {{getEntry entry}}</a></li>
+				{{/if}}
+			{{/each}}
+		</ul>
+	</section>
+
+	{{> dayOffEntry}}
+
+	<a href="/list">List</a>
+</template>
+
+<template name="dayOffEntry">
+	<form class="entry-form">
+		{{> Template.dynamic template=nextEntry}}
+	</form>
+</template>
+
+<template name="dayOffType">
+	<section class="day-off-buttons">
+		{{#each dayOffButtons}}
+			{{> dayOffTypeButton}}
+		{{/each}}
+	</section>
+</template>
+
+<template name="dayOffTypeButton">
+	<button type="submit" class="day-off-button" name="dayOffType" value="{{value}}">{{text}}</button>
+</template>
+
+<template name="requestorName">
+	<input type="text" name="requestorName" id="name" placeholder="Your name" required />
+	<button type="submit">Next</button>
+</template>
+
+<template name="requestedDate">
+	<input type="date" name="requestedDate" id="date" required />
+	<button type="submit">Next</button>
+</template>
+
+<template name="requestedLocation">
+	<select name="requestedLocation" id="location" required>
+		<option value="">Select location</option>
+		{{#each location in locations}}
+			<option value="{{location._id}}">{{location.name}}</option>
+		{{/each}}
+	</select>
+	<button type="submit">Next</button>
+</template>
+
+<template name="confirmation">
+	<input type="hidden" name="confirmation" value="confirmed" />
+	<p>
+		Does everything look right? Click an entry to change it.
+	</p>
+	<button type="submit">Submit request</button>
+</template>
+
+<template name="numberToCall">
+	<div>
+		<p>
+			Call {{number}}.
+		</p>
+	</div>
+</template>
