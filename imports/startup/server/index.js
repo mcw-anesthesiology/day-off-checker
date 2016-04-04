@@ -1,4 +1,4 @@
-import './migrations.js';
+import './accounts.js';
+import './fixtures.js';
+import './mail.js';
 import './register-api.js';
-
-const APP_EMAIL_ADDRESS = "admin@day-off-checker.me"; // FIXME

@@ -151,6 +151,10 @@ Template.dayOffType.helpers({
 	dayOffButtons: dayOffButtons
 });
 
+Template.requestedLocation.onCreated(function(){
+	Meteor.subscribe('locations');
+});
+
 Template.requestedLocation.helpers({
 	locations(){
 		return Locations.find({}, { sort: { name: 1 } });

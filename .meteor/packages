@@ -21,7 +21,6 @@ kadira:flow-router
 kadira:blaze-layout
 session
 fourseven:scss
-percolate:migrations
 aldeed:simple-schema
 accounts-ui
 accounts-password
@@ -30,3 +29,4 @@ useraccounts:unstyled
 aldeed:template-extension
 useraccounts:flow-routing
 email
+meteorhacks:ssr

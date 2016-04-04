@@ -5,6 +5,8 @@ import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 
 import { Locations } from './locations.js';
 
+import { APP_EMAIL_ADDRESS } from '../constants.js';
+
 import moment from 'moment';
 import map from 'lodash/map';
 
@@ -73,26 +75,29 @@ Meteor.methods({
 
 		if(Meteor.isServer){
 			request.ipAddress = this.connection.clientAddress;
-			sendNotifications();
 		}
 
 		DayOffRequests.insert(request);
+
+		if(Meteor.isServer){
+			sendNotifications(request);
+		}
 	}
 });
 
-function getUsersToEmail(){
-	return Meteor.users.find({ notify: true });
+function getUsersToNotify(){
+	return Meteor.users.find({ notify: true }).fetch(); // FIXME
 }
 
-function sendNotifications(){
-	const users = getUsersToEmail();
+function sendNotifications(request){
+	const users = getUsersToNotify();
 	for(let user of users){
 		Email.send({
-			to: user.email,
+			to: user.emails[0].address,
 			from: APP_EMAIL_ADDRESS,
 			subject: "Notification!",
-			text: "test"
-		})
+			text: `Name: ${request.requestorName}\nType: ${request.dayOffType}\nDate: ${request.requestedDate}\nLocation: ${request.requestedLocation.name}`
+		});
 	}
 }
 

@@ -50,6 +50,7 @@ logging@1.0.10
 mdg:validation-error@0.2.0
 meteor@1.1.12
 meteor-base@1.0.2
+meteorhacks:ssr@2.2.0
 minifier-css@1.1.9
 minifier-js@1.1.9
 minimongo@1.0.12
@@ -63,7 +64,6 @@ npm-bcrypt@0.7.8_2
 npm-mongo@1.4.41
 observe-sequence@1.0.9
 ordered-dict@1.0.5
-percolate:migrations@0.9.8
 promise@0.6.5
 random@1.0.7
 rate-limit@1.0.2
