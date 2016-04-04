@@ -64,10 +64,29 @@
 	<button type="submit">Submit request</button>
 </template>
 
-<template name="numberToCall">
+<template name="submissionConfirmation">
 	<div>
+	{{#if sickDay}}
 		<p>
-			Call {{number}}.
+			Please notify your rotation site charge faculty
+			and the faculty you are assigned directly as soon as possible
+			using the following number.
 		</p>
+		<p>
+			{{number}}
+		</p>
+		<p>
+			If you are on call, notify both chief residents via pager as soon as possible.
+		</p>
+		<ul>
+		{{#each chief in chiefs}}
+			<li>{{chief.name}}: {{chief.pager}}</li>
+		{{/each}}
+		</ul>
+	{{else}}
+		<p>
+			Approval requests have been sent. You will be notified of their responses.
+		</p>
+	{{/if}}
 	</div>
 </template>

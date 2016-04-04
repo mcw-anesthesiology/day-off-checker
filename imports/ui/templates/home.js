@@ -91,7 +91,7 @@ Template.dayOffEntry.helpers({
 		if(!Session.get("confirmation"))
 			return "confirmation";
 
-		return "numberToCall";
+		return "submissionConfirmation";
 	}
 });
 
@@ -161,9 +161,19 @@ Template.requestedLocation.helpers({
 	}
 });
 
-Template.numberToCall.helpers({
+Template.submissionConfirmation.onCreated(() => {
+	Meteor.subscribe('chiefUserData');
+});
+
+Template.submissionConfirmation.helpers({
+	sickDay(){
+		return Session.get("dayOffType") === "sick";
+	},
 	number(){
 		const location = Session.get("requestedLocation");
-		return Locations.findOne(location).number;
+		return location.number;
+	},
+	chiefs(){
+		return Meteor.users.find({ role: "chief" }, { pager: 1, name: 1 });
 	}
 });

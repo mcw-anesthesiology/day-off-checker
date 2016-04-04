@@ -1,3 +1,4 @@
+import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import { AccountsTemplates } from 'meteor/useraccounts:core';
 import { FlowRouter } from 'meteor/kadira:flow-router';
