@@ -17,6 +17,7 @@ import './home.html';
 const entries = [
 	"dayOffType",
 	"requestorName",
+	"requestorEmail",
 	"requestedDate",
 	"requestedLocation"
 ];
@@ -24,6 +25,7 @@ const entries = [
 const entryNames = {
 	dayOffType: "Type",
 	requestorName: "Name",
+	requestorEmail: "Email",
 	requestedDate: "Date",
 	requestedLocation: "Location"
 };
@@ -120,6 +122,10 @@ Template.dayOffEntry.events({
 				if(["sick", "iDay"].indexOf(input.value) !== -1)
 				break;
 			case "requestorName":
+				// TODO: Validation
+				value = input.value;
+				break;
+			case "requestorEmail":
 				// TODO: Validation
 				value = input.value;
 				break;

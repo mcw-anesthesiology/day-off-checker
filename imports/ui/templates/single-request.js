@@ -6,7 +6,8 @@ import { DayOffRequests } from '../../api/day-off-requests.js';
 import find from 'lodash/find';
 
 import './single-request.html';
-import './request-row.js';
+import './sick-day-request.js';
+import './i-day-request.js';
 
 Template.singleRequest.onCreated(() => {
 	Meteor.subscribe('dayOffRequests');

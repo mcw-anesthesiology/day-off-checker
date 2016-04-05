@@ -2,20 +2,55 @@
 	<header>
 		<h1>All Requests</h1>
 	</header>
-	<table>
+
+{{#if sickDayRequests}}
+	<h2>Sick days</h2>
+	<table class="sick-day-requests">
 		<thead>
 			<tr>
 				<th>Name</th>
-				<th>Type</th>
-				<th>Date</th>
 				<th>Location</th>
+				<th>Sick day</th>
+				<th>Requested</th>
 			</tr>
 		</thead>
 		<tbody>
-			{{#each request in requests }}
-				{{> requestRow request=request}}
-			{{/each}}
+	{{#each request in sickDayRequests}}
+			{{>sickDayRequest request=request}}
+	{{/each}}
 		</tbody>
 	</table>
+{{/if}}
+
+{{#if iDayRequests}}
+	<h2>I-Day Requests</h2>
+	<table class="i-day-requests">
+		<thead>
+			<tr>
+				<th rowspan="2">Name</th>
+				<th rowspan="2">Location</th>
+				<th rowspan="2">I-Day</th>
+				<th rowspan="2">Requested</th>
+				<th rowspan="2">Status</th>
+				<th colspan="2">Approval 1</th>
+				<th colspan="2">Approval 2</th>
+				<th colspan="2">Approval 3</th>
+			</tr>
+			<tr>
+				<th>Approver</th>
+				<th>Status</th>
+				<th>Approver</th>
+				<th>Status</th>
+				<th>Approver</th>
+				<th>Status</th>
+			</tr>
+		</thead>
+		<tbody>
+	{{#each request in iDayRequests}}
+			{{>iDayRequest request=request}}
+	{{/each}}
+		</tbody>
+	</table>
+{{/if}}
 	<a href="/">Back home</a>
 </template>

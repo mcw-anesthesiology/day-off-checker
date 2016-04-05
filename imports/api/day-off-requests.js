@@ -54,6 +54,11 @@ Meteor.methods({
 				type: String,
 				label: "Name"
 			},
+			requestorEmail: {
+				type: String,
+				label: "Email",
+				regEx: SimpleSchema.RegEx.Email
+			},
 			requestedDate: {
 				type: Date,
 				label: "Requested date",
@@ -130,7 +135,8 @@ Meteor.methods({
 					status: "approved"
 				}
 			});
-			sendRequestApprovalNotifications();
+			if(Meteor.isServer)
+				sendRequestApprovalNotifications(request);
 		}
 	},
 	'dayOffRequests.denyRequest'(requestId, reason){ // FIXME: Way more validation
@@ -153,7 +159,11 @@ Meteor.methods({
 				"confirmationRequests.$.reason": reason
 			}
 		});
-		sendRequestDenialNotifications();
+
+		if(Meteor.isServer){
+			const request = DayOffRequests.findOne(requestId);
+			sendRequestDenialNotifications(request);
+		}
 	}
 });
 
@@ -190,6 +200,21 @@ function sendNotifications(request){
 		catch(e){
 			console.log("Error sending notification: " + e);
 		}
+	}
+
+	try{
+		timeout += 1000; // FIXME
+		Meteor.setTimeout(() => {
+			Email.send({
+				to: request.requestorEmail,
+				from: APP_EMAIL_ADDRESS,
+				subject: "Request Confirmation",
+				text: "This is confirming that you have sent a day off request." // FIXME: Better, also different if i-day
+			});
+		}, timeout);
+	}
+	catch(e){
+		console.log("Error sending notification: " + e);
 	}
 }
 
@@ -231,10 +256,74 @@ function sendConfirmationRequests(request){
 	}
 }
 
-function sendRequestApprovalNotifications(){
-	// TODO
+function sendRequestApprovalNotifications(request){
+	const users = getUsersToNotify(request);
+	let timeout = 0; // FIXME
+	for(let user of users){
+		try {
+			timeout += 1000; // FIXME
+			Meteor.setTimeout(() => {
+				Email.send({
+					to: user.emails[0].address,
+					from: APP_EMAIL_ADDRESS,
+					subject: "Request Accepted", // FIXME
+					text: "Request has been accepted." // FIXME
+				});
+			}, timeout);
+		}
+		catch(e){
+			console.log("Error sending approval notification: " + e);
+		}
+	}
+
+	try{
+		timeout += 1000; // FIXME
+		Meteor.setTimeout(() => {
+			Email.send({
+				to: request.requestorEmail,
+				from: APP_EMAIL_ADDRESS,
+				subject: "Request Approved!",
+				text: "Your request has been approved!" // FIXME
+			});
+		}, timeout);
+	}
+	catch(e){
+		console.log("Error sending approval notification: " + e);
+	}
 }
 
-function sendRequestDenialNotifications(){
-	// TODO
+function sendRequestDenialNotifications(request){
+	const users = getUsersToNotify(request);
+	let timeout = 0; // FIXME
+	for(let user of users){
+		try{
+			timeout += 1000; // FIXME
+			Meteor.setTimeout(() => {
+				Email.send({
+					to: user.emails[0].address,
+					from: APP_EMAIL_ADDRESS,
+					subject: "Request Denied", // FIXME
+					text: "Request has been denied." // FIXME
+				});
+			}, timeout);
+		}
+		catch(e){
+			console.log("Error sending denial notification: " + e);
+		}
+	}
+
+	try{
+		timeout += 1000; // FIXME
+		Meteor.setTimeout(() => {
+			Email.send({
+				to: request.requestorEmail,
+				from: APP_EMAIL_ADDRESS,
+				subject: "Request Denied",
+				text: "Your request has been denied." // FIXME
+			});
+		}, timeout);
+	}
+	catch(e){
+		console.log("Error sending denial notification: " + e);
+	}
 }

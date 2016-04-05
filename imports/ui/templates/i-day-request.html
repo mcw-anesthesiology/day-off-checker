@@ -1,0 +1,18 @@
+<template name="iDayRequest">
+	<tr>
+		<td title="request.requestorEmail">{{request.requestorName}}</td>
+		<td>{{request.requestedLocation.name}}</td>
+		<td>{{displayDate request.requestedDate}}</td>
+		<td>{{displayDate request.requestTime}}</td>
+		<td>{{request.status}}</td>
+{{#each confirmationRequest in request.confirmationRequests}}
+		<td>{{confirmationRequest.confirmer}}</td>
+		<td>
+			{{confirmationRequest.status}}
+	{{#if requestDenied confirmationRequest}}
+			: {{confirmationRequest.reason}}
+	{{/if}}
+		</td>
+{{/each}}
+	</tr>
+</template>
