@@ -12,19 +12,10 @@
 			</tr>
 		</thead>
 		<tbody>
-			{{#each requests }}
-				{{> request}}
+			{{#each request in requests }}
+				{{> requestRow request=request}}
 			{{/each}}
 		</tbody>
 	</table>
 	<a href="/">Back home</a>
-</template>
-
-<template name="request">
-	<tr>
-		<td>{{requestorName}}</td>
-		<td>{{dayOffType}}</td>
-		<td>{{requestedDate}}</td>
-		<td>{{requestedLocation.name}}</td>
-	</tr>
 </template>

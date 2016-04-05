@@ -11,6 +11,8 @@ import moment from 'moment';
 
 import './home.html';
 
+// TODO: ReactiveVar/Dict instead of Session?
+
 
 const entries = [
 	"dayOffType",
@@ -88,8 +90,8 @@ Template.dayOffEntry.helpers({
 				return entry;
 			}
 		}
-		if(!Session.get("confirmation"))
-			return "confirmation";
+		if(!Session.get("requestConfirmation"))
+			return "requestConfirmation";
 
 		return "submissionConfirmation";
 	}
@@ -133,7 +135,7 @@ Template.dayOffEntry.events({
 			case "requestedLocation":
 				value = Locations.findOne(input.value);
 				break;
-			case "confirmation":
+			case "requestConfirmation":
 				insertEntries();
 				value = input.value;
 				break;

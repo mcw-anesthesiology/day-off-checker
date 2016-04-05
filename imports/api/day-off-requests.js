@@ -15,12 +15,25 @@ export const DayOffRequests = new Mongo.Collection('dayOffRequests');
 
 if(Meteor.isServer){
 	Meteor.publish('dayOffRequests', function(){
-		return DayOffRequests.find({}); // FIXME
+		if(!this.userId)
+			return;
+		const user = Meteor.users.findOne(this.userId);
+		if(user.role === "admin"){
+			return DayOffRequests.find({});
+		}
+		else{
+			return DayOffRequests.find({
+				$or: [
+					{ notified: user.username },
+					{ "confirmationRequests.confirmer": user.username }
+				]
+			});
+		}
 	});
 }
 
 if(Meteor.isClient){
-	Meteor.subscribe('allUserData');
+	Meteor.subscribe('allUserData'); // FIXME?
 }
 
 Meteor.methods({
@@ -72,12 +85,15 @@ Meteor.methods({
 			}
 		}).validate(request);
 
+		if(request.dayOffType == "iDay")
+			request.status = "pending";
+
 		if(Meteor.isServer){
 			request.ipAddress = this.connection.clientAddress;
 			request.requestTime = new Date();
 		}
 
-		DayOffRequests.insert(request);
+		request._id = DayOffRequests.insert(request);
 
 		if(Meteor.isServer){
 			switch(request.dayOffType){
@@ -142,9 +158,8 @@ function sendConfirmationRequests(request){
 	let timeout = 0; // FIXME
 	for(let user of users){
 		try {
-			let confirmationRequest = {};
+			let confirmationRequest = {}; // TODO: Rename to approvalRequest?
 			timeout += 1000; // FIXME
-			confirmationRequest.token = Random.id();
 			confirmationRequest.confirmer = user.username;
 			confirmationRequest.status = "pending";
 			Meteor.setTimeout(() => { // FIXME
@@ -152,7 +167,7 @@ function sendConfirmationRequests(request){
 					to: user.emails[0].address,
 					from: APP_EMAIL_ADDRESS,
 					subject: "Confirmation required",
-					text: `Please click here to respond to the confirmation request: ${APP_URL}/confirmation/${confirmationRequest.confirmationUrl}`
+					text: `Please click here to respond to the confirmation request: ${APP_URL}/request/${request._id}` // FIXME
 				});
 			}, timeout);
 			DayOffRequests.update(request, {

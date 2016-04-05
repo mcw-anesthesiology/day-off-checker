@@ -26,17 +26,10 @@ FlowRouter.route('/list', {
 	}
 });
 
-FlowRouter.route('/confirmation/:token', {
-	name: "Confirmation",
+FlowRouter.route('/request/:_id', {
+	name: "Request.single",
 	triggersEnter: [AccountsTemplates.ensureSignedIn],
 	action(params){
-		Meteor.subscribe('dayOffRequests');
-		const request = DayOffRequests.findOne({ "confirmationRequests.token": params.token });
-		const confirmationRequest = find(request.confirmationRequests, { token: params.token });
-
-		if(Meteor.user().username === confirmationRequest.confirmer)
-			BlazeLayout.render('main', { main: 'confirmation' });
-		else
-			FlowRouter.go('/'); // FIXME: Error message or something
+		BlazeLayout.render('main', { main: 'singleRequest' });
 	}
 });
