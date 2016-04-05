@@ -11,6 +11,8 @@ import '../../ui/layouts';
 import '../../ui/templates';
 
 
+BlazeLayout.setRoot('body');
+
 FlowRouter.route('/', {
 	name: 'App.home',
 	action() {
