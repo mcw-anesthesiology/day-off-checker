@@ -35,3 +35,26 @@ Template.singleRequest.helpers({
 		}
 	}
 });
+
+Template.singleRequest.events({
+	'submit #confirm-request-form'(event, instance){
+		event.preventDefault();
+		Meteor.call('dayOffRequests.approveRequest', FlowRouter.getParam('_id'), (err, res) => { // FIXME: Using param unsafe?
+			if(err)
+				alert(err); // FIXME
+		});
+	},
+	'submit #deny-request-form'(event,instance){
+		event.preventDefault();
+		const reason = $("#deny-reason").val().trim();
+		if(reason == ""){
+			alert("Please enter a reason why you are denying the request");
+			return;
+		}
+
+		Meteor.call('dayOffRequests.denyRequest', FlowRouter.getParam('_id'), reason, (err, res) => { // FIXME: Using param unsafe?
+			if(err)
+				alert(err); // FIXME
+		});
+	}
+});

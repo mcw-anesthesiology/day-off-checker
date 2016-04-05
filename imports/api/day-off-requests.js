@@ -105,6 +105,55 @@ Meteor.methods({
 					break;
 			}
 		}
+	},
+	'dayOffRequests.approveRequest'(requestId){ // FIXME: Way more validation
+		DayOffRequests.update({
+			_id: requestId,
+			dayOffType: "iDay",
+			status: "pending",
+			"confirmationRequests.confirmer": Meteor.user().username
+		}, {
+			$set: {
+				"confirmationRequests.$.status": "approved"
+			}
+		});
+
+		const request = DayOffRequests.findOne(requestId);
+		let allApproved = true;
+		for(let confirmationRequest of request.confirmationRequests){
+			if(confirmationRequest.status !== "approved")
+				allApproved = false;
+		}
+		if(allApproved){
+			DayOffRequests.update({ _id: requestId }, {
+				$set: {
+					status: "approved"
+				}
+			});
+			sendRequestApprovalNotifications();
+		}
+	},
+	'dayOffRequests.denyRequest'(requestId, reason){ // FIXME: Way more validation
+		new SimpleSchema({
+			reason: {
+				type: String,
+				label: "Denial reason"
+			}
+		}).validate({ reason: reason });
+
+		DayOffRequests.update({
+			_id: requestId,
+			dayOffType: "iDay",
+			status: "pending",
+			"confirmationRequests.confirmer": Meteor.user().username
+		}, {
+			$set: {
+				status: "denied",
+				"confirmationRequests.$.status": "denied",
+				"confirmationRequests.$.reason": reason
+			}
+		});
+		sendRequestDenialNotifications();
 	}
 });
 
@@ -180,4 +229,12 @@ function sendConfirmationRequests(request){
 			console.log("Error sending confirmation: " + e);
 		}
 	}
+}
+
+function sendRequestApprovalNotifications(){
+	// TODO
+}
+
+function sendRequestDenialNotifications(){
+	// TODO
 }

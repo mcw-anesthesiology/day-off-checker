@@ -39,14 +39,14 @@ function insertEntries(){
 	for(let entry of entries){
 		let value = Session.get(entry);
 		if(!value){
-			alert("Please complete all entries");
+			alert("Please complete all entries"); // TODO: Replace alerts with something better
 			return;
 		}
 		request[entry] = value;
 	}
 	Meteor.call('dayOffRequests.insert', request, (err, res) => {
 		if(err)
-			alert(err);
+			alert(err); // FIXME
 	});
 }
 
