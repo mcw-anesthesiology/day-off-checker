@@ -57,6 +57,13 @@ const accounts = [
 		role: "admin"
 	},
 	{
+		name: "Chris Fox",
+		username: "cafox",
+		password: "test",
+		email: "cafox@mcw.edu",
+		role: "admin"
+	},
+	{
 		name: "Amy Matenaer",
 		username: "amatenaer",
 		password: "test",
