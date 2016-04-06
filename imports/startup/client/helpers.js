@@ -1,3 +1,4 @@
+import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 
 import moment from 'moment';
@@ -14,5 +15,14 @@ moment.updateLocale('en', {
 });
 
 Template.registerHelper('displayDate', (date) => {
+	if(!date)
+		return "";
 	return moment(date).calendar();
+});
+
+Template.registerHelper('displayNameByUsername', (username) => {
+	if(!username)
+		return "";
+	const user = Meteor.users.findOne({ username: username });
+	return user.name;
 });

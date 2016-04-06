@@ -1,0 +1,94 @@
+.requests-list {
+	position: relative;
+
+	header {
+
+		h1 {
+
+		}
+		margin-top: 2em;
+		margin-bottom: 2em;
+	}
+
+	h2 {
+		margin-bottom: 1em;
+	}
+
+	.search {
+		background: transparent;
+		border: 1px solid $input-border-color;
+		border-radius: 3px;
+		padding-left: 0.5em;
+	}
+
+	table {
+		width: 100%;
+		margin-bottom: 2em;
+
+		& + .reactive-table-navigation {
+			margin-bottom: 4em;
+		}
+	}
+
+	.sick-day-requests {
+
+	}
+
+	.i-day-requests {
+
+	}
+
+	.sort-container {
+		float: right;
+	}
+
+	.sort {
+		background-color: $button-background-color;
+		color: $button-text-color;
+		border: 1px solid $input-border-color;
+		border-radius: 3px;
+		padding-left: 8px;
+		padding-right: 8px;
+	}
+
+	.sort:after {
+		display:inline-block;
+		width: 0;
+		height: 0;
+		border-left: 5px solid transparent;
+		border-right: 5px solid transparent;
+		border-bottom: 5px solid transparent;
+		content:"";
+		position: relative;
+		top:-10px;
+		right:-5px;
+	}
+	.sort.asc:after {
+		width: 0;
+		height: 0;
+		border-left: 5px solid transparent;
+		border-right: 5px solid transparent;
+		border-top: 5px solid $button-text-color;
+		content:"";
+		position: relative;
+		top:4px;
+		right:-5px;
+	}
+	.sort.desc:after {
+		width: 0;
+		height: 0;
+		border-left: 5px solid transparent;
+		border-right: 5px solid transparent;
+		border-bottom: 5px solid $button-text-color;
+		content:"";
+		position: relative;
+		top:-4px;
+		right:-5px;
+	}
+
+	footer {
+		position: absolute;
+		bottom: 20px;
+		right: 40px;
+	}
+}

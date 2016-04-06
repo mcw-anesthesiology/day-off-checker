@@ -5,13 +5,16 @@
 		</header>
 
 		<section class="completed-entries">
-			<ul>
+			<table>
 {{#each entry in entries}}
 	{{#if getEntry entry}}
-				<li><a href="#" class="completed-entry" data-id="{{entry}}">{{entryName entry}}: {{getEntry entry}}</a></li>
+				<tr class="completed-entry {{editable}}" data-id="{{entry}}">
+					<th>{{entryName entry}}</th>
+					<td>{{getEntry entry}}</td>
+				</tr>
 	{{/if}}
 {{/each}}
-			</ul>
+			</table>
 		</section>
 
 		{{> dayOffEntry}}
@@ -74,28 +77,33 @@
 </template>
 
 <template name="submissionConfirmation">
-	<div>
-	{{#if sickDay}}
+	<input type="hidden" name="submissionConfirmation" value="restart" />
+	<div class="submission-confirmation">
+{{#if sickDay}}
 		<p>
 			Please notify your rotation site charge faculty
 			and the faculty you are assigned directly as soon as possible
 			using the following number.
 		</p>
-		<p>
-			{{number}}
+		<p class="location-number">
+			{{location}}: {{number}}
 		</p>
 		<p>
 			If you are on call, notify both chief residents via pager as soon as possible.
 		</p>
-		<ul>
-		{{#each chief in chiefs}}
-			<li>{{chief.name}}: {{chief.pager}}</li>
-		{{/each}}
-		</ul>
-	{{else}}
+		<table class="chief-pager-table">
+	{{#each chief in chiefs}}
+			<tr>
+				<th>{{chief.name}}</th>
+				<td>{{chief.pager}}</td>
+			</tr>
+	{{/each}}
+		</table>
+{{else}}
 		<p>
 			Approval requests have been sent. You will be notified of their responses.
 		</p>
-	{{/if}}
+{{/if}}
 	</div>
+	<button type="submit">Restart</button>
 </template>

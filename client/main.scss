@@ -1,3 +1,4 @@
+@import "../imports/ui/sass/colors";
 @import url(https://fonts.googleapis.com/css?family=Roboto);
 
 $base-font-family: Helvetica, Arial, sans-serif;
@@ -9,12 +10,12 @@ $base-line-height: 1.5;
 $spacing-unit: 30px;
 
 $text-color: #333;
-$heading-text-color: #333; // FIXME
+$heading-text-color: $md-deep-purple-900; // FIXME
 $background-color: #fdfdfd; // FIXME
 
-$input-border-color: #3F51B5;
-$button-background-color: transparent;
-$button-text-color: #FFC107;
+$input-border-color: $md-deep-purple-400;
+$button-background-color: $md-deep-purple-400;
+$button-text-color: #fff;
 
 $on-desktop: 768px;
 $medium-desktop: 992px;

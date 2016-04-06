@@ -30,6 +30,11 @@ const entryNames = {
 	requestedLocation: "Location"
 };
 
+const dayOffTypeNames = {
+	sick: "Sick",
+	iDay: "I-Day"
+};
+
 const dayOffButtons = [
 	{ text: "Sick day", value: "sick" },
 	{ text: "I-Day", value: "iDay" }
@@ -49,25 +54,34 @@ function insertEntries(){
 	Meteor.call('dayOffRequests.insert', request, (err, res) => {
 		if(err)
 			alert(err); // FIXME
+		else
+			Session.set("submissionConfirmation", true);
 	});
 }
 
 Template.home.helpers({
 	entries: entries,
+	editable(){
+		if(!Session.equals("submissionConfirmation", true))
+			return "editable";
+	},
 	getEntry(id){
 		const entry = Session.get(id);
 
 		if(entry){
 			switch(id){
+				case "dayOffType":
+					return dayOffTypeNames[entry];
+					break;
 				case "requestedLocation":
-				return entry.name;
-				break;
+					return entry.name;
+					break;
 				case "requestedDate":
-				return moment(entry).calendar();
-				break;
+					return moment(entry).calendar();
+					break;
 				default:
-				return entry;
-				break;
+					return entry;
+					break;
 			}
 		}
 	},
@@ -77,10 +91,10 @@ Template.home.helpers({
 });
 
 Template.home.events({
-	'click .completed-entry'(event, instance) {
-		event.preventDefault();
+	'click .completed-entry.editable th, click .completed-entry.editable td'(event, instance) {
 		const target = event.target;
-		const entry = target.dataset.id;
+		const parent = $(target).parent();
+		const entry = parent.data('id');
 		Session.set(entry, undefined);
 	}
 });
@@ -114,12 +128,15 @@ Template.dayOffEntry.events({
 		event.preventDefault();
 
 		const form = event.target;
-		const input = form.children[0];
+		const input = $(form).children("input, select")[0];
 
 		let value;
 		switch(input.name){
 			case "dayOffType":
 				if(["sick", "iDay"].indexOf(input.value) !== -1)
+					value = input.value;
+				else
+					alert("Unknown day off type");
 				break;
 			case "requestorName":
 				// TODO: Validation
@@ -144,6 +161,13 @@ Template.dayOffEntry.events({
 			case "requestConfirmation":
 				insertEntries();
 				value = input.value;
+				break;
+			case "submissionConfirmation":
+				Session.set(input.name, undefined);
+				Session.set("requestConfirmation", false);
+				for(let entry of entries){
+					Session.set(entry, undefined);
+				}
 				break;
 			default:
 				alert("Unknown attribute name");
@@ -175,13 +199,15 @@ Template.submissionConfirmation.onCreated(() => {
 
 Template.submissionConfirmation.helpers({
 	sickDay(){
-		return Session.get("dayOffType") === "sick";
+		return Session.get('dayOffType') === "sick";
+	},
+	location(){
+		return Session.get('requestedLocation').name;
 	},
 	number(){
-		const location = Session.get("requestedLocation");
-		return location.number;
+		return Session.get('requestedLocation').number;
 	},
 	chiefs(){
-		return Meteor.users.find({ role: "chief" }, { pager: 1, name: 1 });
+		return Meteor.users.find({ role: 'chief' }, { pager: 1, name: 1 });
 	}
 });
