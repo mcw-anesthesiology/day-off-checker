@@ -1,0 +1,76 @@
+.home {
+	height: 100vh;
+
+	header {
+
+		h1 {
+			text-align: center;
+			font-size: 4em;
+		}
+	}
+
+	.completed-entries {
+		position: absolute;
+		width: 100%;
+		top: 15%;
+		text-align: center;
+
+		ul {
+			list-style: none;
+
+			li {
+
+				a {
+					color: grey;
+
+					animation-duration: 1s;
+					animation-name: slidein;
+				}
+			}
+		}
+	}
+
+	.entry-form {
+		width: 100%;
+		position: absolute;
+		top: 40%;
+		text-align: center;
+
+		.day-off-buttons {
+
+			.day-off-button {
+				width: 200px;
+			}
+		}
+
+		input, select {
+			font-size: 2em;
+			width: 240px;
+			background: transparent;
+			border: 1px solid $input-border-color;
+		}
+
+		button {
+			font-size: 2em;
+			width:80px;
+			background-color: $button-background-color;
+			border: 1px solid $input-border-color;
+		}
+	}
+
+	footer {
+		position: absolute;
+		bottom: 20px;
+		right: 40px;
+	}
+}
+
+@keyframes slidein {
+	from {
+		top: 40%;
+	}
+
+	to {
+		top: 15%;
+	}
+}

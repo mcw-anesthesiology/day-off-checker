@@ -1,21 +1,25 @@
 <template name="home">
-	<header>
-		<h1>Need a day off?</h1>
-	</header>
+	<section class="home">
+		<header>
+			<h1>Need a day off?</h1>
+		</header>
 
-	<section class="completed-entries">
-		<ul>
-			{{#each entry in entries}}
-				{{#if getEntry entry}}
-					<li><a href="#" class="completed-entry" data-id="{{entry}}">{{entryName entry}}: {{getEntry entry}}</a></li>
-				{{/if}}
-			{{/each}}
-		</ul>
+		<section class="completed-entries">
+			<ul>
+{{#each entry in entries}}
+	{{#if getEntry entry}}
+				<li><a href="#" class="completed-entry" data-id="{{entry}}">{{entryName entry}}: {{getEntry entry}}</a></li>
+	{{/if}}
+{{/each}}
+			</ul>
+		</section>
+
+		{{> dayOffEntry}}
+
+		<footer>
+			<a href="/list">List</a>
+		</footer>
 	</section>
-
-	{{> dayOffEntry}}
-
-	<a href="/list">List</a>
 </template>
 
 <template name="dayOffEntry">
@@ -26,9 +30,9 @@
 
 <template name="dayOffType">
 	<section class="day-off-buttons">
-		{{#each dayOffButtons}}
-			{{> dayOffTypeButton}}
-		{{/each}}
+{{#each dayOffButtons}}
+		{{> dayOffTypeButton}}
+{{/each}}
 	</section>
 </template>
 
@@ -54,9 +58,9 @@
 <template name="requestedLocation">
 	<select name="requestedLocation" id="location" required>
 		<option value="">Select location</option>
-		{{#each location in locations}}
+{{#each location in locations}}
 			<option value="{{location._id}}">{{location.name}}</option>
-		{{/each}}
+{{/each}}
 	</select>
 	<button type="submit">Next</button>
 </template>

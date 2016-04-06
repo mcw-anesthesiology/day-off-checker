@@ -1,10 +1,39 @@
-@import "../imports/ui/sass/home";
+@import url(https://fonts.googleapis.com/css?family=Roboto);
 
-body {
-	font-family: sans-serif;
+$base-font-family: Helvetica, Arial, sans-serif;
+$heading-font-family: "Roboto", Helvetica, Arial, sans-serif;
+$base-font-size: 16px;
+$base-font-weight: 400;
+$base-line-height: 1.5;
+
+$spacing-unit: 30px;
+
+$text-color: #333;
+$heading-text-color: #333; // FIXME
+$background-color: #fdfdfd; // FIXME
+
+$input-border-color: #3F51B5;
+$button-background-color: transparent;
+$button-text-color: #FFC107;
+
+$on-desktop: 768px;
+$medium-desktop: 992px;
+$large-desktop: 1200px;
+
+@mixin flex {
+	display: -webkit-flex;
+	display: -moz-flex;
+	display: -ms-flex;
+	display: flex;
 }
 
-
-.container {
-	height: 100%;
+@mixin prefix($property, $value, $vendors: webkit moz ms o) {
+	@if $vendors {
+    	@each $vendor in $vendors {
+        	#{"-" + $vendor + "-" + $property}: #{$value};
+    	}
+	}
+	#{$property}: #{$value};
 }
+
+@import "../imports/ui/sass/index";
