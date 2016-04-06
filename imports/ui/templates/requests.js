@@ -5,7 +5,6 @@ import { DayOffRequests } from '../../api/day-off-requests.js';
 import { Locations } from '../../api/locations.js';
 
 import find from 'lodash/find';
-import List from 'list.js';
 
 import './requests.html';
 
