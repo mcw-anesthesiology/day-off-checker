@@ -1,13 +1,40 @@
 .home {
-	height: 100vh;
+	padding-top: 1em;
+
+	@include mobile {
+		font-size: 4em;
+	}
+
+	position: relative;
+	min-height: 100vh;
+	font-size: 2em;
 	background-color: $background-color;
 
 	@include prefix(transition, "background-color 0.5s ease-in, background-image 0.5s ease-in");
 
+	&.sick,
+	&.iDay {
+
+		header {
+
+			@include mobile {
+				display: none;
+			}
+		}
+	}
+
 	&.sick {
-		background-color: $sick-day-background-color;
+		// background-color: $sick-day-background-color;
 
 		.entry-form {
+
+			.btn-primary {
+				background-color: $sick-day-button-color;
+				border-color: $sick-day-button-border-color;
+			}
+		}
+
+		.submission-confirmation {
 
 			.btn-primary {
 				background-color: $sick-day-button-color;
@@ -17,9 +44,17 @@
 	}
 
 	&.iDay {
-		background-color: $i-day-background-color;
+		// background-color: $i-day-background-color;
 
 		.entry-form {
+
+			.btn-primary {
+				background-color: $i-day-button-color;
+				border-color: $i-day-button-border-color;
+			}
+		}
+
+		.submission-confirmation {
 
 			.btn-primary {
 				background-color: $i-day-button-color;
@@ -29,35 +64,53 @@
 	}
 
 	header {
+		padding: 1em;
+
+		@include mobile {
+			padding: 0.5em;
+		}
 
 		h1 {
 			text-align: center;
-			font-size: 4em;
+			font-size: 3em;
+
+			@media screen and (min-width: $on-desktop) {
+				font-size: 3em;
+			}
 		}
 	}
 
 	.completed-entries {
-		position: absolute;
-		width: 100%;
-		top: 15%;
+		margin-top: 1em;
+		font-size: 1.5em;
+
+		@include mobile {
+			margin-top: 0.5em;
+		}
 
 		table {
-			width: 100%;
 			margin-left: auto;
 			margin-right: auto;
 
-			@media (min-width: 300px) {
-				width: 300px;
+			@media (min-width: $on-desktop) {
+				font-size: 0.75em;
 			}
 
 			.completed-entry {
 				color: grey;
-
 				animation-duration: 1s;
 				animation-name: slidein;
 
+				@include mobile {
+					display: none;
+				}
+
 				&.editable {
 					cursor: pointer;
+
+					@include mobile {
+						display: table-row;
+					}
 
 					&:hover {
 						text-decoration: underline;
@@ -66,22 +119,30 @@
 
 				th, td {
 					width: 50%;
+					padding-left: 1em;
+					padding-right: 1em;
 				}
 			}
 		}
 	}
 
 	.entry-form {
-		width: 100%;
 		position: absolute;
-		top: 40%;
+		width: 100%;
+		top: 45%;
+		margin-top: 3em;
 		text-align: center;
+
+		@include mobile {
+			margin-top: 1em;
+		}
 
 		.day-off-buttons {
 
 			.day-off-button {
-				margin: 0px 0.5em;
-				font-size: 3em;
+				margin: 0.5em;
+				font-size: 2em;
+				padding: 0.5em;
 
 				&.sick {
 					background-color: $sick-day-button-color;
@@ -96,15 +157,25 @@
 		}
 
 		input, select {
-			height: 1.5em;
-			font-size: 2em;
+			width: 70%;
+			background: transparent;
+
+			@include mobile {
+
+			}
+		}
+
+		input {
+			font-size: 1.5em;
 		}
 
 		select {
-
+			font-size: 1em;
+			height: 2em;
 		}
 
 		button {
+			font-size: 1em;
 
 			@include prefix(transition, box-shadow 0.25s ease-out);
 
@@ -114,38 +185,50 @@
 		}
 
 		p {
-			font-size: 1.75em;
+			font-size: 1.5em;
+			margin-bottom: 1em;
+			margin-left: 1em;
+			margin-right: 1em;
+		}
+	}
+
+	.submission-confirmation {
+
+		p {
+			font-size: 1.5em;
 			margin-bottom: 1em;
 			margin-left: 1em;
 			margin-right: 1em;
 		}
 
-		.submission-confirmation {
-			p {
-				font-size: 1.5em;
-			}
+		.location-number {
+			font-size: 1.75em;
+		}
 
-			.location-number {
-				font-size: 1.75em;
-			}
+		.chief-pager-table {
+			margin-left: auto;
+			margin-right: auto;
+			margin-bottom: 1.75em;
+			font-size: 1.5em;
 
-			.chief-pager-table {
-				margin-left: auto;
-				margin-right: auto;
-				margin-bottom: 1.75em;
-				font-size: 1.5em;
+			tr {
 
-				tr {
+				th {
+					padding-right: 1em;
+				}
 
-					th {
-						padding-right: 1em;
-					}
+				td {
 
-					td {
-
-					}
 				}
 			}
+		}
+
+		.btn-primary {
+			font-size: 1em;
+			display: block;
+			margin-left: auto;
+			margin-right: auto;
+			margin-bottom: 1em;
 		}
 	}
 

@@ -1,8 +1,10 @@
 @import "../imports/ui/sass/colors";
 @import url(https://fonts.googleapis.com/css?family=Roboto);
+@import url(https://fonts.googleapis.com/css?family=Raleway);
 
 $base-font-family: Helvetica, Arial, sans-serif;
 $heading-font-family: "Roboto", Helvetica, Arial, sans-serif;
+$button-font-family: "Raleway", "Roboto", Helvetica, Arial, sans-serif;
 $base-font-size: 16px;
 $base-font-weight: 400;
 $base-line-height: 1.5;
@@ -11,7 +13,7 @@ $spacing-unit: 30px;
 
 $text-color: #333;
 $heading-text-color: $md-grey-800; // FIXME
-$background-color: $md-grey-100; // FIXME
+$background-color: $md-grey-50; // FIXME
 $background-color-darker: $md-grey-200;
 
 $input-border-color: $md-deep-purple-400;
@@ -20,13 +22,13 @@ $button-text-color: #fff;
 
 $sick-day-button-color: $md-cyan-400;
 $sick-day-button-border-color: $md-cyan-700;
-$sick-day-background-color: $md-cyan-50;
-$sick-day-background-color-darker: $md-cyan-100;
+$sick-day-background-color: rgba($md-cyan-50, 0.6);
+$sick-day-background-color-darker: rgba($md-cyan-100, 0.6);
 
 $i-day-button-color: $md-light-green-400;
 $i-day-button-border-color: $md-light-green-700;
-$i-day-background-color: $md-light-green-50;
-$i-day-background-color-darker: $md-light-green-100;
+$i-day-background-color: rgba($md-light-green-50, 0.6);
+$i-day-background-color-darker: rgba($md-light-green-100, 0.6);
 
 $on-desktop: 768px;
 $medium-desktop: 992px;
@@ -46,6 +48,14 @@ $large-desktop: 1200px;
     	}
 	}
 	#{$property}: #{$value};
+}
+
+@mixin mobile {
+	@media
+	only screen and (-webkit-min-device-pixel-ratio: 2),
+	only screen and (min-resolution: 192dpi) {
+		@content;
+	}
 }
 
 @import "../imports/ui/sass/index";

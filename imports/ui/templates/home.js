@@ -112,8 +112,6 @@ Template.dayOffEntry.helpers({
 		}
 		if(!Session.get("requestConfirmation"))
 			return "requestConfirmation";
-
-		return "submissionConfirmation";
 	}
 });
 
@@ -166,13 +164,6 @@ Template.dayOffEntry.events({
 				insertEntries();
 				value = input.value;
 				break;
-			case "submissionConfirmation":
-				Session.set(input.name, undefined);
-				Session.set("requestConfirmation", false);
-				for(let entry of entries){
-					Session.set(entry, undefined);
-				}
-				break;
 			default:
 				alert("Unknown attribute name");
 				break;
@@ -185,6 +176,18 @@ Template.dayOffEntry.events({
 
 Template.dayOffType.helpers({
 	dayOffButtons: dayOffButtons
+});
+
+Template.requestorName.onRendered(() => {
+	$("#name").placeholder();
+});
+
+Template.requestorEmail.onRendered(() => {
+	$("#email").placeholder();
+});
+
+Template.requestedDate.onRendered(() => {
+	$("#date").placeholder();
 });
 
 Template.requestedLocation.onCreated(function(){
@@ -215,3 +218,13 @@ Template.submissionConfirmation.helpers({
 		return Meteor.users.find({ role: 'chief' }, { pager: 1, name: 1 });
 	}
 });
+
+Template.submissionConfirmation.events({
+	'click #restart'(event, instance){
+		Session.set("submissionConfirmation", undefined);
+		Session.set("requestConfirmation", undefined);
+		for(let entry of entries){
+			Session.set(entry, undefined);
+		}
+	}
+})

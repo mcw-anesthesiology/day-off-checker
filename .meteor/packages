@@ -25,7 +25,6 @@ aldeed:simple-schema
 accounts-ui
 accounts-password
 useraccounts:core
-useraccounts:unstyled
 aldeed:template-extension
 useraccounts:flow-routing
 email
@@ -33,5 +32,7 @@ meteorhacks:ssr
 random
 reactive-dict
 twbs:bootstrap
-zenniz:jquery-placeholder
 aslagle:reactive-table
+tmeasday:html5-history-api
+zenniz:jquery-placeholder
+useraccounts:bootstrap

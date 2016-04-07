@@ -4,20 +4,24 @@
 			<h1>Need a day off?</h1>
 		</header>
 
+{{#if editable}}
 		<section class="completed-entries">
 			<table>
-{{#each entry in entries}}
-	{{#if getEntry entry}}
+	{{#each entry in entries}}
+		{{#if getEntry entry}}
 				<tr class="completed-entry {{editable}}" data-id="{{entry}}">
 					<th>{{entryName entry}}</th>
 					<td>{{getEntry entry}}</td>
 				</tr>
-	{{/if}}
-{{/each}}
+		{{/if}}
+	{{/each}}
 			</table>
 		</section>
 
-		{{> dayOffEntry}}
+		{{>dayOffEntry}}
+{{else}}
+		{{>submissionConfirmation}}
+{{/if}}
 
 		<footer>
 			<a href="/list">List</a>
@@ -44,44 +48,28 @@
 </template>
 
 <template name="requestorName">
-	<div class="col-md-3 col-md-offset-4 col-sm-5 col-sm-offset-3 col-xs-9">
-		<input type="text" class="form-control" name="requestorName" id="name" placeholder="Your name" required />
-	</div>
-	<div class="col-xs-1">
-		<button type="submit" class="btn btn-lg btn-primary">Next</button>
-	</div>
+	<input type="text" name="requestorName" id="name" placeholder="Your name" required />
+	<button type="submit" class="btn btn-lg btn-primary">Next</button>
 </template>
 
 <template name="requestorEmail">
-	<div class="col-md-3 col-md-offset-4 col-sm-5 col-sm-offset-3 col-xs-9">
-		<input type="email" class="form-control" name="requestorEmail" id="email" placeholder="Your email" required />
-	</div>
-	<div class="col-xs-1">
-		<button type="submit" class="btn btn-lg btn-primary">Next</button>
-	</div>
+	<input type="email" name="requestorEmail" id="email" placeholder="Your email" required />
+	<button type="submit" class="btn btn-lg btn-primary">Next</button>
 </template>
 
 <template name="requestedDate">
-	<div class="col-md-3 col-md-offset-4 col-sm-5 col-sm-offset-3 col-xs-9">
-		<input type="date" class="form-control" name="requestedDate" id="date" required />
-	</div>
-	<div class="col-xs-1">
-		<button type="submit" class="btn btn-lg btn-primary">Next</button>
-	</div>
+	<input type="date" name="requestedDate" id="date" required />
+	<button type="submit" class="btn btn-lg btn-primary">Next</button>
 </template>
 
 <template name="requestedLocation">
-	<div class="col-md-3 col-md-offset-4 col-sm-5 col-sm-offset-3 col-xs-9">
-		<select class="form-control" name="requestedLocation" id="location" required>
-			<option value="">Select location</option>
+	<select name="requestedLocation" id="location" required>
+		<option value="">Select location</option>
 {{#each location in locations}}
-			<option value="{{location._id}}">{{location.name}}</option>
+		<option value="{{location._id}}">{{location.name}}</option>
 {{/each}}
-		</select>
-	</div>
-	<div class="col-xs-1">
-		<button type="submit" class="btn btn-lg btn-primary">Next</button>
-	</div>
+	</select>
+	<button type="submit" class="btn btn-lg btn-primary">Next</button>
 </template>
 
 <template name="requestConfirmation">
@@ -93,7 +81,6 @@
 </template>
 
 <template name="submissionConfirmation">
-	<input type="hidden" name="submissionConfirmation" value="restart" />
 	<div class="submission-confirmation">
 {{#if sickDay}}
 		<p>
@@ -120,6 +107,6 @@
 			Approval requests have been sent. You will be notified of their responses.
 		</p>
 {{/if}}
+		<button type="button" class="btn btn-lg btn-primary" id="restart">Restart</button>
 	</div>
-	<button type="submit" class="btn btn-lg btn-primary">Restart</button>
 </template>

@@ -1,29 +1,8 @@
-/**
- * Reset some basic elements
- */
-body, h1, h2, h3, h4, h5, h6,
-p, blockquote, pre, hr,
-dl, dd, ol, ul, figure {
-    margin: 0;
-    padding: 0;
-}
-
-
-
-/**
- * Basic styling
- */
 body {
 	background-color: $background-color;
-    font: $base-font-weight #{$base-font-size}/#{$base-line-height} $base-font-family;
+    // font: $base-font-weight #{$base-font-size}/#{$base-line-height} $base-font-family;
     color: $text-color;
     background-color: $background-color;
-    -webkit-text-size-adjust: 100%;
-    -webkit-font-feature-settings: "kern" 1;
-    -moz-font-feature-settings: "kern" 1;
-    -o-font-feature-settings: "kern" 1;
-    font-feature-settings: "kern" 1;
-    font-kerning: normal;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -33,4 +12,9 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn.btn-primary {
 	background-color: $button-background-color;
+    font-family: $button-font-family;
+}
+
+.placeholder {
+    color: #999;
 }
