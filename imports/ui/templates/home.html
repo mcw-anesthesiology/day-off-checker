@@ -1,5 +1,5 @@
 <template name="home">
-	<section class="home">
+	<section class="home {{dayOffType}}">
 		<header>
 			<h1>Need a day off?</h1>
 		</header>
@@ -26,7 +26,7 @@
 </template>
 
 <template name="dayOffEntry">
-	<form class="entry-form">
+	<form class="entry-form form-horizontal">
 		{{> Template.dynamic template=nextEntry}}
 	</form>
 </template>
@@ -40,32 +40,48 @@
 </template>
 
 <template name="dayOffTypeButton">
-	<button type="submit" class="day-off-button" name="dayOffType" value="{{value}}">{{text}}</button>
+	<button type="submit" class="day-off-button btn btn-lg btn-primary {{value}}" name="dayOffType" value="{{value}}">{{text}}</button>
 </template>
 
 <template name="requestorName">
-	<input type="text" name="requestorName" id="name" placeholder="Your name" required />
-	<button type="submit">Next</button>
+	<div class="col-md-3 col-md-offset-4 col-sm-5 col-sm-offset-3 col-xs-9">
+		<input type="text" class="form-control" name="requestorName" id="name" placeholder="Your name" required />
+	</div>
+	<div class="col-xs-1">
+		<button type="submit" class="btn btn-lg btn-primary">Next</button>
+	</div>
 </template>
 
 <template name="requestorEmail">
-	<input type="email" name="requestorEmail" id="email" placeholder="Your email" required />
-	<button type="submit">Next</button>
+	<div class="col-md-3 col-md-offset-4 col-sm-5 col-sm-offset-3 col-xs-9">
+		<input type="email" class="form-control" name="requestorEmail" id="email" placeholder="Your email" required />
+	</div>
+	<div class="col-xs-1">
+		<button type="submit" class="btn btn-lg btn-primary">Next</button>
+	</div>
 </template>
 
 <template name="requestedDate">
-	<input type="date" name="requestedDate" id="date" required />
-	<button type="submit">Next</button>
+	<div class="col-md-3 col-md-offset-4 col-sm-5 col-sm-offset-3 col-xs-9">
+		<input type="date" class="form-control" name="requestedDate" id="date" required />
+	</div>
+	<div class="col-xs-1">
+		<button type="submit" class="btn btn-lg btn-primary">Next</button>
+	</div>
 </template>
 
 <template name="requestedLocation">
-	<select name="requestedLocation" id="location" required>
-		<option value="">Select location</option>
+	<div class="col-md-3 col-md-offset-4 col-sm-5 col-sm-offset-3 col-xs-9">
+		<select class="form-control" name="requestedLocation" id="location" required>
+			<option value="">Select location</option>
 {{#each location in locations}}
 			<option value="{{location._id}}">{{location.name}}</option>
 {{/each}}
-	</select>
-	<button type="submit">Next</button>
+		</select>
+	</div>
+	<div class="col-xs-1">
+		<button type="submit" class="btn btn-lg btn-primary">Next</button>
+	</div>
 </template>
 
 <template name="requestConfirmation">
@@ -73,7 +89,7 @@
 	<p>
 		Does everything look right? Click an entry to change it.
 	</p>
-	<button type="submit">Submit request</button>
+	<button type="submit" class="btn btn-lg btn-primary">Submit request</button>
 </template>
 
 <template name="submissionConfirmation">
@@ -105,5 +121,5 @@
 		</p>
 {{/if}}
 	</div>
-	<button type="submit">Restart</button>
+	<button type="submit" class="btn btn-lg btn-primary">Restart</button>
 </template>

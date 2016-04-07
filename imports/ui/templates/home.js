@@ -61,6 +61,9 @@ function insertEntries(){
 
 Template.home.helpers({
 	entries: entries,
+	dayOffType(){
+		return Session.get("dayOffType");
+	},
 	editable(){
 		if(!Session.equals("submissionConfirmation", true))
 			return "editable";
@@ -92,6 +95,7 @@ Template.home.helpers({
 
 Template.home.events({
 	'click .completed-entry.editable th, click .completed-entry.editable td'(event, instance) {
+		// TODO: Fill input with old value
 		const target = event.target;
 		const parent = $(target).parent();
 		const entry = parent.data('id');
@@ -128,7 +132,7 @@ Template.dayOffEntry.events({
 		event.preventDefault();
 
 		const form = event.target;
-		const input = $(form).children("input, select")[0];
+		const input = $(form).find("input, select")[0];
 
 		let value;
 		switch(input.name){

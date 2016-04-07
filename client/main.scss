@@ -10,12 +10,23 @@ $base-line-height: 1.5;
 $spacing-unit: 30px;
 
 $text-color: #333;
-$heading-text-color: $md-deep-purple-900; // FIXME
-$background-color: #fdfdfd; // FIXME
+$heading-text-color: $md-grey-800; // FIXME
+$background-color: $md-grey-100; // FIXME
+$background-color-darker: $md-grey-200;
 
 $input-border-color: $md-deep-purple-400;
 $button-background-color: $md-deep-purple-400;
 $button-text-color: #fff;
+
+$sick-day-button-color: $md-cyan-400;
+$sick-day-button-border-color: $md-cyan-700;
+$sick-day-background-color: $md-cyan-50;
+$sick-day-background-color-darker: $md-cyan-100;
+
+$i-day-button-color: $md-light-green-400;
+$i-day-button-border-color: $md-light-green-700;
+$i-day-background-color: $md-light-green-50;
+$i-day-background-color-darker: $md-light-green-100;
 
 $on-desktop: 768px;
 $medium-desktop: 992px;
