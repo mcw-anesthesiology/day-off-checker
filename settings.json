@@ -1,0 +1,9 @@
+{
+	"galaxy.meteor.com": {
+		"env": {
+			"MONGO_URL": "mongodb://day-off-checker:GS4hU9ZEXe4juxEz@ds017070.mlab.com:17070/day-off-checker",
+			"ROOT_URL": "http://day-off-reporter.mcw-anesthesiology.tech",
+			"MAIL_URL": "smtp://40701ebe2b9d2c3ec:18d0ca555fd201@mailtrap.io:2525/"
+		}
+	}
+}
