@@ -31,7 +31,7 @@ const entryNames = {
 };
 
 const dayOffTypeNames = {
-	sick: "Sick",
+	sick: "Sick day",
 	iDay: "I-Day"
 };
 

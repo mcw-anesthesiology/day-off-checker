@@ -1,10 +1,12 @@
 @import "../imports/ui/sass/colors";
 @import url(https://fonts.googleapis.com/css?family=Roboto);
 @import url(https://fonts.googleapis.com/css?family=Raleway);
+@import url(https://fonts.googleapis.com/css?family=Nunito);
 
 $base-font-family: Helvetica, Arial, sans-serif;
 $heading-font-family: "Roboto", Helvetica, Arial, sans-serif;
 $button-font-family: "Raleway", "Roboto", Helvetica, Arial, sans-serif;
+$site-header-font-family: "Nunito", "Roboto", "Raleway", Helvetica, Arial, sans-serif;
 $base-font-size: 16px;
 $base-font-weight: 400;
 $base-line-height: 1.5;
@@ -13,20 +15,20 @@ $spacing-unit: 30px;
 
 $text-color: #333;
 $heading-text-color: $md-grey-800; // FIXME
-$background-color: $md-grey-50; // FIXME
-$background-color-darker: $md-grey-200;
+$background-color: $md-blue-grey-50; // FIXME
+$background-color-darker: $md-blue-grey-100;
 
-$input-border-color: $md-deep-purple-400;
-$button-background-color: $md-deep-purple-400;
+$input-border-color: $md-blue-grey-700;
+$button-background-color: $md-blue-grey-500;
 $button-text-color: #fff;
 
-$sick-day-button-color: $md-cyan-400;
-$sick-day-button-border-color: $md-cyan-700;
+$sick-day-button-color: $md-cyan-300;
+$sick-day-button-border-color: $md-cyan-600;
 $sick-day-background-color: rgba($md-cyan-50, 0.6);
 $sick-day-background-color-darker: rgba($md-cyan-100, 0.6);
 
-$i-day-button-color: $md-light-green-400;
-$i-day-button-border-color: $md-light-green-700;
+$i-day-button-color: $md-light-green-300;
+$i-day-button-border-color: $md-light-green-600;
 $i-day-background-color: rgba($md-light-green-50, 0.6);
 $i-day-background-color-darker: rgba($md-light-green-100, 0.6);
 
@@ -52,8 +54,8 @@ $large-desktop: 1200px;
 
 @mixin mobile {
 	@media
-	only screen and (-webkit-min-device-pixel-ratio: 2),
-	only screen and (min-resolution: 192dpi) {
+	only screen and (-webkit-min-device-pixel-ratio: 2) and (orientation: portrait),
+	only screen and (min-resolution: 192dpi) and (orientation: portrait) {
 		@content;
 	}
 }

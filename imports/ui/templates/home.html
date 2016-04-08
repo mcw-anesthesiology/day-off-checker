@@ -1,7 +1,7 @@
 <template name="home">
 	<section class="home {{dayOffType}}">
 		<header>
-			<h1>Need a day off?</h1>
+			<h1>Day off reporter</h1>
 		</header>
 
 {{#if editable}}
@@ -24,13 +24,13 @@
 {{/if}}
 
 		<footer>
-			<a href="/list">List</a>
+			<a href="/list">Login</a>
 		</footer>
 	</section>
 </template>
 
 <template name="dayOffEntry">
-	<form class="entry-form form-horizontal">
+	<form class="entry-form">
 		{{> Template.dynamic template=nextEntry}}
 	</form>
 </template>

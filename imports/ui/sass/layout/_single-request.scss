@@ -13,12 +13,11 @@
 		color: $button-text-color;
 		border: 1px solid $input-border-color;
 		border-radius: 3px;
-		box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.75);
 
-		@include prefix(transition, transform 0.25s ease-out);
+		@include prefix(transition, box-shadow 0.25s ease-out);
 
 		&:hover {
-			@include prefix(transform, translateY(-4px));
+			box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.75);
 		}
 	}
 
