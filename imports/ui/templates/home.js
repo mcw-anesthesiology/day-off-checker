@@ -3,6 +3,7 @@ import { Template } from 'meteor/templating';
 import { Session } from 'meteor/session';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { BlazeLayout } from 'meteor/kadira:blaze-layout';
+import { AccountsTemplates } from 'meteor/useraccounts:core';
 
 import { DayOffRequests } from '../../api/day-off-requests.js';
 import { Locations } from '../../api/locations.js';
@@ -100,6 +101,9 @@ Template.home.events({
 		const parent = $(target).parent();
 		const entry = parent.data('id');
 		Session.set(entry, undefined);
+	},
+	'click #logout'(event, instance){
+		AccountsTemplates.logout();
 	}
 });
 

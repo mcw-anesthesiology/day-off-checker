@@ -90,5 +90,12 @@
 		position: absolute;
 		bottom: 20px;
 		right: 40px;
+
+		a {
+
+			& + a {
+				margin-left: 1em;
+			}
+		}
 	}
 }

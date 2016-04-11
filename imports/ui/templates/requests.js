@@ -1,10 +1,12 @@
 import { Meteor } from 'meteor/meteor';
+import { AccountsTemplates } from 'meteor/useraccounts:core';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 
 import { DayOffRequests } from '../../api/day-off-requests.js';
 import { Locations } from '../../api/locations.js';
 
 import find from 'lodash/find';
+import moment from 'moment';
 
 import './requests.html';
 
@@ -13,6 +15,12 @@ function displayConfirmerName(value, object, key){
 	const user = Meteor.users.findOne({ username: value });
 	if(user)
 		return user.name;
+}
+
+function displayDate(date){
+	if(!date)
+		return "";
+	return moment(date).calendar();
 }
 
 Template.requestsList.onCreated(() => {
@@ -32,8 +40,8 @@ Template.requestsList.helpers({
 			fields: [
 				{ key: 'requestorName', label: 'Name' },
 				{ key: 'requestedLocation.name', label: 'Location' },
-				{ key: 'requestedDate', label: 'Sick day' },
-				{ key: 'requestTime', label: 'Requested' }
+				{ key: 'requestedDate', label: 'Sick day', fn: displayDate },
+				{ key: 'requestTime', label: 'Requested', fn: displayDate }
 			]
 		}
 	},
@@ -50,8 +58,8 @@ Template.requestsList.helpers({
 				{ key: '_id', label: 'ID' },
 				{ key: 'requestorName', label: 'Name' },
 				{ key: 'requestedLocation.name', label: 'Location' },
-				{ key: 'requestedDate', label: 'I-Day' },
-				{ key: 'requestTime', label: 'Requested' },
+				{ key: 'requestedDate', label: 'I-Day', fn: displayDate },
+				{ key: 'requestTime', label: 'Requested', fn: displayDate },
 				{ key: 'status', label: 'Status' },
 				{ key: 'confirmationRequests.0.confirmer', label: 'Approver', fn: displayConfirmerName },
 				{ key: 'confirmationRequests.0.status', label: 'Approval Status' },
@@ -63,6 +71,12 @@ Template.requestsList.helpers({
 		}
 	}
 });
+
+Template.requestsList.events({
+	'click #logout'(event, instance){
+		AccountsTemplates.logout();
+	}
+})
 
 function displayConfirmerName(value, object, key){
 	const user = Meteor.users.findOne({ username: value });

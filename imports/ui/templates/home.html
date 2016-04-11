@@ -24,7 +24,12 @@
 {{/if}}
 
 		<footer>
-			<a href="/list">Login</a>
+{{#if currentUser}}
+			<a href="/list">Request List</a>
+			<a href="#" id="logout">Logout</a>
+{{else}}
+			<a href="/login">Login</a>
+{{/if}}
 		</footer>
 	</section>
 </template>
