@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
+import { FlowRouter } from 'meteor/kadira:flow-router';
 
 import moment from 'moment';
 
@@ -25,4 +26,12 @@ Template.registerHelper('displayNameByUsername', (username) => {
 		return "";
 	const user = Meteor.users.findOne({ username: username });
 	return user.name;
+});
+
+Template.registerHelper('routeName', () => {
+	return FlowRouter.getRouteName();
+});
+
+Template.registerHelper('routeIs', (routeName) => {
+	return (FlowRouter.getRouteName() === routeName);
 });

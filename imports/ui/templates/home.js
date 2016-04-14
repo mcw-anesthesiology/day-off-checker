@@ -62,6 +62,9 @@ function insertEntries(){
 
 Template.home.helpers({
 	entries: entries,
+	currentUserAdmin(){
+		return (Meteor.user().role === "admin");
+	},
 	dayOffType(){
 		return Session.get("dayOffType");
 	},
@@ -101,9 +104,6 @@ Template.home.events({
 		const parent = $(target).parent();
 		const entry = parent.data('id');
 		Session.set(entry, undefined);
-	},
-	'click #logout'(event, instance){
-		AccountsTemplates.logout();
 	}
 });
 

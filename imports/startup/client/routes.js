@@ -14,7 +14,7 @@ import '../../ui/templates';
 BlazeLayout.setRoot('body');
 
 FlowRouter.route('/', {
-	name: 'App.home',
+	name: 'Home',
 	// TODO: Maybe?
 	// triggersEnter: [() => {
 	// 	if(Meteor.user())
@@ -26,7 +26,7 @@ FlowRouter.route('/', {
 });
 
 FlowRouter.route('/list', {
-	name: 'Request.list',
+	name: 'List',
 	triggersEnter: [AccountsTemplates.ensureSignedIn],
 	action(){
 		BlazeLayout.render('main', { main: 'requestsList' });
@@ -34,9 +34,20 @@ FlowRouter.route('/list', {
 });
 
 FlowRouter.route('/request/:_id', {
-	name: "Request.single",
+	name: 'Request',
 	triggersEnter: [AccountsTemplates.ensureSignedIn],
 	action(params){
 		BlazeLayout.render('main', { main: 'singleRequest' });
+	}
+});
+
+FlowRouter.route('/users', {
+	name: 'Users',
+	triggersEnter: [AccountsTemplates.ensureSignedIn, (context, redirect, stop) => {
+		if(Meteor.user() && Meteor.user().role !== 'admin')
+			redirect('/login');
+	}],
+	action(params){
+		BlazeLayout.render('main', { main: 'usersList' });
 	}
 });
