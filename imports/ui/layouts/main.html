@@ -2,4 +2,20 @@
 	<main class="main">
 		{{> Template.dynamic template=main}}
 	</main>
+	<footer class="{{routeName}}">
+{{#unless routeIs "Home"}}
+		<a href="/">Home</a>
+{{/unless}}
+{{#if currentUser}}
+	{{#if currentUserAdmin}}{{#unless routeIs "Users"}}
+		<a href="/users">User administration</a>
+	{{/unless}}{{/if}}
+	{{#unless routeIs "List"}}
+		<a href="/list">Request List</a>
+	{{/unless}}
+		<a href="#" id="logout">Logout</a>
+{{else}}
+		<a href="/login">Login</a>
+{{/if}}
+	</footer>
 </template>

@@ -21,6 +21,7 @@ Meteor.publish('allUserData', () => {
 		username: 1,
 		name: 1,
 		role: 1,
-		pager: 1
+		pager: 1,
+		emails: 1
 	}});
 });

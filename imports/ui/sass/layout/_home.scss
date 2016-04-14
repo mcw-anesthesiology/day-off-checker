@@ -266,17 +266,22 @@
 			margin-bottom: 1em;
 		}
 	}
+}
 
-	footer {
-		position: absolute;
-		bottom: 20px;
-		right: 40px;
+footer.Home {
+	font-size: 2em;
+	position: absolute;
+	bottom: 20px;
+	right: 40px;
 
-		a {
+	@include mobile() {
+		font-size: 4em;
+	}
 
-			& + a {
-				margin-left: 1em;
-			}
+	a {
+
+		& + a {
+			margin-left: 1em;
 		}
 	}
 }
