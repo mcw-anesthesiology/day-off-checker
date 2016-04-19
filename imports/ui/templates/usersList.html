@@ -1,5 +1,26 @@
 <template name="usersList">
 	<section class="users-list container">
+{{#if userToEdit}}
+		{{>editUser user=userToEdit}}
+{{/if}}
+
 		{{>reactiveTable collection=users settings=usersSettings}}
 	</section>
+</template>
+
+<template name="editUser">
+	<form id="edit-user">
+		<input id="name" name="name" value="{{user.name}}" />
+		<input id="username" name="username" value="{{user.username}}" />
+		<input id="email" name="email" value="{{getFirstEmail user.emails}}" />
+		<select id="role" name="role">
+{{#each role in roles}}
+			<option value="{{role.id}}" {{isSelected role.id}}>{{role.name}}</option>
+{{/each}}
+		</select>
+{{#if userIsChief}}
+		<input id="pager" name="pager" value="{{user.pager}}" />
+{{/if}}
+		<button type="submit">Submit</button>
+	</form>
 </template>
