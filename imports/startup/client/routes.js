@@ -45,7 +45,7 @@ FlowRouter.route('/users', {
 	name: 'Users',
 	triggersEnter: [AccountsTemplates.ensureSignedIn, (context, redirect, stop) => {
 		if(Meteor.user() && Meteor.user().role !== 'admin')
-			redirect('/login');
+			redirect('/');
 	}],
 	action(params){
 		BlazeLayout.render('main', { main: 'usersList' });

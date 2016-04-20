@@ -35,6 +35,10 @@
 			.btn-primary {
 				background-color: $sick-day-button-color;
 				border-color: $sick-day-button-border-color;
+
+				&:hover {
+					background-color: $sick-day-button-hover-color;
+				}
 			}
 		}
 
@@ -43,6 +47,10 @@
 			.btn-primary {
 				background-color: $sick-day-button-color;
 				border-color: $sick-day-button-border-color;
+
+				&:hover {
+					background-color: $sick-day-button-hover-color;
+				}
 			}
 		}
 	}
@@ -55,6 +63,10 @@
 			.btn-primary {
 				background-color: $i-day-button-color;
 				border-color: $i-day-button-border-color;
+
+				&:hover {
+					background-color: $i-day-button-hover-color;
+				}
 			}
 		}
 
@@ -63,6 +75,10 @@
 			.btn-primary {
 				background-color: $i-day-button-color;
 				border-color: $i-day-button-border-color;
+
+				&:hover {
+					background-color: $i-day-button-hover-color;
+				}
 			}
 		}
 	}
@@ -150,11 +166,19 @@
 				&.sick {
 					background-color: $sick-day-button-color;
 					border-color: $sick-day-button-border-color;
+
+					&:hover {
+						background-color: $sick-day-button-hover-color;
+					}
 				}
 
 				&.iDay {
 					background-color: $i-day-button-color;
 					border-color: $i-day-button-border-color;
+
+					&:hover {
+						background-color: $i-day-button-hover-color;
+					}
 				}
 			}
 		}
@@ -198,12 +222,6 @@
 
 		button {
 			font-size: 1.25em;
-
-			@include prefix(transition, box-shadow 0.25s ease-out);
-
-			&:hover {
-				box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.75);
-			}
 		}
 
 		p {

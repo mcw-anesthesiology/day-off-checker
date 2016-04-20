@@ -12,9 +12,20 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn.btn-primary {
 	background-color: $button-background-color;
-    font-family: $button-font-family;
+
+	&:hover {
+		background-color: $button-background-hover-color
+	}
 }
 
 .placeholder {
     color: #999;
+}
+
+select:invalid {
+	color: #999;
+
+	option {
+		color: #555; // default bootstrap color
+	}
 }
