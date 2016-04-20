@@ -18,6 +18,7 @@ Meteor.publish('chiefUserData', () => {
 
 Meteor.publish('allUserData', () => {
 	return Meteor.users.find({}, { fields: {
+		_id: 1,
 		username: 1,
 		name: 1,
 		role: 1,

@@ -1,0 +1,29 @@
+.users-list {
+	padding-top: 1em;
+
+	#edit-user {
+		padding: 1em;
+
+		.button-row {
+			text-align: center;
+
+			@media screen and (min-width: $on-desktop) {
+				text-align: right;
+			}
+
+			button {
+				margin: 0px 1em;
+			}
+		}
+	}
+
+	.reactive-table {
+
+		tbody {
+
+			tr {
+				cursor: pointer;
+			}
+		}
+	}
+}

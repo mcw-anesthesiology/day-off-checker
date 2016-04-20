@@ -1,6 +1,8 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 
+import '../../api/users.js';
+
 import './usersList.html';
 
 const roleNames = {
@@ -11,6 +13,7 @@ const roleNames = {
 
 Template.usersList.onCreated(() => {
 	Meteor.subscribe('allUserData');
+	Session.set("userToEdit", undefined);
 });
 
 Template.usersList.helpers({
@@ -34,7 +37,10 @@ Template.usersList.helpers({
 });
 
 Template.usersList.events({
-	'click .reactive-table tbody tr'(){
+	'click #add-user'(){
+		Session.set("userToEdit", {});
+	},
+	'click .reactive-table tbody tr'(event){
 		event.preventDefault();
 		const user = this;
 		Session.set("userToEdit", user);
@@ -42,7 +48,8 @@ Template.usersList.events({
 });
 
 function getFirstEmail(emails){
-	return emails[0].address;
+	if(emails && emails.length > 0)
+		return emails[0].address;
 }
 
 function roleName(role){
@@ -50,6 +57,9 @@ function roleName(role){
 }
 
 Template.editUser.helpers({
+	editing(){
+		return Session.get("userToEdit")._id;
+	},
 	getFirstEmail: getFirstEmail,
 	roles(){
 		let roles = [];
@@ -64,10 +74,42 @@ Template.editUser.helpers({
 			return "selected";
 	},
 	userIsChief(){
-		return $("#role").val() === "chief";
+		const user = Session.get("userToEdit");
+		return user.role === "chief";
 	}
 });
 
 Template.editUser.events({
-
+	'click .close-edit-user'(event, instance){
+		Session.set("userToEdit", undefined);
+	},
+	'change #role'(event, instance){
+		let user = Session.get("userToEdit");
+		user.role = event.target.value;
+		Session.set("userToEdit", user);
+	},
+	'submit #edit-user'(event, instance){
+		event.preventDefault();
+		const form = event.target;
+		const formArray = $(form).serializeArray();
+		const userId = Session.get("userToEdit")._id;
+		let user = {};
+		for(let i of formArray){
+			user[i.name] = i.value;
+		}
+		if(userId)
+			Meteor.call('updateUser', userId, user, (err, res) => {
+				if(err)
+					alert(err); // FIXME
+				else
+					Session.set("userToEdit", undefined);
+			});
+		else
+			Meteor.call('addUser', user, (err, res) => {
+				if(err)
+					alert(err); // FIXME
+				else
+					Session.set("userToEdit", undefined);
+			});
+	}
 });
