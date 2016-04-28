@@ -51,3 +51,14 @@ FlowRouter.route('/users', {
 		BlazeLayout.render('main', { main: 'usersList' });
 	}
 });
+
+FlowRouter.route('/locations', {
+	name: 'Locations',
+	triggersEnter: [AccountsTemplates.ensureSignedIn, (context, redirect, stop) => {
+		if(Meteor.user() && Meteor.user().role !== 'admin')
+			redirect('/');
+	}],
+	action(params){
+		BlazeLayout.render('main', { main: 'locationsList' });
+	}
+});
