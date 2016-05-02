@@ -11,12 +11,6 @@ import moment from 'moment';
 import './requests.html';
 
 
-function displayConfirmerName(value, object, key){
-	const user = Meteor.users.findOne({ username: value });
-	if(user)
-		return user.name;
-}
-
 function displayDate(date){
 	if(!date)
 		return "";
