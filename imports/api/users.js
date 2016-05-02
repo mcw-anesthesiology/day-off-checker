@@ -3,6 +3,34 @@ import { Mongo } from 'meteor/mongo';
 import { Accounts } from 'meteor/accounts-base';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 
+if(Meteor.isServer){
+	Meteor.publish('chiefUserData', () => {
+		return Meteor.users.find({ role: 'chief' }, { fields: {
+			name: 1,
+			role: 1,
+			pager: 1
+		}});
+	});
+
+	Meteor.publish('allUserData', () => {
+		return Meteor.users.find({}, { fields: {
+			_id: 1,
+			username: 1,
+			name: 1,
+			role: 1,
+			pager: 1,
+			emails: 1
+		}});
+	});
+
+	Meteor.publish('locationAdminUserData', () => {
+		return Meteor.users.find({ role: 'location_admin' }, { fields: {
+			_id: 1,
+			name: 1
+		}});
+	});
+}
+
 const userSchema = new SimpleSchema({
 	name: {
 		type: String,

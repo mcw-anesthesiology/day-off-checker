@@ -2,17 +2,22 @@ import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 
 import { Locations } from '../../api/locations.js';
+import '../../api/users.js';
 
 import './locationsList.html';
 
 Template.locationsList.onCreated(() => {
-	Meteor.subscribe('Locations');
+	Meteor.subscribe('locations');
+	Meteor.subscribe('locationAdminUserData');
 	Session.set("locationToEdit", undefined);
 });
 
 Template.locationsList.helpers({
 	locations(){
 		return Locations.find();
+	},
+	editing(){
+		return Session.get("locationToEdit")._id;
 	},
 	locationToEdit(){
 		return Session.get("locationToEdit");
@@ -23,19 +28,27 @@ Template.locationsList.helpers({
 				{ key: "_id", label: "ID" },
 				{ key: "name", label: "Name" },
 				{ key: "number", label: "Number" },
-				{ key: "administrator", label: "Administrator" }
+				{ key: "administrator", label: "Administrator" } // TODO: Show name
 			]
 		};
 	}
 });
 
-Template.locationsList.events({
+function userName(){
+	// TODO
+}
 
+Template.locationsList.events({
+	'click #add-location'(){
+		Session.set('locationToEdit', {});
+	}
 });
 
 Template.editLocation.helpers({
-	users(){ // TODO
-		return [];
+	siteAdmins(){
+		const users = Meteor.users.find({ role: 'location_admin' }).fetch();
+		console.log(users[0]._id);
+		return users;
 	}
 });
 

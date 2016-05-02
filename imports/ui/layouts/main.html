@@ -7,9 +7,14 @@
 		<a href="/">Home</a>
 {{/unless}}
 {{#if currentUser}}
-	{{#if currentUserAdmin}}{{#unless routeIs "Users"}}
+	{{#if currentUserAdmin}}
+		{{#unless routeIs "Users"}}
 		<a href="/users">User administration</a>
-	{{/unless}}{{/if}}
+		{{/unless}}
+		{{#unless routeIs "Locations"}}
+		<a href="/locations">Locations</a>
+		{{/unless}}
+	{{/if}}
 	{{#unless routeIs "List"}}
 		<a href="/list">Request List</a>
 	{{/unless}}
