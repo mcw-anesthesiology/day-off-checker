@@ -28,7 +28,6 @@ useraccounts:core
 aldeed:template-extension
 useraccounts:flow-routing
 email
-meteorhacks:ssr
 random
 reactive-dict
 twbs:bootstrap
@@ -36,3 +35,4 @@ aslagle:reactive-table
 tmeasday:html5-history-api
 zenniz:jquery-placeholder
 useraccounts:bootstrap
+tomwasd:history-polyfill

@@ -2,7 +2,8 @@
   "name": "day-off-checker",
   "private": true,
   "scripts": {
-    "start": "meteor run"
+    "start": "MAIL_URL=smtp://40701ebe2b9d2c3ec:18d0ca555fd201@mailtrap.io:2525/ meteor run --settings settings.json",
+    "deploy": "DEPLOY_HOSTNAME=galaxy.meteor.com meteor deploy www.dayoff.site --settings settings.json"
   },
   "dependencies": {
     "lodash": "^4.7.0",

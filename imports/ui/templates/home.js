@@ -191,7 +191,7 @@ Template.requestorEmail.onRendered(() => {
 });
 
 Template.requestedDate.onRendered(() => {
-	$("#date").placeholder();
+	$("#date").placeholder(); // FIXME: Not a date for sick day? Next day only?
 });
 
 Template.requestedLocation.onCreated(function(){

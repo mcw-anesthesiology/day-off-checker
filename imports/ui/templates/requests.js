@@ -110,7 +110,7 @@ Template.singleRequest.helpers({
 			]
 		}
 	},
-	needsResponse(){
+	needsResponse(){ // TODO: Show something else if false, pretty this html a bit
 		try {
 			const request = DayOffRequests.findOne(FlowRouter.getParam('_id'));
 			const confirmationRequest = find(request.confirmationRequests, { confirmer: Meteor.user().username });
