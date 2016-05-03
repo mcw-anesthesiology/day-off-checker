@@ -6,7 +6,9 @@ import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 
 import { Locations } from './locations.js';
 
-import { APP_EMAIL_ADDRESS, APP_URL } from '../constants.js';
+import { APP_EMAIL_ADDRESS } from '../constants.js';
+
+import { alertAdministrator } from '../startup/server/utils.js';
 
 import moment from 'moment';
 import map from 'lodash/map';
@@ -162,7 +164,7 @@ Meteor.methods({
 
 		if(Meteor.isServer){
 			const request = DayOffRequests.findOne(requestId);
-			sendRequestDenialNotifications(request);
+			sendRequestDenialNotifications(request, reason);
 		}
 	}
 });
@@ -179,16 +181,51 @@ function getUsersToNotify(request){
 
 function sendNotifications(request){
 	const users = getUsersToNotify(request);
+	const requestUrl = Meteor.absoluteUrl("request/" + request._id);
+	let errors = false;
+	const locationAdmin = Meteor.findUserByUsername(request.requestedLocation.administrator);
 	let timeout = 0; // FIXME
 	for(let user of users){
 		try {
 			timeout += 1000; // FIXME
 			Meteor.setTimeout(() => { // FIXME
-				Email.send({ // TODO: Split into function?
+				Email.send({
 					to: user.emails[0].address,
 					from: APP_EMAIL_ADDRESS,
-					subject: "Notification!",
-					text: `Name: ${request.requestorName}\nType: ${request.dayOffType}\nDate: ${request.requestedDate}\nLocation: ${request.requestedLocation.name}`
+					subject: "Sick day notification",
+					html: `
+						<html>
+							<body>
+								<h1>Hello ${user.name}</h1>
+
+								<p>${request.requestorName} has taken a sick day.</p>
+
+								<table>
+									<thead>
+										<tr>
+											<th>Name</th>
+											<th>Date</th>
+											<th>Location</th>
+											<th>Location administrator</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>${request.requestorName}</td>
+											<td>${moment(request.requestedDate).calendar()}</td>
+											<td>${request.requestedLocation.name}</td>
+											<td>${locationAdmin.name}</td>
+										</tr>
+									</tbody>
+								</table>
+
+								<p><a href="${requestUrl}">View details</a></p>
+
+								<p>If you have any questions or concerns about the system please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
+
+								<p>Thank you!</p>
+							</body>
+						</html>`
 				});
 			}, timeout);
 			DayOffRequests.update(request, {
@@ -199,6 +236,7 @@ function sendNotifications(request){
 		}
 		catch(e){
 			console.log("Error sending notification: " + e);
+			errors = true;
 		}
 	}
 
@@ -208,13 +246,29 @@ function sendNotifications(request){
 			Email.send({
 				to: request.requestorEmail,
 				from: APP_EMAIL_ADDRESS,
-				subject: "Request Confirmation",
-				text: "This is confirming that you have sent a day off request." // FIXME: Better, also different if i-day
+				subject: "Sick Day Confirmation",
+				html: `
+					<html>
+						<body>
+							<h1>Hello ${request.requestorName}</h1>
+
+							<p>This email is confirming that you have successfully notified us of your sick day on ${moment(request.requestedDate).calendar()}.</p>
+
+							<p>If you have any questions or concerns about the system please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
+
+							<p>Thank you!</p>
+						</body>
+					</html>`
 			});
 		}, timeout);
 	}
 	catch(e){
 		console.log("Error sending notification: " + e);
+		errors = true;
+	}
+
+	if(errors){
+		alertAdministrator();
 	}
 }
 
@@ -229,6 +283,8 @@ function getUsersForConfirmation(request){
 
 function sendConfirmationRequests(request){
 	const users = getUsersForConfirmation(request);
+	const requestUrl = Meteor.absoluteUrl("request/" + request._id);
+	let errors = false;
 	let timeout = 0; // FIXME
 	for(let user of users){
 		try {
@@ -237,11 +293,26 @@ function sendConfirmationRequests(request){
 			confirmationRequest.confirmer = user.username;
 			confirmationRequest.status = "pending";
 			Meteor.setTimeout(() => { // FIXME
-				Email.send({ // TODO: Split into function?
+				Email.send({
 					to: user.emails[0].address,
 					from: APP_EMAIL_ADDRESS,
 					subject: "Confirmation required",
-					text: `Please click here to respond to the confirmation request: ${APP_URL}/request/${request._id}` // FIXME
+					html: `
+						<html>
+							<body>
+								<h1>Hello ${user.name}</h1>
+
+								<p>${request.requestorName} has requested an I-Day for ${moment(request.requestedDate).calendar()}.</p>
+
+								<p>Please navigate to <a href="${requestUrl}">${requestUrl}</a> to approve or deny this request.</p>
+
+								<p>You will be notified when the request is approved or denied.</p>
+
+								<p>If you have any questions or concerns about the system please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
+
+								<p>Thank you!</p>
+							</body>
+						</html>`
 				});
 			}, timeout);
 			DayOffRequests.update(request, {
@@ -252,12 +323,48 @@ function sendConfirmationRequests(request){
 		}
 		catch(e){
 			console.log("Error sending confirmation: " + e);
+			errors = true;
 		}
+	}
+
+	try{
+		timeout += 1000; // FIXME
+		Meteor.setTimeout(() => {
+			Email.send({
+				to: request.requestorEmail,
+				from: APP_EMAIL_ADDRESS,
+				subject: "Request Confirmation",
+				html: `
+					<html>
+						<body>
+							<h1>Hello ${request.requestorName}</h1>
+
+							<p>This email is confirming that you have sent a day off request.</p>
+
+							<p>Confirmation has been requested by the chiefs and the location site administrator. You will be notified of their response.</p>
+
+							<p>If you have any questions or concerns please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
+
+							<p>Thank you!</p>
+						</body>
+					</html>`
+			});
+		}, timeout);
+	}
+	catch(e){
+		console.log("Error sending notification: " + e);
+		errors = true;
+	}
+
+	if(errors){
+		alertAdministrator();
 	}
 }
 
 function sendRequestApprovalNotifications(request){
 	const users = getUsersToNotify(request);
+	const requestUrl = Meteor.absoluteUrl("request/" + request._id);
+	let errors = false;
 	let timeout = 0; // FIXME
 	for(let user of users){
 		try {
@@ -266,13 +373,29 @@ function sendRequestApprovalNotifications(request){
 				Email.send({
 					to: user.emails[0].address,
 					from: APP_EMAIL_ADDRESS,
-					subject: "Request Accepted", // FIXME
-					text: "Request has been accepted." // FIXME
+					subject: "I-Day Request Approved",
+					html: `
+						<html>
+							<body>
+								<h1>Hello ${user.name}</h1>
+
+								<p>
+									This email is notifying you that <a href="${requestUrl}">
+									${request.requestorName}'s I-Day request for ${moment(request.requestedDate).calendar()}</a>
+									has been approved.
+								</p>
+
+								<p>If you have any questions or concerns please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
+
+								<p>Thank you!</p>
+							</body>
+						</html>`
 				});
 			}, timeout);
 		}
 		catch(e){
 			console.log("Error sending approval notification: " + e);
+			errors = true;
 		}
 	}
 
@@ -283,17 +406,35 @@ function sendRequestApprovalNotifications(request){
 				to: request.requestorEmail,
 				from: APP_EMAIL_ADDRESS,
 				subject: "Request Approved!",
-				text: "Your request has been approved!" // FIXME
+				html: `
+					<html>
+						<body>
+							<h1>Hello ${request.requestorName}</h1>
+
+							<p>Your I-Day request for ${moment(request.requestedDate).calendar()} has been approved!</p>
+
+							<p>If you have any questions or concerns please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
+
+							<p>Thank you!</p>
+						</body>
+					</html>` // TODO: Tell them anything else important?
 			});
 		}, timeout);
 	}
 	catch(e){
 		console.log("Error sending approval notification: " + e);
+		errors = true;
+	}
+
+	if(errors){
+		alertAdministrator();
 	}
 }
 
-function sendRequestDenialNotifications(request){
+function sendRequestDenialNotifications(request, reason){
 	const users = getUsersToNotify(request);
+	const requestUrl = Meteor.absoluteUrl("request/" + request._id);
+	let errors = false;
 	let timeout = 0; // FIXME
 	for(let user of users){
 		try{
@@ -302,13 +443,35 @@ function sendRequestDenialNotifications(request){
 				Email.send({
 					to: user.emails[0].address,
 					from: APP_EMAIL_ADDRESS,
-					subject: "Request Denied", // FIXME
-					text: "Request has been denied." // FIXME
+					subject: "I-Day Request Denied",
+					html: `
+						<html>
+							<body>
+								<h1>Hello ${user.name}</h1>
+
+								<p>
+									This email is notifying you that <a href="${requestUrl}">
+									${request.requestorName}'s I-Day request for ${moment(request.requestedDate).calendar()}</a>
+									has been denied by ${Meteor.user.name} for the following reason.
+								</p>
+
+								<blockquote>
+									<p>${reason.replace(/(?:\r\n|\r|\n)/g, '<br />')}</p>
+								</blockquote>
+
+								<p>${request.requestorName} will be notified of its denial.</p>
+
+								<p>If you have any questions or concerns please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
+
+								<p>Thank you!</p>
+							</body>
+						</html>`
 				});
 			}, timeout);
 		}
 		catch(e){
 			console.log("Error sending denial notification: " + e);
+			errors = true;
 		}
 	}
 
@@ -318,12 +481,35 @@ function sendRequestDenialNotifications(request){
 			Email.send({
 				to: request.requestorEmail,
 				from: APP_EMAIL_ADDRESS,
-				subject: "Request Denied",
-				text: "Your request has been denied." // FIXME
+				subject: "I-Day Request Denied",
+				html: `
+					<html>
+						<body>
+							<h1>Hello ${request.requestorName}</h1>
+
+							<p>
+								This email is notifying you that your I-Day request for ${moment(request.requestedDate).calendar()}
+								has been denied by ${Meteor.user.name} for the following reason.
+							</p>
+
+							<blockquote>
+								<p>${reason.replace(/(?:\r\n|\r|\n)/g, '<br />')}</p>
+							</blockquote>
+
+							<p>If you have any questions or concerns please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
+
+							<p>Thank you!</p>
+						</body>
+					</html>`
 			});
 		}, timeout);
 	}
 	catch(e){
 		console.log("Error sending denial notification: " + e);
+		errors = true;
+	}
+
+	if(errors){
+		alertAdministrator();
 	}
 }
