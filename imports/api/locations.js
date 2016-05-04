@@ -8,3 +8,12 @@ if(Meteor.isServer){
 		return Locations.find({});
 	});
 }
+
+Meteor.methods({
+	'updateLocation'(){
+		// TODO
+	},
+	'addLocation'(){
+		// TODO
+	}
+});

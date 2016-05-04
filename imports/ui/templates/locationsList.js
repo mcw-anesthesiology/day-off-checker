@@ -66,16 +66,20 @@ Template.editLocation.events({
 			location[i.name] = i.value;
 		}
 		if(locationId)
-			Meteor.call('updateLocation', locationId, location, (err, res) => { // TODO
-				if(err)
-					alert(err); // FIXME
+			Meteor.call('updateLocation', locationId, location, (err, res) => {
+				if(err){
+					console.log(err.name + ": " + err.message);
+					Session.set("errorAlert", "There was a problem updating the location. Please refresh the page and try again. If this problem continues, please let me know at jmischka@mcw.edu.");
+				}
 				else
 					Session.set('locationToEdit', undefined);
 			});
 		else
-			Meteor.call('addLocation', location, (err, res) => { // TODO
-				if(err)
-					alert(err); // FIXME
+			Meteor.call('addLocation', location, (err, res) => {
+				if(err){
+					console.log(err.name + ": " + err.message);
+					Session.set("errorAlert", "There was a problem adding the location. Please refresh the page and try again. If this problem continues, please let me know at jmischka@mcw.edu.");
+				}
 				else
 					Session.set('locationToEdit', undefined);
 			});
