@@ -36,7 +36,7 @@ if(Meteor.isServer){
 }
 
 if(Meteor.isClient){
-	Meteor.subscribe('allUserData'); // FIXME?
+	Meteor.subscribe('allUserData'); // FIXME ?
 }
 
 Meteor.methods({
