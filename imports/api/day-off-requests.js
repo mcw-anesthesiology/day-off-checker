@@ -2,13 +2,14 @@ import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import { Email } from 'meteor/email';
 import { Random } from 'meteor/random';
+import { Accounts } from 'meteor/accounts-base';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 
 import { Locations } from './locations.js';
 
 import { APP_EMAIL_ADDRESS } from '../constants.js';
 
-import { alertAdministrator } from '../startup/server/utils.js';
+import { alertAdministrator } from '../utils.js';
 
 import moment from 'moment';
 import map from 'lodash/map';
@@ -183,7 +184,7 @@ function sendNotifications(request){
 	const users = getUsersToNotify(request);
 	const requestUrl = Meteor.absoluteUrl("request/" + request._id);
 	let errors = false;
-	const locationAdmin = Meteor.findUserByUsername(request.requestedLocation.administrator);
+	const locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
 	let timeout = 0; // FIXME
 	for(let user of users){
 		try {

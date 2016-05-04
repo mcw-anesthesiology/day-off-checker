@@ -12,8 +12,6 @@ import moment from 'moment';
 
 import './home.html';
 
-// TODO: ReactiveVar/Dict instead of Session?
-
 
 const entries = [
 	"dayOffType",
@@ -47,14 +45,16 @@ function insertEntries(){
 	for(let entry of entries){
 		let value = Session.get(entry);
 		if(!value){
-			alert("Please complete all entries"); // TODO: Replace alerts with something better
+			Session.set("errorAlert", "Please complete all entries");
 			return;
 		}
 		request[entry] = value;
 	}
 	Meteor.call('dayOffRequests.insert', request, (err, res) => {
-		if(err)
-			alert(err); // FIXME
+		if(err){
+			console.log(err.name + ": " + err.message);
+			Session.set("errorAlert", "Problem creating a request. Please refresh the page and try again. If this problem continues, please let me know at jmischka@mcw.edu.");
+		}
 		else
 			Session.set("submissionConfirmation", true);
 	});
@@ -142,7 +142,7 @@ Template.dayOffEntry.events({
 				if(["sick", "iDay"].indexOf(input.value) !== -1)
 					value = input.value;
 				else
-					alert("Unknown day off type");
+					Session.set("errorAlert", "Unknown day off type");
 				break;
 			case "requestorName":
 				// TODO: Validation
@@ -155,9 +155,9 @@ Template.dayOffEntry.events({
 			case "requestedDate":
 				let time = moment(input.value, "YYYY-MM-DD");
 				if(!time.isValid())
-					alert("Invalid date. Please make sure it is formatted correctly (YYYY-MM-DD).");
+					Session.set("errorAlert", "Invalid date. Please make sure it is formatted correctly (YYYY-MM-DD).");
 				else if(time.isBefore(moment().startOf("day")))
-					alert("You cannot request a day off for a date in the past.");
+					Session.set("errorAlert", "You cannot request a day off for a date in the past.");
 				else
 					value = time.toDate();
 				break;
@@ -169,7 +169,7 @@ Template.dayOffEntry.events({
 				value = input.value;
 				break;
 			default:
-				alert("Unknown attribute name");
+				Session.set("errorAlert", "Unknown attribute name");
 				break;
 		}
 

@@ -126,21 +126,25 @@ Template.singleRequest.events({
 	'submit #confirm-request-form'(event, instance){
 		event.preventDefault();
 		Meteor.call('dayOffRequests.approveRequest', FlowRouter.getParam('_id'), (err, res) => { // FIXME: Using param unsafe?
-			if(err)
-				alert(err); // FIXME
+			if(err){
+				console.log(err.name + ": " + err.message);
+				Session.set("errorAlert", "There was a problem approving the request. Please refresh the page and try again. If this problem continues, please let me know at jmischka@mcw.edu.");
+			}
 		});
 	},
 	'submit #deny-request-form'(event,instance){
 		event.preventDefault();
 		const reason = $("#deny-reason").val().trim();
 		if(reason == ""){
-			alert("Please enter a reason why you are denying the request");
+			Session.set("errorAlert", "Please enter a reason why you are denying the request");
 			return;
 		}
 
 		Meteor.call('dayOffRequests.denyRequest', FlowRouter.getParam('_id'), reason, (err, res) => { // FIXME: Using param unsafe?
-			if(err)
-				alert(err); // FIXME
+			if(err){
+				console.log(err.name + ": " + err.message);
+				Session.set("errorAlert", "There was a problem denying the request. Please refresh the page and try again. If this problem continues, please let me know at jmischka@mcw.edu.");
+			}
 		});
 	}
 });

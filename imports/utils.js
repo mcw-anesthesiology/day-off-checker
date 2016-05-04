@@ -1,7 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Email } from 'meteor/email';
 
-import { APP_EMAIL_ADDRESS } from '../../constants.js';
+import { APP_EMAIL_ADDRESS } from './constants.js';
 
 export function alertAdministrator(){
 	const adminEmail = "jmischka@mcw.edu"; // FIXME: Put this somewhere better, database probably
