@@ -99,10 +99,11 @@ Template.home.helpers({
 
 Template.home.events({
 	'click .completed-entry.editable th, click .completed-entry.editable td'(event, instance) {
-		// TODO: Fill input with old value
 		const target = event.target;
 		const parent = $(target).parent();
 		const entry = parent.data('id');
+		const oldValue = Session.get(entry);
+		Session.set('old_' + entry, oldValue);
 		Session.set(entry, undefined);
 	}
 });
@@ -186,12 +187,31 @@ Template.requestorName.onRendered(() => {
 	$("#name").placeholder();
 });
 
+Template.requestorName.helpers({
+	oldValue(){
+		return Session.get('old_requestorName');
+	}
+})
+
 Template.requestorEmail.onRendered(() => {
 	$("#email").placeholder();
 });
 
+Template.requestorEmail.helpers({
+	oldValue(){
+		return Session.get('old_requestorEmail');
+	}
+});
+
 Template.requestedDate.onRendered(() => {
-	$("#date").placeholder(); // FIXME: Not a date for sick day? Next day only?
+	// $("#date").placeholder(); // FIXME: Not a date for sick day? Next day only?
+});
+
+Template.requestedDate.helpers({
+	oldValue(){
+		if(Session.get('old_requestedDate')){}
+			return moment(Session.get('old_requestedDate')).format('YYYY-MM-DD');
+	}
 });
 
 Template.requestedLocation.onCreated(function(){
@@ -201,6 +221,15 @@ Template.requestedLocation.onCreated(function(){
 Template.requestedLocation.helpers({
 	locations(){
 		return Locations.find({}, { sort: { name: 1 } });
+	},
+	oldValueSelected(location){
+		try{
+			if(Session.get('old_requestedLocation')._id === location._id)
+				return "selected";
+		}
+		catch(e){
+
+		}
 	}
 });
 

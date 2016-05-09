@@ -37,7 +37,11 @@
 			<textarea id="deny-reason" name="deny_reason" class="form-control" required></textarea>
 			<button type="submit">Deny request</button>
 		</form>
-	{{/if}}
+	{{else}}{{#if completedResponse}}
+		<p>
+			You have already submitted a response to this request.
+		</p>
+	{{/if}}{{/if}}
 {{else}}
 		<p>
 			It looks like you're not allowed to view this request.

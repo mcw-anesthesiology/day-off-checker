@@ -1,7 +1,13 @@
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
+import { Email } from 'meteor/email';
+import { Accounts } from 'meteor/accounts-base';
 
 import map from 'lodash/map';
+
+import { APP_EMAIL_ADDRESS } from '../constants.js';
+
+import { alertAdministrator } from '../utils.js';
 
 export const Locations = new Mongo.Collection('locations');
 
@@ -47,7 +53,7 @@ Meteor.methods({
 		if(Meteor.isServer){
 			notifyNewLocationAdmin(location);
 		}
-	}
+	},
 	'updateLocation'(locationId, location){ // TODO: More validation
 		if(Meteor.user().role !== "admin")
 			throw new Meteor.Error('updateLocation.unauthorized');
@@ -85,5 +91,30 @@ Meteor.methods({
 });
 
 function notifyNewLocationAdmin(location){
-	// TODO
+	try {
+		const user = Accounts.findUserByUsername(location.administrator);
+		Email.send({
+			from: APP_EMAIL_ADDRESS,
+			to: user.emails[0].address,
+			subject: "New location administrator",
+			html: `
+				<html>
+					<body>
+						<h1>Hello ${user.name}</h1>
+						<p>
+							This email is notifying you that you have been added as an administrator in the Anesthesiology department's day off
+							management site for ${location.name}.
+						</p>
+
+						<p>If you have any questions or concerns please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
+
+						<p>Thank you!</p>
+					</body>
+				</html>`
+		});
+	}
+	catch(e){
+		console.log("Error notifying new location admin: " + e);
+		alertAdministrator();
+	}
 }

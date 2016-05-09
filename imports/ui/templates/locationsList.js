@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
+import { Accounts } from 'meteor/accounts-base';
 
 import { Locations } from '../../api/locations.js';
 import '../../api/users.js';
@@ -28,14 +29,19 @@ Template.locationsList.helpers({
 				{ key: "_id", label: "ID" },
 				{ key: "name", label: "Name" },
 				{ key: "number", label: "Number" },
-				{ key: "administrator", label: "Administrator" } // TODO: Show name
+				{ key: "administrator", label: "Administrator" }
 			]
 		};
 	}
 });
 
-function userName(){
-	// TODO
+function userName(username){
+	try {
+		return Accounts.findUserByUsername(username).name;
+	}
+	catch(e){
+		return username;
+	}
 }
 
 Template.locationsList.events({

@@ -44,17 +44,17 @@
 </template>
 
 <template name="requestorName">
-	<input type="text" name="requestorName" id="name" placeholder="Your name" required />
+	<input type="text" name="requestorName" id="name" placeholder="Your name" value="{{oldValue}}" required />
 	<button type="submit" class="btn btn-lg btn-primary">Next</button>
 </template>
 
 <template name="requestorEmail">
-	<input type="email" name="requestorEmail" id="email" placeholder="Your email" required />
+	<input type="email" name="requestorEmail" id="email" placeholder="Your email" value="{{oldValue}}" required />
 	<button type="submit" class="btn btn-lg btn-primary">Next</button>
 </template>
 
 <template name="requestedDate">
-	<input type="date" name="requestedDate" id="date" required />
+	<input type="date" name="requestedDate" id="date" value="{{oldValue}}" required />
 	<button type="submit" class="btn btn-lg btn-primary">Next</button>
 </template>
 
@@ -62,7 +62,7 @@
 	<select name="requestedLocation" id="location" required>
 		<option value="">Select location</option>
 {{#each location in locations}}
-		<option value="{{location._id}}">{{location.name}}</option>
+		<option value="{{location._id}}" {{oldValueSelected location}}>{{location.name}}</option>
 {{/each}}
 	</select>
 	<button type="submit" class="btn btn-lg btn-primary">Next</button>
