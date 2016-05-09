@@ -110,11 +110,21 @@ Template.singleRequest.helpers({
 			]
 		}
 	},
-	needsResponse(){ // TODO: Show something else if false, pretty this html a bit
+	needsResponse(){ // TODO: Pretty this html a bit
 		try {
 			const request = DayOffRequests.findOne(FlowRouter.getParam('_id'));
 			const confirmationRequest = find(request.confirmationRequests, { confirmer: Meteor.user().username });
 			return confirmationRequest.status === "pending" && request.status === "pending";
+		}
+		catch(e){
+			return false;
+		}
+	},
+	submittedResponse(){
+		try {
+			const request = DayOffRequests.findOne(FlowRouter.getParam('_id'));
+			const confirmationRequest = find(request.confirmationRequests, { confirmer: Meteor.user().username });
+			return confirmationRequest;
 		}
 		catch(e){
 			return false;
@@ -125,7 +135,7 @@ Template.singleRequest.helpers({
 Template.singleRequest.events({
 	'submit #confirm-request-form'(event, instance){
 		event.preventDefault();
-		Meteor.call('dayOffRequests.approveRequest', FlowRouter.getParam('_id'), (err, res) => { // FIXME: Using param unsafe?
+		Meteor.call('dayOffRequests.approveRequest', FlowRouter.getParam('_id'), (err, res) => {
 			if(err){
 				console.log(err.name + ": " + err.message);
 				Session.set("errorAlert", "There was a problem approving the request. Please refresh the page and try again. If this problem continues, please let me know at jmischka@mcw.edu.");
@@ -140,7 +150,7 @@ Template.singleRequest.events({
 			return;
 		}
 
-		Meteor.call('dayOffRequests.denyRequest', FlowRouter.getParam('_id'), reason, (err, res) => { // FIXME: Using param unsafe?
+		Meteor.call('dayOffRequests.denyRequest', FlowRouter.getParam('_id'), reason, (err, res) => {
 			if(err){
 				console.log(err.name + ": " + err.message);
 				Session.set("errorAlert", "There was a problem denying the request. Please refresh the page and try again. If this problem continues, please let me know at jmischka@mcw.edu.");
