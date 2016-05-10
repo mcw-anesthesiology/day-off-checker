@@ -9,6 +9,10 @@ import { DayOffRequests } from '../../api/day-off-requests.js';
 import { Locations } from '../../api/locations.js';
 
 import moment from 'moment';
+import 'twix';
+
+import 'bootstrap-daterangepicker';
+import 'bootstrap-daterangepicker/daterangepicker.css';
 
 import './home.html';
 
@@ -18,7 +22,8 @@ const entries = [
 	"requestorName",
 	"requestorEmail",
 	"requestedDate",
-	"requestedLocation"
+	"requestedLocation",
+	"requestReason"
 ];
 
 const entryNames = {
@@ -26,7 +31,8 @@ const entryNames = {
 	requestorName: "Name",
 	requestorEmail: "Email",
 	requestedDate: "Date",
-	requestedLocation: "Location"
+	requestedLocation: "Location",
+	requestReason: "Reason"
 };
 
 const dayOffTypeNames = {
@@ -84,7 +90,10 @@ Template.home.helpers({
 					return entry.name;
 					break;
 				case "requestedDate":
-					return moment(entry).calendar();
+					return moment(entry[0]).twix(entry[1], true).format();
+					break;
+				case "requestReason":
+					return entry;
 					break;
 				default:
 					return entry;
@@ -135,7 +144,7 @@ Template.dayOffEntry.events({
 		event.preventDefault();
 
 		const form = event.target;
-		const input = $(form).find("input, select")[0];
+		const input = $(form).find("input, select, textarea")[0];
 
 		let value;
 		switch(input.name){
@@ -154,16 +163,24 @@ Template.dayOffEntry.events({
 				value = input.value;
 				break;
 			case "requestedDate":
-				let time = moment(input.value, "YYYY-MM-DD");
-				if(!time.isValid())
-					Session.set("errorAlert", "Invalid date. Please make sure it is formatted correctly (YYYY-MM-DD).");
-				else if(time.isBefore(moment().startOf("day")))
+				let dates = input.value.split(" - ");
+				let startDate = moment(dates[0], "MM/DD/YYYY");
+				let endDate = moment(dates[1], "MM/DD/YYYY");
+				let range = startDate.twix(endDate, true);
+				if(!range.isValid())
+					Session.set("errorAlert", "Invalid date range. Please select first the beginning date and then the ending date.");
+				else if(range.isPast() || startDate.isBefore(moment().startOf("day")))
 					Session.set("errorAlert", "You cannot request a day off for a date in the past.");
 				else
-					value = time.toDate();
+					value = [ startDate.toDate(), endDate.toDate() ];
 				break;
 			case "requestedLocation":
 				value = Locations.findOne(input.value);
+				break;
+			case "requestReason":
+				value = input.value.trim();
+				if(!value)
+					value = "(None)";
 				break;
 			case "requestConfirmation":
 				insertEntries();
@@ -184,7 +201,7 @@ Template.dayOffType.helpers({
 });
 
 Template.requestorName.onRendered(() => {
-	$("#name").placeholder();
+	this.$("#name").placeholder();
 });
 
 Template.requestorName.helpers({
@@ -194,7 +211,7 @@ Template.requestorName.helpers({
 })
 
 Template.requestorEmail.onRendered(() => {
-	$("#email").placeholder();
+	this.$("#email").placeholder();
 });
 
 Template.requestorEmail.helpers({
@@ -204,13 +221,19 @@ Template.requestorEmail.helpers({
 });
 
 Template.requestedDate.onRendered(() => {
-	// $("#date").placeholder(); // FIXME: Not a date for sick day? Next day only?
+	this.$("#daterange").placeholder();
+	this.$("#daterange").daterangepicker({
+		minDate: moment().startOf("day")
+	});
 });
 
 Template.requestedDate.helpers({
 	oldValue(){
-		if(Session.get('old_requestedDate')){}
-			return moment(Session.get('old_requestedDate')).format('YYYY-MM-DD');
+		if(Session.get('old_requestedDate')){
+			const dates = Session.get('old_requestedDate');
+			let range = moment(dates[0]).twix(dates[1], true);
+			return range.simpleFormat("MM/DD/YYYY");
+		}
 	}
 });
 
@@ -230,6 +253,18 @@ Template.requestedLocation.helpers({
 		catch(e){
 
 		}
+	}
+});
+
+Template.requestReason.onRendered(() => {
+	this.$("#reason").placeholder();
+});
+
+Template.requestReason.helpers({
+	oldValue(){
+		let oldReason = Session.get("old_requestReason");
+		if(oldReason != "(None)")
+			return oldReason;
 	}
 });
 

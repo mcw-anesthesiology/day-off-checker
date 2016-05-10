@@ -5,27 +5,40 @@
 		</header>
 
 {{#if sickDayRequests}}
-		<h2>Sick days</h2>
-		{{>reactiveTable collection=sickDayRequests settings=sickDaySettings}}
+		<section class="sick-day-requests">
+			<h2>Sick days</h2>
+			{{>reactiveTable collection=sickDayRequests settings=sickDaySettings}}
+		</section>
 {{/if}}
 
 {{#if iDayRequests}}
-		<h2>I-Day Requests</h2>
-		{{>reactiveTable collection=iDayRequests settings=iDaySettings}}
+		<section class="i-day-requests">
+			<h2>I-Day Requests</h2>
+			{{>reactiveTable collection=iDayRequests settings=iDaySettings}}
+		</section>
 {{/if}}
 	</section>
 </template>
 
-<template name="singleRequest">
+<template name="singleRequestPage">
 	<section class="single-request container">
 		<header>
 			<h1>Request</h1>
 		</header>
 
-{{#if request}}
+		{{>requestDetails}}
+	</section>
+</template>
+
+<template name="requestDetails">
+	{{!-- TODO:	Different depending on what kind of request --}}
+	<section class="request-deatils">
+
+{{#if request}} {{!-- TODO: Not use a table for this --}}
 		{{>reactiveTable collection=request settings=requestSettings}}
 
 	{{#if needsResponse}}
+		{{!-- TODO: Pretty this html a bit --}}
 		<form class="col-md-offset-1 col-md-4" id="confirm-request-form">
 			<h2>Confirm request</h2>
 			<button type="submit">Confirm request</button>
