@@ -183,20 +183,13 @@
 			}
 		}
 
-		input, select, button {
+		input, select, textarea, button {
 			display: table-cell;
 			vertical-align: middle;
 		}
 
-		input, select {
+		input, select, textarea {
 			width: 70%;
-			border: none;
-			border-bottom: 2px solid $md-grey-600;
-			background: transparent;
-
-			&:focus {
-				outline: none;
-			}
 
 			@media screen and (min-width: $medium-desktop) {
 				width: 50%;
@@ -211,6 +204,16 @@
 			}
 		}
 
+		input, select {
+			border: none;
+			border-bottom: 2px solid $md-grey-600;
+			background: transparent;
+
+			&:focus {
+				outline: none;
+			}
+		}
+
 		input {
 			font-size: 1.5em;
 		}
@@ -218,6 +221,10 @@
 		select {
 			font-size: 1em;
 			height: 2em;
+		}
+
+		textarea {
+			font-size: 1em;
 		}
 
 		button {

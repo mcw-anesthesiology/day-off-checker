@@ -1,11 +1,15 @@
-footer {
-	position: absolute; // FIXME: This isn't right on pages where you need to scroll
-	bottom: 20px;
-	right: 40px;
+body {
+	position: relative;
 
-	a {
-		& + a {
-			margin-left: 1em;
+	footer {
+		position: absolute; // FIXME: This isn't right on pages where you need to scroll
+		bottom: 20px;
+		right: 40px;
+
+		a {
+			& + a {
+				margin-left: 1em;
+			}
 		}
 	}
 }

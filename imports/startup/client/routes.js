@@ -37,7 +37,7 @@ FlowRouter.route('/request/:_id', {
 	name: 'Request',
 	triggersEnter: [AccountsTemplates.ensureSignedIn],
 	action(params){
-		BlazeLayout.render('main', { main: 'singleRequest' });
+		BlazeLayout.render('main', { main: 'singleRequestPage' });
 	}
 });
 

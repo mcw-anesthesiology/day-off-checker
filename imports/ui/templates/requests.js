@@ -13,8 +13,14 @@ import './requests.html';
 
 function displayDate(date){
 	if(!date)
-		return "";
+		return "Invalid date";
 	return moment(date).calendar();
+}
+
+function displayDateRange(dates){
+	if(!dates || dates.length < 2)
+		return "Invalid date range";
+	return moment(dates[0]).twix(dates[1], true).format();
 }
 
 Template.requestsList.onCreated(() => {
@@ -32,10 +38,11 @@ Template.requestsList.helpers({
 	sickDaySettings(){
 		return {
 			fields: [
-				{ key: 'requestorName', label: 'Name' },
+				{ key: 'requestorName', label: 'Name', sortOrder: 1, sortDirection: 'asc' },
 				{ key: 'requestedLocation.name', label: 'Location' },
-				{ key: 'requestedDate', label: 'Sick day', fn: displayDate },
-				{ key: 'requestTime', label: 'Requested', fn: displayDate }
+				{ key: 'requestedDate', label: 'Sick days', fn: displayDateRange },
+				{ key: 'requestTime', label: 'Requested', fn: displayDate, sortOrder: 0, sortDirection: 'desc' },
+				{ key: 'requestReason', label: 'Reason' },
 			]
 		}
 	},
@@ -52,15 +59,10 @@ Template.requestsList.helpers({
 				{ key: '_id', label: 'ID' },
 				{ key: 'requestorName', label: 'Name' },
 				{ key: 'requestedLocation.name', label: 'Location' },
-				{ key: 'requestedDate', label: 'I-Day', fn: displayDate },
+				{ key: 'requestedDate', label: 'I-Days', fn: displayDateRange },
 				{ key: 'requestTime', label: 'Requested', fn: displayDate },
-				{ key: 'status', label: 'Status' },
-				{ key: 'confirmationRequests.0.confirmer', label: 'Approver', fn: displayConfirmerName },
-				{ key: 'confirmationRequests.0.status', label: 'Approval Status' },
-				{ key: 'confirmationRequests.1.confirmer', label: 'Approver', fn: displayConfirmerName },
-				{ key: 'confirmationRequests.1.status', label: 'Approval Status' },
-				{ key: 'confirmationRequests.2.confirmer', label: 'Approver', fn: displayConfirmerName },
-				{ key: 'confirmationRequests.2.status', label: 'Approval Status' }
+				{ key: 'requestReason', label: 'Reason' },
+				{ key: 'status', label: 'Status' }
 			]
 		}
 	}
@@ -78,11 +80,11 @@ function displayConfirmerName(value, object, key){
 		return user.name;
 }
 
-Template.singleRequest.onCreated(() => {
+Template.requestDetails.onCreated(() => {
 	Meteor.subscribe('dayOffRequests');
 });
 
-Template.singleRequest.helpers({
+Template.requestDetails.helpers({
 	request(){
 		try {
 			return DayOffRequests.find(FlowRouter.getParam('_id'));
@@ -98,8 +100,9 @@ Template.singleRequest.helpers({
 				{ key: '_id', label: 'ID' },
 				{ key: 'requestorName', label: 'Name' },
 				{ key: 'requestedLocation.name', label: 'Location' },
-				{ key: 'requestedDate', label: 'I-Day' },
-				{ key: 'requestTime', label: 'Requested' },
+				{ key: 'requestedDate', label: 'I-Day', fn: displayDateRange },
+				{ key: 'requestTime', label: 'Requested', fn: displayDate },
+				{ key: 'requestReason', label: 'Reason' },
 				{ key: 'status', label: 'Status' },
 				{ key: 'confirmationRequests.0.confirmer', label: 'Approver', fn: displayConfirmerName },
 				{ key: 'confirmationRequests.0.status', label: 'Approval Status' },
@@ -110,7 +113,7 @@ Template.singleRequest.helpers({
 			]
 		}
 	},
-	needsResponse(){ // TODO: Pretty this html a bit
+	needsResponse(){
 		try {
 			const request = DayOffRequests.findOne(FlowRouter.getParam('_id'));
 			const confirmationRequest = find(request.confirmationRequests, { confirmer: Meteor.user().username });
@@ -132,7 +135,7 @@ Template.singleRequest.helpers({
 	}
 });
 
-Template.singleRequest.events({
+Template.requestDetails.events({
 	'submit #confirm-request-form'(event, instance){
 		event.preventDefault();
 		Meteor.call('dayOffRequests.approveRequest', FlowRouter.getParam('_id'), (err, res) => {

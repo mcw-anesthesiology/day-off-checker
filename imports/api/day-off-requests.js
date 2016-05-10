@@ -11,8 +11,9 @@ import { APP_EMAIL_ADDRESS } from '../constants.js';
 
 import { alertAdministrator } from '../utils.js';
 
-import moment from 'moment';
 import map from 'lodash/map';
+import moment from 'moment';
+import 'twix';
 
 export const DayOffRequests = new Mongo.Collection('dayOffRequests');
 
@@ -44,6 +45,9 @@ Meteor.methods({
 		const locations = Locations.find({}).fetch();
 		const locationAdmins = Meteor.users.find({ role: "location_admin" }).fetch();
 
+		if(request.requestReason == "(None)")
+			request.requestReason = "";
+
 		new SimpleSchema({
 			dayOffType: {
 				type: String,
@@ -63,8 +67,8 @@ Meteor.methods({
 				regEx: SimpleSchema.RegEx.Email
 			},
 			requestedDate: {
-				type: Date,
-				label: "Requested date",
+				type: [Date],
+				label: "Requested date range",
 				min: moment().utc().startOf("day").toDate()
 			},
 			requestedLocation: {
@@ -90,6 +94,10 @@ Meteor.methods({
 				type: String,
 				label: "Location administrator",
 				allowedValues: map(locationAdmins, "username")
+			},
+			requestReason: {
+				type: String,
+				label: "Reason"
 			}
 		}).validate(request);
 
@@ -213,7 +221,7 @@ function sendNotifications(request){
 									<tbody>
 										<tr>
 											<td>${request.requestorName}</td>
-											<td>${moment(request.requestedDate).calendar()}</td>
+											<td>${moment(request.requestedDate[0]).twix(request.requestedDate[1], true).format()}</td>
 											<td>${request.requestedLocation.name}</td>
 											<td>${locationAdmin.name}</td>
 										</tr>
@@ -253,7 +261,7 @@ function sendNotifications(request){
 						<body>
 							<h1>Hello ${request.requestorName}</h1>
 
-							<p>This email is confirming that you have successfully notified us of your sick day on ${moment(request.requestedDate).calendar()}.</p>
+							<p>This email is confirming that you have successfully notified us of your sick day on ${moment(request.requestedDate[0]).twix(request.requestedDate[1], true).format()}.</p>
 
 							<p>If you have any questions or concerns about the system please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
 
@@ -303,7 +311,7 @@ function sendConfirmationRequests(request){
 							<body>
 								<h1>Hello ${user.name}</h1>
 
-								<p>${request.requestorName} has requested an I-Day for ${moment(request.requestedDate).calendar()}.</p>
+								<p>${request.requestorName} has requested an I-Day for ${moment(request.requestedDate[0]).twix(request.requestedDate[1], true).format()}.</p>
 
 								<p>Please navigate to <a href="${requestUrl}">${requestUrl}</a> to approve or deny this request.</p>
 
@@ -382,7 +390,7 @@ function sendRequestApprovalNotifications(request){
 
 								<p>
 									This email is notifying you that <a href="${requestUrl}">
-									${request.requestorName}'s I-Day request for ${moment(request.requestedDate).calendar()}</a>
+									${request.requestorName}'s I-Day request for ${moment(request.requestedDate[0]).twix(request.requestedDate[1], true).format()}</a>
 									has been approved.
 								</p>
 
@@ -412,7 +420,7 @@ function sendRequestApprovalNotifications(request){
 						<body>
 							<h1>Hello ${request.requestorName}</h1>
 
-							<p>Your I-Day request for ${moment(request.requestedDate).calendar()} has been approved!</p>
+							<p>Your I-Day request for ${moment(request.requestedDate[0]).twix(request.requestedDate[1], true).format()} has been approved!</p>
 
 							<p>If you have any questions or concerns please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
 
@@ -452,7 +460,7 @@ function sendRequestDenialNotifications(request, reason){
 
 								<p>
 									This email is notifying you that <a href="${requestUrl}">
-									${request.requestorName}'s I-Day request for ${moment(request.requestedDate).calendar()}</a>
+									${request.requestorName}'s I-Day request for ${moment(request.requestedDate[0]).twix(request.requestedDate[1], true).format()}</a>
 									has been denied by ${Meteor.user.name} for the following reason.
 								</p>
 
@@ -489,7 +497,7 @@ function sendRequestDenialNotifications(request, reason){
 							<h1>Hello ${request.requestorName}</h1>
 
 							<p>
-								This email is notifying you that your I-Day request for ${moment(request.requestedDate).calendar()}
+								This email is notifying you that your I-Day request for ${moment(request.requestedDate[0]).twix(request.requestedDate[1], true).format()}
 								has been denied by ${Meteor.user.name} for the following reason.
 							</p>
 
