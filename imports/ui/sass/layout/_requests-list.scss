@@ -99,3 +99,65 @@
 		}
 	}
 }
+
+.request-details {
+
+	.request-details-main {
+		position: relative;
+
+		.request-date,
+		.request-location {
+			font-size: 2em;
+		}
+
+		.request-reason {
+			margin-top: 1em;
+			margin-bottom: 1em;
+			font-size: 1.5em;
+		}
+
+		.id-time-container {
+			font-size: 1.1em;
+		}
+	}
+
+	.request-details-aside {
+
+		.panel {
+
+			.panel-body {
+
+				.label {
+					display: block;
+					margin-left: auto;
+					margin-right: auto;
+				}
+			}
+		}
+	}
+
+	.request-response-container {
+		background-color: $md-grey-300;
+		border-color: $md-grey-400;
+
+		form {
+
+			button {
+				display: block;
+				margin: 1em auto 0px;
+			}
+		}
+	}
+}
+
+.single-request {
+
+	header {
+		margin-top: 2em;
+		margin-bottom: 2em;
+	}
+
+	.request-details {
+		margin-bottom: 2em;
+	}
+}

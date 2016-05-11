@@ -1,4 +1,5 @@
 import { Meteor } from 'meteor/meteor';
+import { Accounts } from 'meteor/accounts-base';
 import { AccountsTemplates } from 'meteor/useraccounts:core';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 
@@ -7,6 +8,7 @@ import { Locations } from '../../api/locations.js';
 
 import find from 'lodash/find';
 import moment from 'moment';
+import 'twix';
 
 import './requests.html';
 
@@ -23,11 +25,14 @@ function displayDateRange(dates){
 	return moment(dates[0]).twix(dates[1], true).format();
 }
 
-Template.requestsList.onCreated(() => {
-	Meteor.subscribe('dayOffRequests');
+Template.requestsList.onCreated(function(){
+	Meteor.subscribe('dayOffRequests'); // FIXME: Make sure these permissions make sense
 });
 
 Template.requestsList.helpers({
+	sickDayDetails(){
+		return Session.get("sickDayDetails");
+	},
 	sickDayRequests(){
 		const requests = DayOffRequests.find({ dayOffType: "sick" }, { sort: { createdAt: -1 } });
 		if(requests.count() > 0)
@@ -45,6 +50,9 @@ Template.requestsList.helpers({
 				{ key: 'requestReason', label: 'Reason' },
 			]
 		}
+	},
+	iDayDetails(){
+		return Session.get("iDayDetails");
 	},
 	iDayRequests(){
 		const requests = DayOffRequests.find({ dayOffType: "iDay" }, { sort: { createdAt: -1 } });
@@ -69,53 +77,66 @@ Template.requestsList.helpers({
 });
 
 Template.requestsList.events({
-	'click #logout'(event, instance){
-		AccountsTemplates.logout();
+	'click .sick-day-requests tr'(event){
+		Session.set("sickDayDetails", this); // FIXME: This isn't reactive. Because of reactiveTable?
+	},
+	'click .i-day-requests tr'(event){
+		Session.set("iDayDetails", this); // FIXME: This isn't reactive. Because of reactiveTable?
 	}
 })
 
-function displayConfirmerName(value, object, key){
-	const user = Meteor.users.findOne({ username: value });
-	if(user)
-		return user.name;
-}
-
-Template.requestDetails.onCreated(() => {
-	Meteor.subscribe('dayOffRequests');
-});
-
-Template.requestDetails.helpers({
+Template.singleRequestPage.helpers({
 	request(){
 		try {
-			return DayOffRequests.find(FlowRouter.getParam('_id'));
+			return DayOffRequests.findOne(FlowRouter.getParam('_id'));
 		}
 		catch(e){
 			console.log(e);
 			return false;
 		}
+	}
+});
+
+Template.requestDetails.onCreated(function(){
+	Meteor.subscribe('dayOffRequests');
+});
+
+// Template.requestDetails.onRendered(function(){
+	// this.$("#daterange").daterangepicker();
+	// FIXME: No one on god's earth knows why this doesn't work
+// });
+
+Template.requestDetails.helpers({
+	isIDay(request){
+		return (request.dayOffType === "iDay");
 	},
-	requestSettings(){
-		return {
-			fields: [
-				{ key: '_id', label: 'ID' },
-				{ key: 'requestorName', label: 'Name' },
-				{ key: 'requestedLocation.name', label: 'Location' },
-				{ key: 'requestedDate', label: 'I-Day', fn: displayDateRange },
-				{ key: 'requestTime', label: 'Requested', fn: displayDate },
-				{ key: 'requestReason', label: 'Reason' },
-				{ key: 'status', label: 'Status' },
-				{ key: 'confirmationRequests.0.confirmer', label: 'Approver', fn: displayConfirmerName },
-				{ key: 'confirmationRequests.0.status', label: 'Approval Status' },
-				{ key: 'confirmationRequests.1.confirmer', label: 'Approver', fn: displayConfirmerName },
-				{ key: 'confirmationRequests.1.status', label: 'Approval Status' },
-				{ key: 'confirmationRequests.2.confirmer', label: 'Approver', fn: displayConfirmerName },
-				{ key: 'confirmationRequests.2.status', label: 'Approval Status' }
-			]
+	// requestDates(request){
+	// 	let range = moment(request.requestedDate[0]).twix(request.requestedDate[1], true);
+	// 	return range.simpleFormat("MM/DD/YYYY");
+	// },
+	displayISODate(date){
+		return date.toISOString();
+	},
+	confirmationRequests(request){
+		return request.confirmationRequests;
+	},
+	statusLabelType(status){
+		const labelTypes = {
+			pending: "warning",
+			approved: "success",
+			denied: "danger"
+		};
+
+		try {
+			return `label-${labelTypes[status]}`;
+		}
+		catch(e){
+			console.log(e);
+			return "label-default";
 		}
 	},
-	needsResponse(){
+	needsResponse(request){
 		try {
-			const request = DayOffRequests.findOne(FlowRouter.getParam('_id'));
 			const confirmationRequest = find(request.confirmationRequests, { confirmer: Meteor.user().username });
 			return confirmationRequest.status === "pending" && request.status === "pending";
 		}
@@ -123,9 +144,8 @@ Template.requestDetails.helpers({
 			return false;
 		}
 	},
-	submittedResponse(){
+	submittedResponse(request){
 		try {
-			const request = DayOffRequests.findOne(FlowRouter.getParam('_id'));
 			const confirmationRequest = find(request.confirmationRequests, { confirmer: Meteor.user().username });
 			return confirmationRequest;
 		}
@@ -138,22 +158,24 @@ Template.requestDetails.helpers({
 Template.requestDetails.events({
 	'submit #confirm-request-form'(event, instance){
 		event.preventDefault();
-		Meteor.call('dayOffRequests.approveRequest', FlowRouter.getParam('_id'), (err, res) => {
+		const requestId = instance.$("#confirm-request-id").val();
+		Meteor.call('dayOffRequests.approveRequest', requestId, (err, res) => {
 			if(err){
 				console.log(err.name + ": " + err.message);
 				Session.set("errorAlert", "There was a problem approving the request. Please refresh the page and try again. If this problem continues, please let me know at jmischka@mcw.edu.");
 			}
 		});
 	},
-	'submit #deny-request-form'(event,instance){
+	'submit #deny-request-form'(event, instance){
 		event.preventDefault();
-		const reason = $("#deny-reason").val().trim();
+		const requestId = instance.$("#deny-request-id").val();
+		const reason = instance.$("#deny-reason").val().trim();
 		if(reason == ""){
 			Session.set("errorAlert", "Please enter a reason why you are denying the request");
 			return;
 		}
 
-		Meteor.call('dayOffRequests.denyRequest', FlowRouter.getParam('_id'), reason, (err, res) => {
+		Meteor.call('dayOffRequests.denyRequest', requestId, reason, (err, res) => {
 			if(err){
 				console.log(err.name + ": " + err.message);
 				Session.set("errorAlert", "There was a problem denying the request. Please refresh the page and try again. If this problem continues, please let me know at jmischka@mcw.edu.");

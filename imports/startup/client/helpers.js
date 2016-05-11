@@ -31,3 +31,7 @@ Template.registerHelper('routeName', () => {
 Template.registerHelper('routeIs', (routeName) => {
 	return (FlowRouter.getRouteName() === routeName);
 });
+
+Template.registerHelper('nl2br', (text) => {
+	return text.replace(/(?:\r\n|\r|\n)/g, '<br />');
+});
