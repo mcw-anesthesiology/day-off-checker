@@ -200,7 +200,7 @@ Template.dayOffType.helpers({
 	dayOffButtons: dayOffButtons
 });
 
-Template.requestorName.onRendered(() => {
+Template.requestorName.onRendered(function(){
 	this.$("#name").placeholder();
 });
 
@@ -210,7 +210,7 @@ Template.requestorName.helpers({
 	}
 })
 
-Template.requestorEmail.onRendered(() => {
+Template.requestorEmail.onRendered(function(){
 	this.$("#email").placeholder();
 });
 
@@ -220,7 +220,7 @@ Template.requestorEmail.helpers({
 	}
 });
 
-Template.requestedDate.onRendered(() => {
+Template.requestedDate.onRendered(function(){
 	this.$("#daterange").placeholder();
 	this.$("#daterange").daterangepicker({
 		minDate: moment().startOf("day")
@@ -256,7 +256,7 @@ Template.requestedLocation.helpers({
 	}
 });
 
-Template.requestReason.onRendered(() => {
+Template.requestReason.onRendered(function(){
 	this.$("#reason").placeholder();
 });
 
@@ -268,7 +268,7 @@ Template.requestReason.helpers({
 	}
 });
 
-Template.submissionConfirmation.onCreated(() => {
+Template.submissionConfirmation.onCreated(function(){
 	Meteor.subscribe('chiefUserData');
 });
 

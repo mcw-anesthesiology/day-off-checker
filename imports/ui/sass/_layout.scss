@@ -3,8 +3,7 @@ body {
 
 	footer {
 		position: absolute; // FIXME: This isn't right on pages where you need to scroll
-		bottom: 20px;
-		right: 40px;
+		right: 10px;
 
 		a {
 			& + a {
