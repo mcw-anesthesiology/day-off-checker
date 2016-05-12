@@ -54,7 +54,7 @@
 </template>
 
 <template name="requestedDate">
-	<input type="text" name="requestedDate" id="daterange" value="{{oldValue}}" required />
+	<input type="text" name="requestedDate" id="daterange" placeholder="MM/DD/YYYY - MM/DD/YYYY" value="{{oldValue}}" required />
 	<button type="submit" class="btn btn-lg btn-primary">Next</button>
 </template>
 
@@ -69,9 +69,7 @@
 </template>
 
 <template name="requestReason">
-	<textarea class="form-control" name="requestReason" id="reason" placeholder="Reason (optional)">
-		{{oldValue}}
-	</textarea>
+	<textarea class="form-control" name="requestReason" id="reason" placeholder="Reason (optional)">{{oldValue}}</textarea>
 	<button type="submit" class="btn btn-lg btn-primary">Next</button>
 </template>
 
