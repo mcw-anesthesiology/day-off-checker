@@ -28,7 +28,7 @@ if(Meteor.isServer){
 		else{
 			return DayOffRequests.find({
 				$or: [
-					{ notified: user.username },
+					{ usersNotified: user.username },
 					{ "confirmationRequests.confirmer": user.username }
 				]
 			});

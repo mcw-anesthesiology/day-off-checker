@@ -31,7 +31,7 @@ Template.requestsList.onCreated(function(){
 
 Template.requestsList.helpers({
 	sickDayDetails(){
-		return Session.get("sickDayDetails");
+		return DayOffRequests.findOne(Session.get("sickDayDetailsId"));
 	},
 	sickDayRequests(){
 		const requests = DayOffRequests.find({ dayOffType: "sick" }, { sort: { createdAt: -1 } });
@@ -52,7 +52,7 @@ Template.requestsList.helpers({
 		}
 	},
 	iDayDetails(){
-		return Session.get("iDayDetails");
+		return DayOffRequests.findOne(Session.get('iDayDetailsId'));
 	},
 	iDayRequests(){
 		const requests = DayOffRequests.find({ dayOffType: "iDay" }, { sort: { createdAt: -1 } });
@@ -78,10 +78,10 @@ Template.requestsList.helpers({
 
 Template.requestsList.events({
 	'click .sick-day-requests tr'(event){
-		Session.set("sickDayDetails", this); // FIXME: This isn't reactive. Because of reactiveTable?
+		Session.set("sickDayDetailsId", this._id);
 	},
 	'click .i-day-requests tr'(event){
-		Session.set("iDayDetails", this); // FIXME: This isn't reactive. Because of reactiveTable?
+		Session.set("iDayDetailsId", this._id);
 	}
 })
 
