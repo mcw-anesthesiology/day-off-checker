@@ -47,14 +47,19 @@ function userName(username){
 Template.locationsList.events({
 	'click #add-location'(){
 		Session.set('locationToEdit', {});
+	},
+	'click .reactive-table tr'(event){
+		Session.set('locationToEdit', this);
 	}
 });
 
 Template.editLocation.helpers({
 	siteAdmins(){
-		const users = Meteor.users.find({ role: 'location_admin' }).fetch();
-		console.log(users[0]._id);
-		return users;
+		return Meteor.users.find({ role: 'location_admin' }).fetch();
+	},
+	isSiteAdmin(location, siteAdmin){
+		if(location.administrator === siteAdmin.username)
+			return "selected";
 	}
 });
 

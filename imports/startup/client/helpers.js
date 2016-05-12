@@ -2,27 +2,14 @@ import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 
-import moment from 'moment';
-import 'twix';
 
-Template.registerHelper('displayDate', (date) => {
-	if(!date)
-		return "Invalid date";
-	return moment(date).calendar();
-});
+import { displayDate, displayDateRange, displayNameByUsername, nl2br, capitalizeFirstLetter } from '../../utils.js';
 
-Template.registerHelper('displayDateRange', (dates) => {
-	if(!dates || dates.length < 2)
-		return "Invalid date range";
-	return moment(dates[0]).twix(dates[1], true).format();
-});
+Template.registerHelper('displayDate', displayDate);
 
-Template.registerHelper('displayNameByUsername', (username) => {
-	if(!username)
-		return "";
-	const user = Meteor.users.findOne({ username: username });
-	return user.name;
-});
+Template.registerHelper('displayDateRange', displayDateRange);
+
+Template.registerHelper('displayNameByUsername', displayNameByUsername);
 
 Template.registerHelper('routeName', () => {
 	return FlowRouter.getRouteName();
@@ -32,6 +19,6 @@ Template.registerHelper('routeIs', (routeName) => {
 	return (FlowRouter.getRouteName() === routeName);
 });
 
-Template.registerHelper('nl2br', (text) => {
-	return text.replace(/(?:\r\n|\r|\n)/g, '<br />');
-});
+Template.registerHelper('nl2br', nl2br);
+
+Template.registerHelper('capitalizeFirstLetter', capitalizeFirstLetter);

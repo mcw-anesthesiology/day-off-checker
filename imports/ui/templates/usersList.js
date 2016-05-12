@@ -57,8 +57,8 @@ function roleName(role){
 }
 
 Template.editUser.helpers({
-	editing(){
-		return Session.get("userToEdit")._id;
+	editing(user){
+		return user._id;
 	},
 	getFirstEmail: getFirstEmail,
 	roles(){
@@ -68,14 +68,16 @@ Template.editUser.helpers({
 		}
 		return roles;
 	},
-	isSelected(role){
-		const user = Session.get("userToEdit");
+	isSelected(user, role){
 		if(user.role === role)
 			return "selected";
 	},
-	userIsChief(){
-		const user = Session.get("userToEdit");
+	userIsChief(user){
 		return user.role === "chief";
+	},
+	notifySelected(user){
+		if(user.notify)
+			return "checked";
 	}
 });
 

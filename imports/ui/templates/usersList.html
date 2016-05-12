@@ -13,7 +13,7 @@
 
 <template name="editUser">
 	<div class="well">
-{{#if editing}}
+{{#if editing user}}
 		<h2>Edit user</h2>
 {{else}}
 		<h2>Add user</h2>
@@ -37,18 +37,25 @@
 					<select class="form-control" id="role" name="role" required>
 						<option value="" selected disabled hidden>Select a role</option>
 {{#each role in roles}}
-						<option value="{{role.id}}" {{isSelected role.id}}>{{role.name}}</option>
+						<option value="{{role.id}}" {{isSelected user role.id}}>{{role.name}}</option>
 {{/each}}
 					</select>
 				</div>
-{{#if userIsChief}}
+{{#if userIsChief user}}
 				<div class="form-group col-lg-3 col-md-3 col-sm-4">
 					<label for="pager">Pager</label>
 					<input type="tel" class="form-control" id="pager" name="pager" value="{{user.pager}}" placeholder="Pager" required />
 				</div>
 {{/if}}
+				<div class="form-group col-md-2 col-sm-3">
+					<label>
+						Always notify
+						<input type="checkbox" id="notify" name="notify" value="true" {{notifySelected user}} />
+					</label>
+				</div>
 			</div>
 			<div class="row button-row">
+				{{!-- TODO: Delete/disable user --}}
 				<button type="button" class="btn btn-default close-edit-user">Cancel</button>
 				<button type="submit" class="btn btn-primary">Submit</button>
 			</div>

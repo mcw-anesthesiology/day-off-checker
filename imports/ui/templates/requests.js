@@ -10,20 +10,10 @@ import find from 'lodash/find';
 import moment from 'moment';
 import 'twix';
 
+import { displayDate, displayDateRange, capitalizeFirstLetter } from '../../utils.js';
+
 import './requests.html';
 
-
-function displayDate(date){
-	if(!date)
-		return "Invalid date";
-	return moment(date).calendar();
-}
-
-function displayDateRange(dates){
-	if(!dates || dates.length < 2)
-		return "Invalid date range";
-	return moment(dates[0]).twix(dates[1], true).format();
-}
 
 Template.requestsList.onCreated(function(){
 	Meteor.subscribe('dayOffRequests'); // FIXME: Make sure these permissions make sense
@@ -40,7 +30,7 @@ Template.requestsList.helpers({
 		else
 			return [{}];
 	},
-	sickDaySettings(){
+	sickDaySettings(){ // FIXME: Sorting with dates
 		return {
 			fields: [
 				{ key: 'requestorName', label: 'Name', sortOrder: 1, sortDirection: 'asc' },
@@ -61,24 +51,29 @@ Template.requestsList.helpers({
 		else
 			return [{}];
 	},
-	iDaySettings(){
+	iDaySettings(){ // FIXME: Sorting with dates
 		return {
 			fields: [
-				{ key: '_id', label: 'ID' },
 				{ key: 'requestorName', label: 'Name' },
 				{ key: 'requestedLocation.name', label: 'Location' },
 				{ key: 'requestedDate', label: 'I-Days', fn: displayDateRange },
 				{ key: 'requestTime', label: 'Requested', fn: displayDate },
 				{ key: 'requestReason', label: 'Reason' },
-				{ key: 'status', label: 'Status' }
+				{ key: 'status', label: 'Status', fn: capitalizeFirstLetter }
 			]
 		}
 	}
 });
 
 Template.requestsList.events({
+	'click #close-sick-day-details'(event){
+		Session.set("sickDayDetailsId", undefined);
+	},
 	'click .sick-day-requests tr'(event){
 		Session.set("sickDayDetailsId", this._id);
+	},
+	'click #close-i-day-details'(event){
+		Session.set("iDayDetailsId", undefined);
 	},
 	'click .i-day-requests tr'(event){
 		Session.set("iDayDetailsId", this._id);

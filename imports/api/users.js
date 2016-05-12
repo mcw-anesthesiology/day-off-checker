@@ -19,7 +19,8 @@ if(Meteor.isServer){
 			name: 1,
 			role: 1,
 			pager: 1,
-			emails: 1
+			emails: 1,
+			notify: 1
 		}});
 	});
 
@@ -57,6 +58,11 @@ const userSchema = new SimpleSchema({
 	pager: {
 		type: String,
 		label: "Pager",
+		optional: true
+	},
+	notify: {
+		type: Boolean,
+		label: "Notify",
 		optional: true
 	}
 });
