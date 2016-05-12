@@ -1,9 +1,8 @@
 body {
-	position: relative;
 
 	footer {
-		position: absolute; // FIXME: This isn't right on pages where you need to scroll
-		right: 10px;
+		text-align: right;
+		margin-right: 1em;
 
 		a {
 			& + a {

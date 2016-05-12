@@ -9,7 +9,7 @@ import { Locations } from './locations.js';
 
 import { APP_EMAIL_ADDRESS } from '../constants.js';
 
-import { alertAdministrator } from '../utils.js';
+import { alertAdministrator, displayDateRange, nl2br } from '../utils.js';
 
 import map from 'lodash/map';
 import moment from 'moment';
@@ -69,7 +69,7 @@ Meteor.methods({
 			requestedDate: {
 				type: [Date],
 				label: "Requested date range",
-				min: moment().utc().startOf("day").toDate()
+				min: moment().startOf("day").toDate()
 			},
 			requestedLocation: {
 				type: Object,
@@ -221,7 +221,7 @@ function sendNotifications(request){
 									<tbody>
 										<tr>
 											<td>${request.requestorName}</td>
-											<td>${moment(request.requestedDate[0]).twix(request.requestedDate[1], true).format()}</td>
+											<td>${displayDateRange(request.requestedDate)}</td>
 											<td>${request.requestedLocation.name}</td>
 											<td>${locationAdmin.name}</td>
 										</tr>
@@ -261,7 +261,7 @@ function sendNotifications(request){
 						<body>
 							<h1>Hello ${request.requestorName}</h1>
 
-							<p>This email is confirming that you have successfully notified us of your sick day on ${moment(request.requestedDate[0]).twix(request.requestedDate[1], true).format()}.</p>
+							<p>This email is confirming that you have successfully notified us of your sick day on ${displayDateRange(request.requestedDate)}.</p>
 
 							<p>If you have any questions or concerns about the system please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
 
@@ -311,7 +311,7 @@ function sendConfirmationRequests(request){
 							<body>
 								<h1>Hello ${user.name}</h1>
 
-								<p>${request.requestorName} has requested an I-Day for ${moment(request.requestedDate[0]).twix(request.requestedDate[1], true).format()}.</p>
+								<p>${request.requestorName} has requested an I-Day for ${displayDateRange(request.requestedDate)}.</p>
 
 								<p>Please navigate to <a href="${requestUrl}">${requestUrl}</a> to approve or deny this request.</p>
 
@@ -390,7 +390,7 @@ function sendRequestApprovalNotifications(request){
 
 								<p>
 									This email is notifying you that <a href="${requestUrl}">
-									${request.requestorName}'s I-Day request for ${moment(request.requestedDate[0]).twix(request.requestedDate[1], true).format()}</a>
+									${request.requestorName}'s I-Day request for ${displayDateRange(request.requestedDate)}</a>
 									has been approved.
 								</p>
 
@@ -420,7 +420,7 @@ function sendRequestApprovalNotifications(request){
 						<body>
 							<h1>Hello ${request.requestorName}</h1>
 
-							<p>Your I-Day request for ${moment(request.requestedDate[0]).twix(request.requestedDate[1], true).format()} has been approved!</p>
+							<p>Your I-Day request for ${displayDateRange(request.requestedDate)} has been approved!</p>
 
 							<p>If you have any questions or concerns please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
 
@@ -460,12 +460,12 @@ function sendRequestDenialNotifications(request, reason){
 
 								<p>
 									This email is notifying you that <a href="${requestUrl}">
-									${request.requestorName}'s I-Day request for ${moment(request.requestedDate[0]).twix(request.requestedDate[1], true).format()}</a>
+									${request.requestorName}'s I-Day request for ${displayDateRange(request.requestedDate)}</a>
 									has been denied by ${Meteor.user.name} for the following reason.
 								</p>
 
 								<blockquote>
-									<p>${reason.replace(/(?:\r\n|\r|\n)/g, '<br />')}</p>
+									<p>${nl2br(reason)}</p>
 								</blockquote>
 
 								<p>${request.requestorName} will be notified of its denial.</p>
@@ -497,12 +497,12 @@ function sendRequestDenialNotifications(request, reason){
 							<h1>Hello ${request.requestorName}</h1>
 
 							<p>
-								This email is notifying you that your I-Day request for ${moment(request.requestedDate[0]).twix(request.requestedDate[1], true).format()}
+								This email is notifying you that your I-Day request for ${displayDateRange(request.requestedDate)}
 								has been denied by ${Meteor.user.name} for the following reason.
 							</p>
 
 							<blockquote>
-								<p>${reason.replace(/(?:\r\n|\r|\n)/g, '<br />')}</p>
+								<p>${nl2br(reason)}</p>
 							</blockquote>
 
 							<p>If you have any questions or concerns please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>

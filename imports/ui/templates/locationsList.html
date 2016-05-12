@@ -37,12 +37,13 @@
 					<select class="form-control" id="administrator" name="administrator" required>
 						<option value="" selected disabled hidden>Select an administrator</option>
 {{#each siteAdmin in siteAdmins}}
-						<option value="{{siteAdmin._id}}">{{siteAdmin.name}}</option>
+						<option value="{{siteAdmin.username}}" {{isSiteAdmin location siteAdmin}}>{{siteAdmin.name}}</option>
 {{/each}}
 					</select>
 				</div>
 			</div>
 			<div class="row button-row">
+				{{!-- TODO: Delete/hide location --}}
 				<button type="button" class="btn btn-default close-edit-location">Cancel</button>
 				<button type="submit" class="btn btn-primary">Submit</button>
 			</div>

@@ -5,6 +5,7 @@
 		</header>
 {{#if sickDayDetails}}
 		{{>requestDetails request=sickDayDetails}}
+		<button type="button" class="close-details-button btn btn-default" id="close-sick-day-details">Close details</button>
 {{/if}}
 {{#if sickDayRequests}}
 		<section class="sick-day-requests">
@@ -16,6 +17,7 @@
 
 {{#if iDayDetails}}
 		{{>requestDetails request=iDayDetails}}
+		<button type="button" class="close-details-button btn btn-default" id="close-i-day-details">Close details</button>
 {{/if}}
 {{#if iDayRequests}}
 		<section class="i-day-requests">
@@ -42,80 +44,97 @@
 	<section class="request-details well well-lg">
 
 {{#if request}}
-		<h1>{{request.requestorName}}{{#if isIDay request}} <span class="label {{statusLabelType request.status}}">{{request.status}}</span>{{/if}}</h1>
+		<h1>{{request.requestorName}}{{#if isIDay request}} <span class="label {{statusLabelType request.status}}">{{capitalizeFirstLetter request.status}}</span>{{/if}}</h1>
 	{{!-- TODO: Render calendar --}}
 		<div class="row">
 			<div class="col-md-9 request-details-main">
-				<div class="row">
-					<div class="col-md-4">
+				<div class="row date-location-container">
+					<div class="col-md-5">
 						<span class="request-date">{{displayDateRange request.requestedDate}}</span>
 					</div>
-					<div class="col-md-4 col-md-offset-1">
+					<div class="col-md-5 col-md-offset-2">
 						<span class="request-location">{{request.requestedLocation.name}}</span>
 					</div>
 				</div>
 	{{#if request.requestReason}}
 				<div class="row request-reason">
-					<div class="col-md-7 col-md-offset-1">
+					<div class="col-md-10 col-md-offset-1">
 						<p>{{request.requestReason}}</p>
 					</div>
 				</div>
 	{{/if}}
 				<div class="row id-time-container">
-					<div class="col-md-4">
+					<div class="col-md-5">
 						<span class="request-id">ID: <span>{{request._id}}</span></span>
 					</div>
-					<div class="col-md-4 col-md-offset-1">
+					<div class="col-md-5 col-md-offset-2">
 						<span class="request-time">Requested: <time datetime="{{displayISODate request.requestTime}}">{{displayDate request.requestTime}}</time></span>
 					</div>
 				</div>
 			</div>
-	{{#if isIDay request}}
 			<div class="col-md-3 request-details-aside">
+	{{#if isIDay request}}
 		{{#each confirmationRequest in request.confirmationRequests}}
 				<div class="panel panel-default">
 					<div class="panel-heading">
 						<h1 class="panel-title">{{displayNameByUsername confirmationRequest.confirmer}}</h1>
 					</div>
 					<div class="panel-body">
-						<span class="label {{statusLabelType confirmationRequest.status}}">{{confirmationRequest.status}}</span>
+						<span class="label {{statusLabelType confirmationRequest.status}}">{{capitalizeFirstLetter confirmationRequest.status}}</span>
 			{{#if confirmationRequest.reason}}
-						<p>{{nl2br confirmationRequest.reason}}</p>
+						<p>{{confirmationRequest.reason}}</p>
 			{{/if}}
 					</div>
 				</div>
 				<label for="{{confirmationRequest.confirmer}}"></label>
 		{{/each}}
-			</div>
+	{{else}}
+		{{#each userNotified in request.usersNotified}}
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h1 class="panel-title">{{displayNameByUsername userNotified}}</h1>
+					</div>
+					<div class="panel-body">
+						<span class="label label-success">Notified</span>
+					</div>
+				</div>
+		{{/each}}
 	{{/if}}
+			</div>
 		</div>
 
+	{{#if needsResponse request}}
+		{{!-- TODO: Pretty this html a bit --}}
 		<div class="row">
 			<div class="col-md-offset-1 col-md-10">
 				<div class="request-response-container well">
-	{{#if needsResponse request}}
-		{{!-- TODO: Pretty this html a bit --}}
 					<div class="row">
-						<form class="col-md-4" id="confirm-request-form">
+						<form class="col-md-5" id="confirm-request-form">
 							<input type="hidden" id="confirm-request-id" value="{{request._id}}" />
 							<button type="submit" class="btn btn-lg btn-primary">Confirm request</button>
 						</form>
 
-						<form class="col-md-4 col-md-offset-2" id="deny-request-form">
+						<form class="col-md-5 col-md-offset-2" id="deny-request-form">
 							<input type="hidden" id="deny-request-id" value="{{request._id}}" />
 							<label for="deny-reason">Reason for denial</label>
 							<textarea id="deny-reason" name="deny_reason" class="form-control" required></textarea>
 							<button type="submit" class="btn btn-lg btn-primary">Deny request</button>
 						</form>
 					</div>
-	{{else}}{{#if submittedResponse request}}
-					<p>
-						You have already submitted a response to this request.
-					</p>
-	{{/if}}{{/if}}
 				</div>
 			</div>
 		</div>
+	{{else}}{{#if submittedResponse request}}
+		<div class="row">
+			<div class="col-md-offset-1 col-md-10">
+				<div class="request-response-container well">
+					<p>
+						You have already submitted a response to this request.
+					</p>
+				</div>
+			</div>
+		</div>
+	{{/if}}{{/if}}
 {{else}}
 		<p>
 			It looks like you're not allowed to view this request.
