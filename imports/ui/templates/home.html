@@ -20,6 +20,9 @@
 
 		{{>dayOffEntry}}
 		{{!-- TODO: Display hints --}}
+	{{#if hint}}
+		<p class="hint">{{hint}}</p>
+	{{/if}}
 {{else}}
 		{{>submissionConfirmation}}
 {{/if}}
@@ -45,17 +48,17 @@
 </template>
 
 <template name="requestorName">
-	<input type="text" name="requestorName" id="name" placeholder="Your name" value="{{oldValue}}" required />
+	<input type="text" name="requestorName" id="name" placeholder="Your name" value="{{oldValue}}" autocomplete="off" required />
 	<button type="submit" class="btn btn-lg btn-primary">Next</button>
 </template>
 
 <template name="requestorEmail">
-	<input type="email" name="requestorEmail" id="email" placeholder="Your email" value="{{oldValue}}" required />
+	<input type="email" name="requestorEmail" id="email" placeholder="Your email" value="{{oldValue}}" autocomplete="off" required />
 	<button type="submit" class="btn btn-lg btn-primary">Next</button>
 </template>
 
 <template name="requestedDate">
-	<input type="text" name="requestedDate" id="daterange" placeholder="MM/DD/YYYY - MM/DD/YYYY" value="{{oldValue}}" required />
+	<input type="text" name="requestedDate" id="daterange" placeholder="MM/DD/YYYY - MM/DD/YYYY" value="{{oldValue}}" autocomplete="off" required />
 	<button type="submit" class="btn btn-lg btn-primary">Next</button>
 </template>
 
@@ -70,7 +73,7 @@
 </template>
 
 <template name="requestReason">
-	<textarea class="form-control" name="requestReason" id="reason" placeholder="Reason (optional)">{{oldValue}}</textarea>
+	<textarea class="form-control" name="requestReason" id="reason" placeholder="Reason (optional)"  autocomplete="off">{{oldValue}}</textarea>
 	<button type="submit" class="btn btn-lg btn-primary">Next</button>
 </template>
 

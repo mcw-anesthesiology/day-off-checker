@@ -15,11 +15,6 @@ BlazeLayout.setRoot('body');
 
 FlowRouter.route('/', {
 	name: 'Home',
-	// TODO: Maybe?
-	// triggersEnter: [() => {
-	// 	if(Meteor.user())
-	// 		FlowRouter.go('/list');
-	// }],
 	action() {
 		BlazeLayout.render('main', { main: 'home' });
 	}

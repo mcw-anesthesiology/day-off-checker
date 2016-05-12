@@ -4,15 +4,26 @@ import { Accounts } from 'meteor/accounts-base';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 
 if(Meteor.isServer){
-	Meteor.publish('chiefUserData', () => {
+	Meteor.publish('currentUserData', function(){
+		if(this.userId)
+			return Meteor.users.find({_id: this.userId}, { fields: {
+				name: 1,
+				role: 1
+			}});
+		else
+			this.ready();
+	});
+
+	Meteor.publish('chiefUserData', function(){
 		return Meteor.users.find({ role: 'chief' }, { fields: {
 			name: 1,
+			username: 1,
 			role: 1,
 			pager: 1
 		}});
 	});
 
-	Meteor.publish('allUserData', () => {
+	Meteor.publish('allUserData', function(){
 		return Meteor.users.find({}, { fields: {
 			_id: 1,
 			username: 1,
@@ -24,10 +35,20 @@ if(Meteor.isServer){
 		}});
 	});
 
-	Meteor.publish('locationAdminUserData', () => {
+	Meteor.publish('locationAdminUserData', function(){
 		return Meteor.users.find({ role: 'location_admin' }, { fields: {
 			_id: 1,
+			username: 1,
+			role: 1,
 			name: 1
+		}});
+	});
+
+	Meteor.publish('notifyUserData', function(){
+		return Meteor.users.find({ notify: true }, { fields: {
+			username: 1,
+			name: 1,
+			notify: 1
 		}});
 	});
 }
@@ -72,16 +93,22 @@ Meteor.methods({
 		if(Meteor.user().role !== "admin")
 			throw new Meteor.Error('addUser.unauthorized');
 
+		if(user.notify)
+			user.notify = true;
+
 		userSchema.validate(user);
 
 		if(Meteor.isServer){
 			const userId = Accounts.createUser(user);
-			Accounts.sendEnrollmentEmail(userId); // FIXME: Accounts.emailTemplates
+			Accounts.sendEnrollmentEmail(userId);
 		}
 	},
 	'updateUser'(userId, user){
 		if(Meteor.user().role !== "admin")
 			throw new Meteor.Error('updateUser.unauthorized');
+
+		if(user.notify)
+			user.notify = true;
 
 		userSchema.validate(user);
 
