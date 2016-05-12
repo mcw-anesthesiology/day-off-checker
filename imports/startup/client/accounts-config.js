@@ -9,11 +9,18 @@ Accounts.config({
 
 AccountsTemplates.configure({
 	forbidClientAccountCreation: true,
+	showForgotPasswordLink: true,
+	enablePasswordChange: true,
 	defaultLayoutType: 'blaze',
-	defaultLayout: 'main'
+	defaultLayout: 'main',
+	texts: {
+		errors: {
+			loginForbidden: "Login failed",
+			mustBeLoggedIn: "Please login"
+		}
+	}
 });
 
-AccountsTemplates.removeField('email');
 const pwd = AccountsTemplates.removeField('password');
 AccountsTemplates.addFields([
 	{
@@ -30,5 +37,26 @@ AccountsTemplates.configureRoute('signIn', {
 	layoutType: 'blaze',
 	name: 'signin',
 	path: '/login',
+	contentRegion: 'main'
+});
+
+AccountsTemplates.configureRoute('forgotPwd', {
+	layoutType: 'blaze',
+	name: 'ForgotPassword',
+	path: '/forgot-password',
+	contentRegion: 'main'
+});
+
+AccountsTemplates.configureRoute('resetPwd', {
+	layoutType: 'blaze',
+	name: 'ResetPassword',
+	path: '/reset-password',
+	contentRegion: 'main'
+});
+
+AccountsTemplates.configureRoute('changePwd', {
+	layoutType: 'blaze',
+	name: 'ChangePassword',
+	path: '/change-password',
 	contentRegion: 'main'
 });

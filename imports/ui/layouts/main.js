@@ -4,6 +4,10 @@ import { AccountsTemplates } from 'meteor/useraccounts:core';
 
 import './main.html';
 
+Template.main.onRendered(function(){
+	Meteor.subscribe("currentUserData");
+});
+
 Template.main.helpers({
 	errorAlert(){
 		return Session.get("errorAlert");

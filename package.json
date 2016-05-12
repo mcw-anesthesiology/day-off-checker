@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "bootstrap-daterangepicker": "^2.1.19",
+    "email-validator": "^1.0.4",
     "lodash": "^4.7.0",
     "meteor-node-stubs": "~0.2.0",
     "moment": "^2.12.0",

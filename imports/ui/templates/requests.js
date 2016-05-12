@@ -10,13 +10,33 @@ import find from 'lodash/find';
 import moment from 'moment';
 import 'twix';
 
+import { ADMIN_EMAIL_ADDRESS } from '../../constants.js';
 import { displayDate, displayDateRange, capitalizeFirstLetter } from '../../utils.js';
 
 import './requests.html';
 
+function displaySortableDate(date){
+	try {
+		const dateString = displayDate(date);
+		return new Spacebars.SafeString(`<span sort="${date.getTime()}">${dateString}</span>`);
+	}
+	catch(e){
+		return "";
+	}
+}
+
+function displaySortableDateRange(dates){
+	try{
+		const dateRangeString = displayDateRange(dates);
+		return new Spacebars.SafeString(`<span sort="${dates[1].getTime()}">${dateRangeString}</span>`);
+	}
+	catch(e){
+		return "";
+	}
+}
 
 Template.requestsList.onCreated(function(){
-	Meteor.subscribe('dayOffRequests'); // FIXME: Make sure these permissions make sense
+	Meteor.subscribe('dayOffRequests');
 });
 
 Template.requestsList.helpers({
@@ -30,13 +50,13 @@ Template.requestsList.helpers({
 		else
 			return [{}];
 	},
-	sickDaySettings(){ // FIXME: Sorting with dates
+	sickDaySettings(){
 		return {
 			fields: [
-				{ key: 'requestorName', label: 'Name', sortOrder: 1, sortDirection: 'asc' },
+				{ key: 'requestorName', label: 'Name', sortOrder: 2, sortDirection: 'asc' },
 				{ key: 'requestedLocation.name', label: 'Location' },
-				{ key: 'requestedDate', label: 'Sick days', fn: displayDateRange },
-				{ key: 'requestTime', label: 'Requested', fn: displayDate, sortOrder: 0, sortDirection: 'desc' },
+				{ key: 'requestedDate', label: 'Sick days', fn: displaySortableDateRange, sortOrder: 0, sortDirection: 'desc' },
+				{ key: 'requestTime', label: 'Requested', fn: displaySortableDate, sortOrder: 1, sortDirection: 'desc' },
 				{ key: 'requestReason', label: 'Reason' },
 			]
 		}
@@ -51,13 +71,13 @@ Template.requestsList.helpers({
 		else
 			return [{}];
 	},
-	iDaySettings(){ // FIXME: Sorting with dates
+	iDaySettings(){
 		return {
 			fields: [
-				{ key: 'requestorName', label: 'Name' },
+				{ key: 'requestorName', label: 'Name', sortOrder: 2, sortDirection: 'asc' },
 				{ key: 'requestedLocation.name', label: 'Location' },
-				{ key: 'requestedDate', label: 'I-Days', fn: displayDateRange },
-				{ key: 'requestTime', label: 'Requested', fn: displayDate },
+				{ key: 'requestedDate', label: 'I-Days', fn: displaySortableDateRange, sortOrder: 0, sortDirection: 'desc' },
+				{ key: 'requestTime', label: 'Requested', fn: displaySortableDate, sortOrder: 1, sortDirection: 'desc' },
 				{ key: 'requestReason', label: 'Reason' },
 				{ key: 'status', label: 'Status', fn: capitalizeFirstLetter }
 			]
@@ -157,7 +177,7 @@ Template.requestDetails.events({
 		Meteor.call('dayOffRequests.approveRequest', requestId, (err, res) => {
 			if(err){
 				console.log(err.name + ": " + err.message);
-				Session.set("errorAlert", "There was a problem approving the request. Please refresh the page and try again. If this problem continues, please let me know at jmischka@mcw.edu.");
+				Session.set("errorAlert", "There was a problem approving the request. Please refresh the page and try again. If this problem continues, please let me know at " + ADMIN_EMAIL_ADDRESS + ".");
 			}
 		});
 	},
@@ -173,7 +193,7 @@ Template.requestDetails.events({
 		Meteor.call('dayOffRequests.denyRequest', requestId, reason, (err, res) => {
 			if(err){
 				console.log(err.name + ": " + err.message);
-				Session.set("errorAlert", "There was a problem denying the request. Please refresh the page and try again. If this problem continues, please let me know at jmischka@mcw.edu.");
+				Session.set("errorAlert", "There was a problem denying the request. Please refresh the page and try again. If this problem continues, please let me know at " + ADMIN_EMAIL_ADDRESS + ".");
 			}
 		});
 	}

@@ -5,7 +5,7 @@ import { Accounts } from 'meteor/accounts-base';
 
 import map from 'lodash/map';
 
-import { APP_EMAIL_ADDRESS } from '../constants.js';
+import { APP_ACCOUNTS_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS } from '../constants.js';
 
 import { alertAdministrator } from '../utils.js';
 
@@ -15,10 +15,6 @@ if(Meteor.isServer){
 	Meteor.publish('locations', function(){
 		return Locations.find({});
 	});
-}
-
-if(Meteor.isClient){
-	Meteor.subscribe('allUserData'); // FIXME ?
 }
 
 Meteor.methods({
@@ -54,7 +50,7 @@ Meteor.methods({
 			notifyNewLocationAdmin(location);
 		}
 	},
-	'updateLocation'(locationId, location){ // TODO: More validation
+	'updateLocation'(locationId, location){ // TODO: More validation?
 		if(Meteor.user().role !== "admin")
 			throw new Meteor.Error('updateLocation.unauthorized');
 
@@ -94,7 +90,7 @@ function notifyNewLocationAdmin(location){
 	try {
 		const user = Accounts.findUserByUsername(location.administrator);
 		Email.send({
-			from: APP_EMAIL_ADDRESS,
+			from: APP_ACCOUNTS_EMAIL_ADDRESS,
 			to: user.emails[0].address,
 			subject: "New location administrator",
 			html: `
@@ -105,8 +101,12 @@ function notifyNewLocationAdmin(location){
 							This email is notifying you that you have been added as an administrator in the Anesthesiology department's day off
 							management site for ${location.name}.
 						</p>
-
-						<p>If you have any questions or concerns please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
+						<p>
+							You will be notified when anyone from this location requests a day off, and you will have to login
+							to approve or deny their I-Day requests. You can do this via the link sent to you in the email,
+							or via the <a href="${Meteor.absoluteUrl("list")}">requests list</a> by clicking on the request in the table.
+						</p>
+						<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 
 						<p>Thank you!</p>
 					</body>

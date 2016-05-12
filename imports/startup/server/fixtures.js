@@ -133,7 +133,7 @@ const accounts = [
 
 
 
-Meteor.startup(() => {
+Meteor.startup(() => { // FIXME: Remove this
 	Locations.remove({});
 	for(let location of locations){
 		Locations.insert(location);

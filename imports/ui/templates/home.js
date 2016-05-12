@@ -8,11 +8,15 @@ import { AccountsTemplates } from 'meteor/useraccounts:core';
 import { DayOffRequests } from '../../api/day-off-requests.js';
 import { Locations } from '../../api/locations.js';
 
+import validator from 'email-validator';
+
 import moment from 'moment';
 import 'twix';
 
 import 'bootstrap-daterangepicker';
 import 'bootstrap-daterangepicker/daterangepicker.css';
+
+import { ADMIN_EMAIL_ADDRESS } from '../../constants.js';
 
 import './home.html';
 
@@ -59,7 +63,7 @@ function insertEntries(){
 	Meteor.call('dayOffRequests.insert', request, (err, res) => {
 		if(err){
 			console.log(err.name + ": " + err.message);
-			Session.set("errorAlert", "Problem creating a request. Please refresh the page and try again. If this problem continues, please let me know at jmischka@mcw.edu.");
+			Session.set("errorAlert", "Problem creating a request. Please refresh the page and try again. If this problem continues, please let me know at " + ADMIN_EMAIL_ADDRESS + ".");
 		}
 		else
 			Session.set("submissionConfirmation", true);
@@ -103,6 +107,9 @@ Template.home.helpers({
 	},
 	entryName(entry){
 		return entryNames[entry];
+	},
+	hint(){
+		return Session.get("hint");
 	}
 });
 
@@ -155,12 +162,16 @@ Template.dayOffEntry.events({
 					Session.set("errorAlert", "Unknown day off type");
 				break;
 			case "requestorName":
-				// TODO: Validation
-				value = input.value;
+				if(input.value.trim() === "")
+					Session.set("errorAlert", "Name looks empty. Please double check your name.");
+				else
+					value = input.value;
 				break;
 			case "requestorEmail":
-				// TODO: Validation
-				value = input.value;
+				if(validator.validate(input.value))
+					value = input.value;
+				else
+					Session.set("errorAlert", "Email address seems wrong. Please make sure to enter a valid email address.");
 				break;
 			case "requestedDate":
 				let dates = input.value.split(" - ");
@@ -191,8 +202,10 @@ Template.dayOffEntry.events({
 				break;
 		}
 
-		if(value)
+		if(value){
 			Session.set(input.name, value);
+			Session.set("hint", undefined);
+		}
 	}
 });
 
@@ -225,6 +238,7 @@ Template.requestedDate.onRendered(function(){
 	this.$("#daterange").daterangepicker({
 		minDate: moment().startOf("day")
 	});
+	Session.set("hint", "Select a starting date and an ending date. If you are only missing one day, select the same day as both the starting and ending date.")
 });
 
 Template.requestedDate.helpers({

@@ -4,15 +4,13 @@ import { Email } from 'meteor/email';
 import moment from 'moment';
 import 'twix';
 
-import { APP_EMAIL_ADDRESS } from './constants.js';
+import { APP_ADMIN_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS } from './constants.js';
 
 
 export function alertAdministrator(){
-	const adminEmail = "jmischka@mcw.edu"; // FIXME: Put this somewhere better, database probably
-
 	Email.send({
-		from: APP_EMAIL_ADDRESS,
-		to: adminEmail,
+		from: APP_ADMIN_EMAIL_ADDRESS,
+		to: ADMIN_EMAIL_ADDRESS,
 		subject: "Day off checker error",
 		text: `An error occurred at ${new Date()}. Check the logs.`
 	});

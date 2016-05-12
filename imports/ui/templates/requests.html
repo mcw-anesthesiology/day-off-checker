@@ -40,7 +40,6 @@
 </template>
 
 <template name="requestDetails">
-	{{!-- TODO:	Make this look decent --}}
 	<section class="request-details well well-lg">
 
 {{#if request}}
@@ -104,14 +103,13 @@
 		</div>
 
 	{{#if needsResponse request}}
-		{{!-- TODO: Pretty this html a bit --}}
 		<div class="row">
 			<div class="col-md-offset-1 col-md-10">
 				<div class="request-response-container well">
 					<div class="row">
 						<form class="col-md-5" id="confirm-request-form">
 							<input type="hidden" id="confirm-request-id" value="{{request._id}}" />
-							<button type="submit" class="btn btn-lg btn-primary">Confirm request</button>
+							<button type="submit" class="btn btn-lg btn-primary">Approve request</button>
 						</form>
 
 						<form class="col-md-5 col-md-offset-2" id="deny-request-form">

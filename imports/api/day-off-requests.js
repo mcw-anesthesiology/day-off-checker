@@ -7,7 +7,7 @@ import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 
 import { Locations } from './locations.js';
 
-import { APP_EMAIL_ADDRESS } from '../constants.js';
+import { APP_NOTIFICATION_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS } from '../constants.js';
 
 import { alertAdministrator, displayDateRange, nl2br } from '../utils.js';
 
@@ -37,7 +37,9 @@ if(Meteor.isServer){
 }
 
 if(Meteor.isClient){
-	Meteor.subscribe('allUserData'); // FIXME ?
+	Meteor.subscribe('chiefUserData');
+	Meteor.subscribe('locationAdminUserData');
+	Meteor.subscribe('notifyUserData');
 }
 
 Meteor.methods({
@@ -122,7 +124,7 @@ Meteor.methods({
 			}
 		}
 	},
-	'dayOffRequests.approveRequest'(requestId){ // FIXME: Way more validation
+	'dayOffRequests.approveRequest'(requestId){
 		DayOffRequests.update({
 			_id: requestId,
 			dayOffType: "iDay",
@@ -150,7 +152,7 @@ Meteor.methods({
 				sendRequestApprovalNotifications(request);
 		}
 	},
-	'dayOffRequests.denyRequest'(requestId, reason){ // FIXME: Way more validation
+	'dayOffRequests.denyRequest'(requestId, reason){
 		new SimpleSchema({
 			reason: {
 				type: String,
@@ -200,10 +202,21 @@ function sendNotifications(request){
 			Meteor.setTimeout(() => { // FIXME
 				Email.send({
 					to: user.emails[0].address,
-					from: APP_EMAIL_ADDRESS,
+					from: APP_NOTIFICATION_EMAIL_ADDRESS,
 					subject: "Sick day notification",
 					html: `
 						<html>
+							<head>
+								<style>
+									th, td {
+										padding: 2px 10px;
+									}
+
+									table thead tr th {
+										text-align: left;
+									}
+								</style>
+							</head>
 							<body>
 								<h1>Hello ${user.name}</h1>
 
@@ -230,7 +243,7 @@ function sendNotifications(request){
 
 								<p><a href="${requestUrl}">View details</a></p>
 
-								<p>If you have any questions or concerns about the system please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
+								<p>If you have any questions or concerns about the system please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 
 								<p>Thank you!</p>
 							</body>
@@ -254,7 +267,7 @@ function sendNotifications(request){
 		Meteor.setTimeout(() => {
 			Email.send({
 				to: request.requestorEmail,
-				from: APP_EMAIL_ADDRESS,
+				from: APP_NOTIFICATION_EMAIL_ADDRESS,
 				subject: "Sick Day Confirmation",
 				html: `
 					<html>
@@ -263,7 +276,7 @@ function sendNotifications(request){
 
 							<p>This email is confirming that you have successfully notified us of your sick day on ${displayDateRange(request.requestedDate)}.</p>
 
-							<p>If you have any questions or concerns about the system please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
+							<p>If you have any questions or concerns about the system please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 
 							<p>Thank you!</p>
 						</body>
@@ -297,14 +310,14 @@ function sendConfirmationRequests(request){
 	let timeout = 0; // FIXME
 	for(let user of users){
 		try {
-			let confirmationRequest = {}; // TODO: Rename to approvalRequest?
+			let confirmationRequest = {};
 			timeout += 1000; // FIXME
 			confirmationRequest.confirmer = user.username;
 			confirmationRequest.status = "pending";
 			Meteor.setTimeout(() => { // FIXME
 				Email.send({
 					to: user.emails[0].address,
-					from: APP_EMAIL_ADDRESS,
+					from: APP_NOTIFICATION_EMAIL_ADDRESS,
 					subject: "Confirmation required",
 					html: `
 						<html>
@@ -313,11 +326,11 @@ function sendConfirmationRequests(request){
 
 								<p>${request.requestorName} has requested an I-Day for ${displayDateRange(request.requestedDate)}.</p>
 
-								<p>Please navigate to <a href="${requestUrl}">${requestUrl}</a> to approve or deny this request.</p>
+								<p>Please navigate to <a href="${requestUrl}">${requestUrl}</a> or the <a href="${Meteor.absoluteUrl("list")}">requests list page</a> to approve or deny this request.</p>
 
 								<p>You will be notified when the request is approved or denied.</p>
 
-								<p>If you have any questions or concerns about the system please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
+								<p>If you have any questions or concerns about the system please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 
 								<p>Thank you!</p>
 							</body>
@@ -341,7 +354,7 @@ function sendConfirmationRequests(request){
 		Meteor.setTimeout(() => {
 			Email.send({
 				to: request.requestorEmail,
-				from: APP_EMAIL_ADDRESS,
+				from: APP_NOTIFICATION_EMAIL_ADDRESS,
 				subject: "Request Confirmation",
 				html: `
 					<html>
@@ -352,7 +365,7 @@ function sendConfirmationRequests(request){
 
 							<p>Confirmation has been requested by the chiefs and the location site administrator. You will be notified of their response.</p>
 
-							<p>If you have any questions or concerns please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
+							<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 
 							<p>Thank you!</p>
 						</body>
@@ -381,7 +394,7 @@ function sendRequestApprovalNotifications(request){
 			Meteor.setTimeout(() => {
 				Email.send({
 					to: user.emails[0].address,
-					from: APP_EMAIL_ADDRESS,
+					from: APP_NOTIFICATION_EMAIL_ADDRESS,
 					subject: "I-Day Request Approved",
 					html: `
 						<html>
@@ -394,7 +407,7 @@ function sendRequestApprovalNotifications(request){
 									has been approved.
 								</p>
 
-								<p>If you have any questions or concerns please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
+								<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 
 								<p>Thank you!</p>
 							</body>
@@ -413,7 +426,7 @@ function sendRequestApprovalNotifications(request){
 		Meteor.setTimeout(() => {
 			Email.send({
 				to: request.requestorEmail,
-				from: APP_EMAIL_ADDRESS,
+				from: APP_NOTIFICATION_EMAIL_ADDRESS,
 				subject: "Request Approved!",
 				html: `
 					<html>
@@ -422,11 +435,13 @@ function sendRequestApprovalNotifications(request){
 
 							<p>Your I-Day request for ${displayDateRange(request.requestedDate)} has been approved!</p>
 
-							<p>If you have any questions or concerns please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
+							<p>Be sure to remind your site location administrator 1-2 days prior to your absence.</p>
+
+							<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 
 							<p>Thank you!</p>
 						</body>
-					</html>` // TODO: Tell them anything else important?
+					</html>`
 			});
 		}, timeout);
 	}
@@ -451,7 +466,7 @@ function sendRequestDenialNotifications(request, reason){
 			Meteor.setTimeout(() => {
 				Email.send({
 					to: user.emails[0].address,
-					from: APP_EMAIL_ADDRESS,
+					from: APP_NOTIFICATION_EMAIL_ADDRESS,
 					subject: "I-Day Request Denied",
 					html: `
 						<html>
@@ -470,7 +485,7 @@ function sendRequestDenialNotifications(request, reason){
 
 								<p>${request.requestorName} will be notified of its denial.</p>
 
-								<p>If you have any questions or concerns please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
+								<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 
 								<p>Thank you!</p>
 							</body>
@@ -489,7 +504,7 @@ function sendRequestDenialNotifications(request, reason){
 		Meteor.setTimeout(() => {
 			Email.send({
 				to: request.requestorEmail,
-				from: APP_EMAIL_ADDRESS,
+				from: APP_NOTIFICATION_EMAIL_ADDRESS,
 				subject: "I-Day Request Denied",
 				html: `
 					<html>
@@ -505,7 +520,7 @@ function sendRequestDenialNotifications(request, reason){
 								<p>${nl2br(reason)}</p>
 							</blockquote>
 
-							<p>If you have any questions or concerns please contact me at <a href="mailto:jmischka@mcw.edu">jmischka@mcw.edu</a>.</p>
+							<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 
 							<p>Thank you!</p>
 						</body>

@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 
 import '../../api/users.js';
+import { ADMIN_EMAIL_ADDRESS } from '../../constants.js';
 
 import './usersList.html';
 
@@ -103,7 +104,7 @@ Template.editUser.events({
 			Meteor.call('updateUser', userId, user, (err, res) => {
 				if(err){
 					console.log(err.name + ": " + err.message);
-					Session.set("errorAlert", "There was a problem updating the user. Please refresh the page and try again. If this problem continues, please let me know at jmischka@mcw.edu.");
+					Session.set("errorAlert", "There was a problem updating the user. Please refresh the page and try again. If this problem continues, please let me know at " + ADMIN_EMAIL_ADDRESS + ".");
 				}
 				else
 					Session.set("userToEdit", undefined);
@@ -112,7 +113,7 @@ Template.editUser.events({
 			Meteor.call('addUser', user, (err, res) => {
 				if(err){
 					console.log(err.name + ": " + err.message);
-					Session.set("errorAlert", "There was a problem adding the user. Please refresh the page and try again. If this problem continues, please let me know at jmischka@mcw.edu.");
+					Session.set("errorAlert", "There was a problem adding the user. Please refresh the page and try again. If this problem continues, please let me know at " + ADMIN_EMAIL_ADDRESS + ".");
 				}
 				else
 					Session.set("userToEdit", undefined);
