@@ -57,6 +57,9 @@
 			<div class="row button-row">
 				{{!-- TODO: Delete/disable user --}}
 				<button type="button" class="btn btn-default close-edit-user">Cancel</button>
+{{#if editing user}}
+				<button type="button" class="btn btn-warning" id="resend-enrollment-email">Resend enrollment email</button>
+{{/if}}
 				<button type="submit" class="btn btn-primary">Submit</button>
 			</div>
 		</form>

@@ -91,6 +91,17 @@ Template.editUser.events({
 		user.role = event.target.value;
 		Session.set("userToEdit", user);
 	},
+	'click #resend-enrollment-email'(event, instance){
+		const userId = Session.get("userToEdit")._id;
+		Meteor.call('resendEnrollmentEmail', userId, (err, res) => {
+			if(err){
+				console.log(err.name + ": " + err.message);
+				Session.set("errorAlert", "There was a problem resending the enrollment email. Please refresh the page and try again. If this problem continues, please let me know at " + ADMIN_EMAIL_ADDRESS + ".");
+			}
+			else
+				Session.set("userToEdit", undefined);
+		});
+	},
 	'submit #edit-user'(event, instance){
 		event.preventDefault();
 		const form = event.target;
