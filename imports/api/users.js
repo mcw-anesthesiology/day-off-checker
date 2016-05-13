@@ -90,7 +90,7 @@ const userSchema = new SimpleSchema({
 
 Meteor.methods({
 	'addUser'(user){
-		if(Meteor.user().role !== "admin")
+		if(Meteor.user().role !== 'admin')
 			throw new Meteor.Error('addUser.unauthorized');
 
 		if(user.notify)
@@ -104,7 +104,7 @@ Meteor.methods({
 		}
 	},
 	'updateUser'(userId, user){
-		if(Meteor.user().role !== "admin")
+		if(Meteor.user().role !== 'admin')
 			throw new Meteor.Error('updateUser.unauthorized');
 
 		if(user.notify)
@@ -135,5 +135,12 @@ Meteor.methods({
 			throw new Meteor.Error('updateUser.noUsersFound');
 		else if(usersUpdated > 1)
 			throw new Meteor.Error('updateUser.multipleUsersFound');
+	},
+	'resendEnrollmentEmail'(userId){
+		if(Meteor.user().role !== 'admin')
+			throw new Meteor.Error('resendEnrollmentEmail.unauthorized');
+
+		if(Meteor.isServer)
+			Accounts.sendEnrollmentEmail(userId);
 	}
 });

@@ -133,14 +133,14 @@ const accounts = [
 
 
 
-Meteor.startup(() => { // FIXME: Remove this
-	Locations.remove({});
-	for(let location of locations){
-		Locations.insert(location);
-	}
-
-	Meteor.users.remove({});
-	for(let account of accounts){
-		Accounts.createUser(account);
-	}
-});
+// Meteor.startup(() => { // FIXME: Remove this
+// 	Locations.remove({});
+// 	for(let location of locations){
+// 		Locations.insert(location);
+// 	}
+//
+// 	Meteor.users.remove({});
+// 	for(let account of accounts){
+// 		Accounts.createUser(account);
+// 	}
+// });
