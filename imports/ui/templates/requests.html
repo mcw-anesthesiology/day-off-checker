@@ -4,18 +4,20 @@
 			<h1>All Requests</h1>
 		</header>
 {{#if sickDayDetails}}
+		<h2>Sick Day Details</h2>
 		{{>requestDetails request=sickDayDetails}}
 		<button type="button" class="close-details-button btn btn-default" id="close-sick-day-details">Close details</button>
 {{/if}}
 {{#if sickDayRequests}}
 		<section class="sick-day-requests">
-			<h2>Sick days</h2>
+			<h2>Sick Days</h2>
 			{{>reactiveTable collection=sickDayRequests settings=sickDaySettings}}
 			<hr />
 		</section>
 {{/if}}
 
 {{#if iDayDetails}}
+		<h2>I-Day Details</h2>
 		{{>requestDetails request=iDayDetails}}
 		<button type="button" class="close-details-button btn btn-default" id="close-i-day-details">Close details</button>
 {{/if}}
