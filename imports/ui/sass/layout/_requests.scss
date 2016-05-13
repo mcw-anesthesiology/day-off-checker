@@ -29,6 +29,14 @@
 
 			tr {
 				cursor: pointer;
+
+				.i-day-needs-response-icon {
+					display: inline-block;
+					height: 0.7em;
+					width: 0.7em;
+					border-radius: 50%;
+					background-color: $md-blue-500;
+				}
 			}
 		}
 	}

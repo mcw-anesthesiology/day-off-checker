@@ -79,11 +79,26 @@ Template.requestsList.helpers({
 				{ key: 'requestedDate', label: 'I-Days', fn: displaySortableDateRange, sortOrder: 0, sortDirection: 'desc' },
 				{ key: 'requestTime', label: 'Requested', fn: displaySortableDate, sortOrder: 1, sortDirection: 'desc' },
 				{ key: 'requestReason', label: 'Reason' },
-				{ key: 'status', label: 'Status', fn: capitalizeFirstLetter }
+				{ key: 'status', label: 'Status', fn: capitalizeFirstLetter },
+				{ key: 'confirmationRequests', label: '', fn: iDayNeedsResponse }
 			]
 		}
 	}
 });
+
+function iDayNeedsResponse(confirmationRequests, request){
+	try {
+		const confirmationRequest = find(confirmationRequests, { confirmer: Meteor.user().username });
+		console.log(confirmationRequest);
+		if(confirmationRequest.status === "pending" && request.status === "pending"){
+			console.log("okay");
+			return Spacebars.SafeString('<span class="i-day-needs-response-icon"></span>');
+		}
+	}
+	catch(e){
+		return false;
+	}
+}
 
 Template.requestsList.events({
 	'click #close-sick-day-details'(event){
