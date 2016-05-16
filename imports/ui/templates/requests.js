@@ -220,6 +220,9 @@ Template.requestDetails.events({
 	'click #resend-confirmation-requests'(event, instance){
 		Session.set("requestDetailAdminAction", "resend-confirmation-requests");
 	},
+	'click #close-resend-confirmation-requests'(event, instance){
+		Session.set("requestDetailAdminAction", undefined);
+	},
 	'submit #resend-confirmation-requests-form'(event, instance){
 		event.preventDefault();
 		const requestId = instance.$("#resend-confirmation-requests-request-id").val();
