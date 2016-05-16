@@ -11,9 +11,6 @@ Template.main.onRendered(function(){
 Template.main.helpers({
 	errorAlert(){
 		return Session.get("errorAlert");
-	},
-	currentUserAdmin(){
-		return (Meteor.user().role === "admin");
 	}
 });
 

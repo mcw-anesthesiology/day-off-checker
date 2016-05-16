@@ -37,8 +37,7 @@ if(Meteor.isServer){
 }
 
 if(Meteor.isClient){
-	Meteor.subscribe('chiefUserData');
-	Meteor.subscribe('locationAdminUserData');
+	Meteor.subscribe('basicUserData');
 	Meteor.subscribe('notifyUserData');
 }
 
@@ -177,6 +176,33 @@ Meteor.methods({
 			const request = DayOffRequests.findOne(requestId);
 			sendRequestDenialNotifications(request, reason);
 		}
+	},
+	'dayOffRequests.resendConfirmationRequests'(requestId, resendUsernames){
+		if(Meteor.user().role !== "admin")
+			throw new Meteor.Error("dayOffRequests.resendConfirmationRequests.unauthorized");
+
+		const request = DayOffRequests.findOne(requestId);
+		let pendingConfirmers = [];
+		for(let confirmationRequest of request.confirmationRequests){
+			if(confirmationRequest.status === "pending")
+				pendingConfirmers.push(confirmationRequest.confirmer);
+		}
+
+		new SimpleSchema({
+			resendUsernames: {
+				type: [String],
+				label: "Usernames to resend",
+				allowedValues: pendingConfirmers
+			}
+		}).validate({ resendUsernames: resendUsernames });
+
+		let resendUsers = Meteor.users.find({ username: {
+			$in: resendUsernames
+		}}).fetch();
+
+		if(Meteor.isServer){
+			sendConfirmationRequests(request, resendUsers, false);
+		}
 	}
 });
 
@@ -190,8 +216,8 @@ function getUsersToNotify(request){
 	}).fetch();
 }
 
-function sendNotifications(request){
-	const users = getUsersToNotify(request);
+function sendNotifications(request, users, sendRequestorNotification = true){
+	users = typeof users !== "undefined" ? users : getUsersToNotify(request);
 	const requestUrl = Meteor.absoluteUrl("request/" + request._id);
 	let errors = false;
 	const locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
@@ -251,7 +277,7 @@ function sendNotifications(request){
 				});
 			}, timeout);
 			DayOffRequests.update(request, {
-				$push: {
+				$addToSet: {
 					usersNotified: user.username
 				}
 			});
@@ -262,31 +288,33 @@ function sendNotifications(request){
 		}
 	}
 
-	try{
-		timeout += 1000; // FIXME
-		Meteor.setTimeout(() => {
-			Email.send({
-				to: request.requestorEmail,
-				from: APP_NOTIFICATION_EMAIL_ADDRESS,
-				subject: "Sick Day Confirmation",
-				html: `
-					<html>
-						<body>
-							<h1>Hello ${request.requestorName}</h1>
+	if(sendRequestorNotification){
+		try{
+			timeout += 1000; // FIXME
+			Meteor.setTimeout(() => {
+				Email.send({
+					to: request.requestorEmail,
+					from: APP_NOTIFICATION_EMAIL_ADDRESS,
+					subject: "Sick Day Confirmation",
+					html: `
+						<html>
+							<body>
+								<h1>Hello ${request.requestorName}</h1>
 
-							<p>This email is confirming that you have successfully notified us of your sick day on ${displayDateRange(request.requestedDate)}.</p>
+								<p>This email is confirming that you have successfully notified us of your sick day on ${displayDateRange(request.requestedDate)}.</p>
 
-							<p>If you have any questions or concerns about the system please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
+								<p>If you have any questions or concerns about the system please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 
-							<p>Thank you!</p>
-						</body>
-					</html>`
-			});
-		}, timeout);
-	}
-	catch(e){
-		console.log("Error sending notification: " + e);
-		errors = true;
+								<p>Thank you!</p>
+							</body>
+						</html>`
+				});
+			}, timeout);
+		}
+		catch(e){
+			console.log("Error sending notification: " + e);
+			errors = true;
+		}
 	}
 
 	if(errors){
@@ -303,8 +331,8 @@ function getUsersForConfirmation(request){
 	}).fetch();
 }
 
-function sendConfirmationRequests(request){
-	const users = getUsersForConfirmation(request);
+function sendConfirmationRequests(request, users, sendRequestorNotification = true){
+	users = typeof users !== "undefined" ? users : getUsersForConfirmation(request);
 	const requestUrl = Meteor.absoluteUrl("request/" + request._id);
 	let errors = false;
 	let timeout = 0; // FIXME
@@ -338,7 +366,7 @@ function sendConfirmationRequests(request){
 				});
 			}, timeout);
 			DayOffRequests.update(request, {
-				$push: {
+				$addToSet: {
 					confirmationRequests: confirmationRequest
 				}
 			});
@@ -349,33 +377,35 @@ function sendConfirmationRequests(request){
 		}
 	}
 
-	try{
-		timeout += 1000; // FIXME
-		Meteor.setTimeout(() => {
-			Email.send({
-				to: request.requestorEmail,
-				from: APP_NOTIFICATION_EMAIL_ADDRESS,
-				subject: "Request Confirmation",
-				html: `
-					<html>
-						<body>
-							<h1>Hello ${request.requestorName}</h1>
+	if(sendRequestorNotification){
+		try{
+			timeout += 1000; // FIXME
+			Meteor.setTimeout(() => {
+				Email.send({
+					to: request.requestorEmail,
+					from: APP_NOTIFICATION_EMAIL_ADDRESS,
+					subject: "Request Confirmation",
+					html: `
+						<html>
+							<body>
+								<h1>Hello ${request.requestorName}</h1>
 
-							<p>This email is confirming that you have sent a day off request.</p>
+								<p>This email is confirming that you have sent a day off request.</p>
 
-							<p>Confirmation has been requested by the chiefs and the location site administrator. You will be notified of their response.</p>
+								<p>Confirmation has been requested by the chiefs and the location site administrator. You will be notified of their response.</p>
 
-							<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
+								<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 
-							<p>Thank you!</p>
-						</body>
-					</html>`
-			});
-		}, timeout);
-	}
-	catch(e){
-		console.log("Error sending notification: " + e);
-		errors = true;
+								<p>Thank you!</p>
+							</body>
+						</html>`
+				});
+			}, timeout);
+		}
+		catch(e){
+			console.log("Error sending notification: " + e);
+			errors = true;
+		}
 	}
 
 	if(errors){

@@ -135,6 +135,35 @@
 			</div>
 		</div>
 	{{/if}}{{/if}}
+
+	{{#if currentUserAdmin}}
+		<button type="button" class="btn btn-warning" id="resend-confirmation-requests">Resend confirmation requests</button>
+	{{/if}}
+
+	{{#if currentUserAdmin}}{{#if resendConfirmationRequests}}
+		<div class="panel panel-default resend-confirmation-requests-container">
+			<div class="panel-heading">
+				<h1 class="panel-title">Resend Confirmation Requests</h1>
+			</div>
+			<div class="panel-body">
+				<form id="resend-confirmation-requests-form">
+					<input type="hidden" id="resend-confirmation-requests-request-id" value="{{request._id}}" />
+		{{#each confirmationRequest in confirmationRequests request}}
+			{{#if isPending confirmationRequest}}
+					<div class="form-group">
+						<label>
+							<input type="checkbox" name="resend_username" value="{{confirmationRequest.confirmer}}" />
+							{{displayNameByUsername confirmationRequest.confirmer}}
+						</label>
+					</div>
+			{{/if}}
+		{{/each}}
+
+					<button type="submit" class="btn btn-warning">Resend requests</button>
+				</form>
+			</div>
+		</div>
+	{{/if}}{{/if}}
 {{else}}
 		<p>
 			It looks like you're not allowed to view this request.
