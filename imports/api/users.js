@@ -44,6 +44,16 @@ if(Meteor.isServer){
 		}});
 	});
 
+	Meteor.publish('basicUserData', function(){
+		return Meteor.users.find({}, { fields: {
+			_id: 1,
+			username: 1,
+			name: 1,
+			role: 1,
+			pager: 1
+		}});
+	});
+
 	Meteor.publish('notifyUserData', function(){
 		return Meteor.users.find({ notify: true }, { fields: {
 			username: 1,

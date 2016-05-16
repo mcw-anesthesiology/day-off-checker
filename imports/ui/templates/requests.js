@@ -89,7 +89,6 @@ Template.requestsList.helpers({
 function iDayNeedsResponse(confirmationRequests, request){
 	try {
 		const confirmationRequest = find(confirmationRequests, { confirmer: Meteor.user().username });
-		console.log(confirmationRequest);
 		if(confirmationRequest.status === "pending" && request.status === "pending"){
 			console.log("okay");
 			return Spacebars.SafeString('<span class="i-day-needs-response-icon"></span>');
@@ -150,6 +149,9 @@ Template.requestDetails.helpers({
 	confirmationRequests(request){
 		return request.confirmationRequests;
 	},
+	isPending(confirmationRequest){
+		return (confirmationRequest.status === "pending");
+	},
 	statusLabelType(status){
 		const labelTypes = {
 			pending: "warning",
@@ -182,6 +184,9 @@ Template.requestDetails.helpers({
 		catch(e){
 			return false;
 		}
+	},
+	resendConfirmationRequests(){
+		return Session.equals("requestDetailAdminAction", "resend-confirmation-requests");
 	}
 });
 
@@ -211,5 +216,29 @@ Template.requestDetails.events({
 				Session.set("errorAlert", "There was a problem denying the request. Please refresh the page and try again. If this problem continues, please let me know at " + ADMIN_EMAIL_ADDRESS + ".");
 			}
 		});
+	},
+	'click #resend-confirmation-requests'(event, instance){
+		Session.set("requestDetailAdminAction", "resend-confirmation-requests");
+	},
+	'submit #resend-confirmation-requests-form'(event, instance){
+		event.preventDefault();
+		const requestId = instance.$("#resend-confirmation-requests-request-id").val();
+		const form = event.target;
+		const formArray = $(form).serializeArray();
+		let resendUsernames = [];
+		for(let i of formArray){
+			if(i.name === "resend_username")
+				resendUsernames.push(i.value);
+		}
+		if(resendUsernames.length > 0){
+			Meteor.call('dayOffRequests.resendConfirmationRequests', requestId, resendUsernames, (err, res) => {
+				if(err){
+					console.log(err.name + ": " + err.message);
+					Session.set("errorAlert", "There was a problem resending the requests. Please refresh the page and try again. If this problem continues, please let me know at " + ADMIN_EMAIL_ADDRESS + ".");
+				}
+				else
+					Session.set("requestDetailAdminAction", undefined);
+			});
+		}
 	}
 });
