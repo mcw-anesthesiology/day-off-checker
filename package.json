@@ -3,7 +3,9 @@
   "private": true,
   "scripts": {
     "start": "MAIL_URL=smtp://40701ebe2b9d2c3ec:18d0ca555fd201@mailtrap.io:2525/ meteor run --settings settings.json",
-    "deploy": "DEPLOY_HOSTNAME=galaxy.meteor.com meteor deploy www.dayoff.site --settings settings.json"
+    "deploy-galaxy": "DEPLOY_HOSTNAME=galaxy.meteor.com meteor deploy www.dayoff.site --settings settings.json",
+    "mup-deploy": "PATH=$HOME/.nvm/versions/node/v5.11.1/bin:$PATH mup deploy",
+    "mup-logs": "PATH=$HOME/.nvm/versions/node/v5.11.1/bin:$PATH mup logs"
   },
   "dependencies": {
     "bootstrap-daterangepicker": "^2.1.19",
