@@ -4,7 +4,7 @@
 			<h1>All Requests</h1>
 		</header>
 {{#if sickDayDetails}}
-		<h2>Sick Day Details</h2>
+		<h2 id="sick-day-details">Sick Day Details</h2>
 		{{>requestDetails request=sickDayDetails}}
 		<button type="button" class="close-details-button btn btn-default" id="close-sick-day-details">Close details</button>
 {{/if}}
@@ -17,7 +17,7 @@
 {{/if}}
 
 {{#if iDayDetails}}
-		<h2>I-Day Details</h2>
+		<h2 id="i-day-details">I-Day Details</h2>
 		{{>requestDetails request=iDayDetails}}
 		<button type="button" class="close-details-button btn btn-default" id="close-i-day-details">Close details</button>
 {{/if}}
@@ -84,7 +84,9 @@
 						<span class="label {{statusLabelType confirmationRequest.status}}">{{capitalizeFirstLetter confirmationRequest.status}}</span>
 			{{#if confirmationRequest.reason}}
 						<p>{{confirmationRequest.reason}}</p>
-			{{/if}}
+			{{else}}{{#if confirmationRequest.note}}
+						<p>{{confirmationRequest.note}}</p>
+			{{/if}}{{/if}}
 					</div>
 				</div>
 				<label for="{{confirmationRequest.confirmer}}"></label>
@@ -111,6 +113,8 @@
 					<div class="row">
 						<form class="col-md-5" id="confirm-request-form">
 							<input type="hidden" id="confirm-request-id" value="{{request._id}}" />
+							<label for="confirm-note">Note (optional)</label>
+							<textarea id="confirm-note" name="confirm_note" class="form-control"></textarea>
 							<button type="submit" class="btn btn-lg btn-primary">Approve request</button>
 						</form>
 
@@ -124,17 +128,27 @@
 				</div>
 			</div>
 		</div>
-	{{else}}{{#if submittedResponse request}}
+	{{else}}{{#if notDenied request}}{{#if submittedResponse request}}
+		{{#let confirmationRequest=(submittedResponse request)}}
 		<div class="row">
 			<div class="col-md-offset-1 col-md-10">
 				<div class="request-response-container well">
 					<p>
 						You have already submitted a response to this request.
 					</p>
+			{{#if approvedRequest confirmationRequest}}
+					<form id="confirmation-request-note-edit-form">
+						<input type="hidden" id="note-request-id" value="{{request._id}}" />
+						<label for="confirmation-request-note">Edit approval note</label>
+						<textarea class="form-control" id="confirmation-request-note">{{confirmationRequest.note}}</textarea>
+						<button type="submit" class="btn btn-primary">Edit note</button>
+					</form>
+			{{/if}}
 				</div>
 			</div>
 		</div>
-	{{/if}}{{/if}}
+		{{/let}}
+	{{/if}}{{/if}}{{/if}}
 
 	{{#if currentUserAdmin}}
 		<button type="button" class="btn btn-warning" id="resend-confirmation-requests">Resend confirmation requests</button>

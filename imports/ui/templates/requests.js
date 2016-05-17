@@ -103,14 +103,16 @@ Template.requestsList.events({
 	'click #close-sick-day-details'(event){
 		Session.set("sickDayDetailsId", undefined);
 	},
-	'click .sick-day-requests tr'(event){
+	'click .sick-day-requests tr'(event, instance){
 		Session.set("sickDayDetailsId", this._id);
+		instance.$("#sick-day-details")[0].scrollIntoView();
 	},
 	'click #close-i-day-details'(event){
 		Session.set("iDayDetailsId", undefined);
 	},
-	'click .i-day-requests tr'(event){
+	'click .i-day-requests tr'(event, instance){
 		Session.set("iDayDetailsId", this._id);
+		instance.$("#i-day-details")[0].scrollIntoView();
 	}
 })
 
@@ -143,6 +145,9 @@ Template.requestDetails.helpers({
 	// 	let range = moment(request.requestedDate[0]).twix(request.requestedDate[1], true);
 	// 	return range.simpleFormat("MM/DD/YYYY");
 	// },
+	notDenied(request){
+		return (request.status !== "denied");
+	},
 	displayISODate(date){
 		return date.toISOString();
 	},
@@ -185,6 +190,9 @@ Template.requestDetails.helpers({
 			return false;
 		}
 	},
+	approvedRequest(confirmationRequest){
+		return (confirmationRequest.status === "approved");
+	},
 	resendConfirmationRequests(){
 		return Session.equals("requestDetailAdminAction", "resend-confirmation-requests");
 	}
@@ -194,7 +202,8 @@ Template.requestDetails.events({
 	'submit #confirm-request-form'(event, instance){
 		event.preventDefault();
 		const requestId = instance.$("#confirm-request-id").val();
-		Meteor.call('dayOffRequests.approveRequest', requestId, (err, res) => {
+		const note = instance.$("#confirm-note").val();
+		Meteor.call('dayOffRequests.approveRequest', requestId, note, (err, res) => {
 			if(err){
 				console.log(err.name + ": " + err.message);
 				Session.set("errorAlert", "There was a problem approving the request. Please refresh the page and try again. If this problem continues, please let me know at " + ADMIN_EMAIL_ADDRESS + ".");
@@ -243,5 +252,16 @@ Template.requestDetails.events({
 					Session.set("requestDetailAdminAction", undefined);
 			});
 		}
+	},
+	'submit #confirmation-request-note-edit-form'(event, instance){
+		event.preventDefault();
+		const requestId = instance.$("#note-request-id").val();
+		const note = instance.$("#confirmation-request-note").val().trim();
+		Meteor.call('dayOffRequests.editApprovalNote', requestId, note, (err, res) => {
+			if(err){
+				console.log(err.name + ": " + err.message);
+				Session.set("errorAlert", "There was a problem editing the approval note. Please refresh the page and try again. If this problem continues, please let me know at " + ADMIN_EMAIL_ADDRESS + ".");
+			}
+		});
 	}
 });
