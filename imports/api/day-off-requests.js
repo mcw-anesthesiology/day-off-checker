@@ -123,7 +123,14 @@ Meteor.methods({
 			}
 		}
 	},
-	'dayOffRequests.approveRequest'(requestId){
+	'dayOffRequests.approveRequest'(requestId, note){
+		new SimpleSchema({
+			note: {
+				type: String,
+				label: "Approval note"
+			}
+		}).validate({ note: note });
+
 		DayOffRequests.update({
 			_id: requestId,
 			dayOffType: "iDay",
@@ -131,7 +138,8 @@ Meteor.methods({
 			"confirmationRequests.confirmer": Meteor.user().username
 		}, {
 			$set: {
-				"confirmationRequests.$.status": "approved"
+				"confirmationRequests.$.status": "approved",
+				"confirmationRequests.$.note": note
 			}
 		});
 
@@ -203,6 +211,25 @@ Meteor.methods({
 		if(Meteor.isServer){
 			sendConfirmationRequests(request, resendUsers, false);
 		}
+	},
+	'dayOffRequests.editApprovalNote'(requestId, note){
+		new SimpleSchema({
+			note: {
+				type: String,
+				label: "Approval note"
+			}
+		}).validate({ note: note });
+
+		DayOffRequests.update({
+			_id: requestId,
+			dayOffType: "iDay",
+			status: "pending",
+			"confirmationRequests.confirmer": Meteor.user().username
+		}, {
+			$set: {
+				"confirmationRequests.$.note": note
+			}
+		});
 	}
 });
 
