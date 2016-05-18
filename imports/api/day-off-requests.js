@@ -248,6 +248,15 @@ function sendNotifications(request, users, sendRequestorNotification = true){
 	const requestUrl = Meteor.absoluteUrl("request/" + request._id);
 	let errors = false;
 	const locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
+
+	let reasonHtml = "";
+	if(request.requestReason){
+		reasonHtml = `
+			<blockquote>
+				<p>${nl2br(request.requestReason)}</p>
+			</blockquote>`;
+	}
+
 	let timeout = 0; // FIXME
 	for(let user of users){
 		try {
@@ -294,6 +303,8 @@ function sendNotifications(request, users, sendRequestorNotification = true){
 									</tbody>
 								</table>
 
+								${reasonHtml}
+
 								<p><a href="${requestUrl}">View details</a></p>
 
 								<p>If you have any questions or concerns about the system please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
@@ -325,10 +336,40 @@ function sendNotifications(request, users, sendRequestorNotification = true){
 					subject: "Sick Day Confirmation",
 					html: `
 						<html>
+							<head>
+								<style>
+									th, td {
+										padding: 2px 10px;
+									}
+
+									table thead tr th {
+										text-align: left;
+									}
+								</style>
+							</head>
 							<body>
 								<h1>Hello ${request.requestorName}</h1>
 
 								<p>This email is confirming that you have successfully notified us of your sick day on ${displayDateRange(request.requestedDate)}.</p>
+
+								<table>
+									<thead>
+										<tr>
+											<th>Date</th>
+											<th>Location</th>
+											<th>Location administrator</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>${displayDateRange(request.requestedDate)}</td>
+											<td>${request.requestedLocation.name}</td>
+											<td>${locationAdmin.name}</td>
+										</tr>
+									</tbody>
+								</table>
+
+								${reasonHtml}
 
 								<p>If you have any questions or concerns about the system please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 
@@ -361,7 +402,17 @@ function getUsersForConfirmation(request){
 function sendConfirmationRequests(request, users, sendRequestorNotification = true){
 	users = typeof users !== "undefined" ? users : getUsersForConfirmation(request);
 	const requestUrl = Meteor.absoluteUrl("request/" + request._id);
+	const locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
 	let errors = false;
+
+	let reasonHtml = "";
+	if(request.requestReason){
+		reasonHtml = `
+			<blockquote>
+				<p>${nl2br(request.requestReason)}</p>
+			</blockquote>`;
+	}
+
 	let timeout = 0; // FIXME
 	for(let user of users){
 		try {
@@ -376,12 +427,44 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 					subject: "Confirmation required",
 					html: `
 						<html>
+							<head>
+								<style>
+									th, td {
+										padding: 2px 10px;
+									}
+
+									table thead tr th {
+										text-align: left;
+									}
+								</style>
+							</head>
 							<body>
 								<h1>Hello ${user.name}</h1>
 
 								<p>${request.requestorName} has requested an I-Day for ${displayDateRange(request.requestedDate)}.</p>
 
 								<p>Please navigate to <a href="${requestUrl}">${requestUrl}</a> or the <a href="${Meteor.absoluteUrl("list")}">requests list page</a> to approve or deny this request.</p>
+
+								<table>
+									<thead>
+										<tr>
+											<th>Name</th>
+											<th>Date</th>
+											<th>Location</th>
+											<th>Location administrator</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>${request.requestorName}</td>
+											<td>${displayDateRange(request.requestedDate)}</td>
+											<td>${request.requestedLocation.name}</td>
+											<td>${locationAdmin.name}</td>
+										</tr>
+									</tbody>
+								</table>
+
+								${reasonHtml}
 
 								<p>You will be notified when the request is approved or denied.</p>
 
@@ -414,10 +497,42 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 					subject: "Request Confirmation",
 					html: `
 						<html>
+							<head>
+								<style>
+									th, td {
+										padding: 2px 10px;
+									}
+
+									table thead tr th {
+										text-align: left;
+									}
+								</style>
+							</head>
 							<body>
 								<h1>Hello ${request.requestorName}</h1>
 
 								<p>This email is confirming that you have sent a day off request.</p>
+
+								<table>
+									<thead>
+										<tr>
+											<th>Name</th>
+											<th>Date</th>
+											<th>Location</th>
+											<th>Location administrator</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>${request.requestorName}</td>
+											<td>${displayDateRange(request.requestedDate)}</td>
+											<td>${request.requestedLocation.name}</td>
+											<td>${locationAdmin.name}</td>
+										</tr>
+									</tbody>
+								</table>
+
+								${reasonHtml}
 
 								<p>Confirmation has been requested by the chiefs and the location site administrator. You will be notified of their response.</p>
 
