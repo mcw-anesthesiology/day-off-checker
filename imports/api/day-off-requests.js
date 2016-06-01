@@ -391,15 +391,10 @@ function sendNotifications(request, users, sendRequestorNotification = true){
 }
 
 function getUsersForConfirmation(request){
-	return Meteor.users.find({
-		$or: [
-			{ role: "chief" },
-			{ role: "location_admin", username: request.requestedLocation.administrator }
-		]
-	}).fetch();
+	return Meteor.users.find({ role: "chief" }).fetch();
 }
 
-function sendConfirmationRequests(request, users, sendRequestorNotification = true){
+function sendConfirmationRequests(request, users, sendRequestorNotification = true, sendLocationAdminNotification = true){
 	users = typeof users !== "undefined" ? users : getUsersForConfirmation(request);
 	const requestUrl = Meteor.absoluteUrl("request/" + request._id);
 	const locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
@@ -487,6 +482,86 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 		}
 	}
 
+	if(sendLocationAdminNotification){
+		timeout += 1000; // FIXME
+		let confirmerList = "<ul>";
+		for(let confirmer of users){
+			confirmerList += `<li>${confirmer.name} &lt;${confirmer.emails[0].address}&gt;</li>`;
+		}
+		confirmerList += "</ul>";
+
+		try{
+			Meteor.setTimeout(() => { // FIXME
+				Email.send({
+					to: locationAdmin.emails[0].address,
+					from: APP_NOTIFICATION_EMAIL_ADDRESS,
+					subject: "I-Day requested",
+					html: `
+						<html>
+							<head>
+								<style>
+									th, td {
+										padding: 2px 10px;
+									}
+
+									table thead tr th {
+										text-align: left;
+									}
+								</style>
+							</head>
+							<body>
+								<h1>Hello ${locationAdmin.name}</h1>
+
+								<p>${request.requestorName} has requested an I-Day for ${displayDateRange(request.requestedDate)}.</p>
+
+								<p>Please navigate to <a href="${requestUrl}">${requestUrl}</a> or the <a href="${Meteor.absoluteUrl("list")}">requests list page</a> to view this request.</p>
+
+								<table>
+									<thead>
+										<tr>
+											<th>Name</th>
+											<th>Date</th>
+											<th>Location</th>
+											<th>Location administrator</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>${request.requestorName}</td>
+											<td>${displayDateRange(request.requestedDate)}</td>
+											<td>${request.requestedLocation.name}</td>
+											<td>${locationAdmin.name}</td>
+										</tr>
+									</tbody>
+								</table>
+
+								${reasonHtml}
+
+								<p>
+									If you have a problem with this request, please let one of the chief residents know:
+								</p>
+								${confirmerList}
+
+								<p>You will be notified when the request is approved or denied by the chiefs.</p>
+
+								<p>If you have any questions or concerns about the system please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
+
+								<p>Thank you!</p>
+							</body>
+						</html>`
+				});
+			}, timeout);
+			DayOffRequests.update(request, {
+				$addToSet: {
+					usersNotified: locationAdmin.username
+				}
+			});
+		} catch(e){
+			console.log("Error sending i-day notification to location admin: " + e);
+			errors = true;
+		}
+	}
+
 	if(sendRequestorNotification){
 		try{
 			timeout += 1000; // FIXME
@@ -534,7 +609,7 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 
 								${reasonHtml}
 
-								<p>Confirmation has been requested by the chiefs and the location site administrator. You will be notified of their response.</p>
+								<p>Confirmation has been requested by the chiefs. You will be notified of their response.</p>
 
 								<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 

@@ -40,7 +40,7 @@ Accounts.emailTemplates.enrollAccount.html = (user, url) => {
 			break;
 		case "location_admin":
 			roleDescription = "As a location administrator, you have full access to view all day off requests for the site under your administration. "
-				+ "You will be notified for all sick day submissions for your location, and must approve or deny all I-Day requests for your location."
+				+ "You will be notified for all sick day submissions and all I-Day requests for your location."
 			break;
 	}
 	return `

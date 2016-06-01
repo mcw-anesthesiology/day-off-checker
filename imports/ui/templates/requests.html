@@ -74,25 +74,23 @@
 				</div>
 			</div>
 			<div class="col-md-3 request-details-aside">
-	{{#if isIDay request}}
-		{{#each confirmationRequest in request.confirmationRequests}}
+	{{#each confirmationRequest in request.confirmationRequests}}
 				<div class="panel panel-default">
 					<div class="panel-heading">
 						<h1 class="panel-title">{{displayNameByUsername confirmationRequest.confirmer}}</h1>
 					</div>
 					<div class="panel-body">
 						<span class="label {{statusLabelType confirmationRequest.status}}">{{capitalizeFirstLetter confirmationRequest.status}}</span>
-			{{#if confirmationRequest.reason}}
+		{{#if confirmationRequest.reason}}
 						<p>{{confirmationRequest.reason}}</p>
-			{{else}}{{#if confirmationRequest.note}}
+		{{else}}{{#if confirmationRequest.note}}
 						<p>{{confirmationRequest.note}}</p>
-			{{/if}}{{/if}}
+		{{/if}}{{/if}}
 					</div>
 				</div>
 				<label for="{{confirmationRequest.confirmer}}"></label>
-		{{/each}}
-	{{else}}
-		{{#each userNotified in request.usersNotified}}
+	{{/each}}
+	{{#each userNotified in request.usersNotified}}
 				<div class="panel panel-default">
 					<div class="panel-heading">
 						<h1 class="panel-title">{{displayNameByUsername userNotified}}</h1>
@@ -101,8 +99,7 @@
 						<span class="label label-success">Notified</span>
 					</div>
 				</div>
-		{{/each}}
-	{{/if}}
+	{{/each}}
 			</div>
 		</div>
 
