@@ -6,7 +6,7 @@ import { FlowRouter } from 'meteor/kadira:flow-router';
 import { displayDate, displayDateRange, displayNameByUsername, nl2br, capitalizeFirstLetter } from '../../utils.js';
 
 Template.registerHelper('currentUserAdmin', () => {
-	return (Meteor.user().role === "admin");
+	return (Meteor.user().role === 'admin');
 });
 
 Template.registerHelper('displayDate', displayDate);

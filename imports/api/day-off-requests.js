@@ -1,7 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import { Email } from 'meteor/email';
-import { Random } from 'meteor/random';
 import { Accounts } from 'meteor/accounts-base';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 
@@ -22,14 +21,14 @@ if(Meteor.isServer){
 		if(!this.userId)
 			return;
 		const user = Meteor.users.findOne(this.userId);
-		if(user.role === "admin"){
+		if(user.role === 'admin'){
 			return DayOffRequests.find({});
 		}
 		else{
 			return DayOffRequests.find({
 				$or: [
 					{ usersNotified: user.username },
-					{ "confirmationRequests.confirmer": user.username }
+					{ 'confirmationRequests.confirmer': user.username }
 				]
 			});
 		}
@@ -44,66 +43,66 @@ if(Meteor.isClient){
 Meteor.methods({
 	'dayOffRequests.insert'(request){
 		const locations = Locations.find({}).fetch();
-		const locationAdmins = Meteor.users.find({ role: "location_admin" }).fetch();
+		const locationAdmins = Meteor.users.find({ role: 'location_admin' }).fetch();
 
-		if(request.requestReason == "(None)")
-			request.requestReason = "";
+		if(request.requestReason === '(None)')
+			request.requestReason = '';
 
 		new SimpleSchema({
 			dayOffType: {
 				type: String,
-				label: "Day off type",
+				label: 'Day off type',
 				allowedValues: [
-					"sick",
-					"iDay"
+					'sick',
+					'iDay'
 				]
 			},
 			requestorName: {
 				type: String,
-				label: "Name"
+				label: 'Name'
 			},
 			requestorEmail: {
 				type: String,
-				label: "Email",
+				label: 'Email',
 				regEx: SimpleSchema.RegEx.Email
 			},
 			requestedDate: {
 				type: [Date],
-				label: "Requested date range",
-				min: moment().startOf("day").toDate()
+				label: 'Requested date range',
+				min: moment().startOf('day').toDate()
 			},
 			requestedLocation: {
 				type: Object,
-				label: "Location"
+				label: 'Location'
 			},
-			"requestedLocation._id": {
+			'requestedLocation._id': {
 				type: String,
-				label: "Location ID",
-				allowedValues: map(locations, "_id")
+				label: 'Location ID',
+				allowedValues: map(locations, '_id')
 			},
-			"requestedLocation.name": {
+			'requestedLocation.name': {
 				type: String,
-				label: "Location name",
-				allowedValues: map(locations, "name")
+				label: 'Location name',
+				allowedValues: map(locations, 'name')
 			},
-			"requestedLocation.number": {
+			'requestedLocation.number': {
 				type: String,
-				label: "Location number",
-				allowedValues: map(locations, "number")
+				label: 'Location number',
+				allowedValues: map(locations, 'number')
 			},
-			"requestedLocation.administrator": {
+			'requestedLocation.administrator': {
 				type: String,
-				label: "Location administrator",
-				allowedValues: map(locationAdmins, "username")
+				label: 'Location administrator',
+				allowedValues: map(locationAdmins, 'username')
 			},
 			requestReason: {
 				type: String,
-				label: "Reason"
+				label: 'Reason'
 			}
 		}).validate(request);
 
-		if(request.dayOffType == "iDay")
-			request.status = "pending";
+		if(request.dayOffType === 'iDay')
+			request.status = 'pending';
 
 		if(Meteor.isServer){
 			request.ipAddress = this.connection.clientAddress;
@@ -114,10 +113,10 @@ Meteor.methods({
 
 		if(Meteor.isServer){
 			switch(request.dayOffType){
-				case "sick":
+				case 'sick':
 					sendNotifications(request);
 					break;
-				case "iDay":
+				case 'iDay':
 					sendConfirmationRequests(request);
 					break;
 			}
@@ -127,32 +126,32 @@ Meteor.methods({
 		new SimpleSchema({
 			note: {
 				type: String,
-				label: "Approval note"
+				label: 'Approval note'
 			}
 		}).validate({ note: note });
 
 		DayOffRequests.update({
 			_id: requestId,
-			dayOffType: "iDay",
-			status: "pending",
-			"confirmationRequests.confirmer": Meteor.user().username
+			dayOffType: 'iDay',
+			status: 'pending',
+			'confirmationRequests.confirmer': Meteor.user().username
 		}, {
 			$set: {
-				"confirmationRequests.$.status": "approved",
-				"confirmationRequests.$.note": note
+				'confirmationRequests.$.status': 'approved',
+				'confirmationRequests.$.note': note
 			}
 		});
 
 		const request = DayOffRequests.findOne(requestId);
 		let allApproved = true;
 		for(let confirmationRequest of request.confirmationRequests){
-			if(confirmationRequest.status !== "approved")
+			if(confirmationRequest.status !== 'approved')
 				allApproved = false;
 		}
 		if(allApproved){
 			DayOffRequests.update({ _id: requestId }, {
 				$set: {
-					status: "approved"
+					status: 'approved'
 				}
 			});
 			if(Meteor.isServer)
@@ -163,20 +162,20 @@ Meteor.methods({
 		new SimpleSchema({
 			reason: {
 				type: String,
-				label: "Denial reason"
+				label: 'Denial reason'
 			}
 		}).validate({ reason: reason });
 
 		DayOffRequests.update({
 			_id: requestId,
-			dayOffType: "iDay",
-			status: "pending",
-			"confirmationRequests.confirmer": Meteor.user().username
+			dayOffType: 'iDay',
+			status: 'pending',
+			'confirmationRequests.confirmer': Meteor.user().username
 		}, {
 			$set: {
-				status: "denied",
-				"confirmationRequests.$.status": "denied",
-				"confirmationRequests.$.reason": reason
+				status: 'denied',
+				'confirmationRequests.$.status': 'denied',
+				'confirmationRequests.$.reason': reason
 			}
 		});
 
@@ -186,20 +185,20 @@ Meteor.methods({
 		}
 	},
 	'dayOffRequests.resendConfirmationRequests'(requestId, resendUsernames){
-		if(Meteor.user().role !== "admin")
-			throw new Meteor.Error("dayOffRequests.resendConfirmationRequests.unauthorized");
+		if(Meteor.user().role !== 'admin')
+			throw new Meteor.Error('dayOffRequests.resendConfirmationRequests.unauthorized');
 
 		const request = DayOffRequests.findOne(requestId);
 		let pendingConfirmers = [];
 		for(let confirmationRequest of request.confirmationRequests){
-			if(confirmationRequest.status === "pending")
+			if(confirmationRequest.status === 'pending')
 				pendingConfirmers.push(confirmationRequest.confirmer);
 		}
 
 		new SimpleSchema({
 			resendUsernames: {
 				type: [String],
-				label: "Usernames to resend",
+				label: 'Usernames to resend',
 				allowedValues: pendingConfirmers
 			}
 		}).validate({ resendUsernames: resendUsernames });
@@ -216,18 +215,18 @@ Meteor.methods({
 		new SimpleSchema({
 			note: {
 				type: String,
-				label: "Approval note"
+				label: 'Approval note'
 			}
 		}).validate({ note: note });
 
 		DayOffRequests.update({
 			_id: requestId,
-			dayOffType: "iDay",
-			status: "pending",
-			"confirmationRequests.confirmer": Meteor.user().username
+			dayOffType: 'iDay',
+			status: 'pending',
+			'confirmationRequests.confirmer': Meteor.user().username
 		}, {
 			$set: {
-				"confirmationRequests.$.note": note
+				'confirmationRequests.$.note': note
 			}
 		});
 	}
@@ -237,19 +236,19 @@ function getUsersToNotify(request){
 	return Meteor.users.find({
 		$or: [
 			{ notify: true },
-			{ role: "chief" },
-			{ role: "location_admin", username: request.requestedLocation.administrator }
+			{ role: 'chief' },
+			{ role: 'location_admin', username: request.requestedLocation.administrator }
 		]
 	}).fetch();
 }
 
 function sendNotifications(request, users, sendRequestorNotification = true){
-	users = typeof users !== "undefined" ? users : getUsersToNotify(request);
-	const requestUrl = Meteor.absoluteUrl("request/" + request._id);
+	users = typeof users !== 'undefined' ? users : getUsersToNotify(request);
+	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
 	let errors = false;
 	const locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
 
-	let reasonHtml = "";
+	let reasonHtml = '';
 	if(request.requestReason){
 		reasonHtml = `
 			<blockquote>
@@ -265,7 +264,7 @@ function sendNotifications(request, users, sendRequestorNotification = true){
 				Email.send({
 					to: user.emails[0].address,
 					from: APP_NOTIFICATION_EMAIL_ADDRESS,
-					subject: "Sick day notification",
+					subject: 'Sick day notification',
 					html: `
 						<html>
 							<head>
@@ -321,7 +320,7 @@ function sendNotifications(request, users, sendRequestorNotification = true){
 			});
 		}
 		catch(e){
-			console.log("Error sending notification: " + e);
+			console.log('Error sending notification: ' + e);
 			errors = true;
 		}
 	}
@@ -333,7 +332,7 @@ function sendNotifications(request, users, sendRequestorNotification = true){
 				Email.send({
 					to: request.requestorEmail,
 					from: APP_NOTIFICATION_EMAIL_ADDRESS,
-					subject: "Sick Day Confirmation",
+					subject: 'Sick Day Confirmation',
 					html: `
 						<html>
 							<head>
@@ -380,7 +379,7 @@ function sendNotifications(request, users, sendRequestorNotification = true){
 			}, timeout);
 		}
 		catch(e){
-			console.log("Error sending notification: " + e);
+			console.log('Error sending notification: ' + e);
 			errors = true;
 		}
 	}
@@ -390,17 +389,17 @@ function sendNotifications(request, users, sendRequestorNotification = true){
 	}
 }
 
-function getUsersForConfirmation(request){
-	return Meteor.users.find({ role: "chief" }).fetch();
+function getUsersForConfirmation(){
+	return Meteor.users.find({ role: 'chief' }).fetch();
 }
 
 function sendConfirmationRequests(request, users, sendRequestorNotification = true, sendLocationAdminNotification = true){
-	users = typeof users !== "undefined" ? users : getUsersForConfirmation(request);
-	const requestUrl = Meteor.absoluteUrl("request/" + request._id);
+	users = typeof users !== 'undefined' ? users : getUsersForConfirmation(request);
+	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
 	const locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
 	let errors = false;
 
-	let reasonHtml = "";
+	let reasonHtml = '';
 	if(request.requestReason){
 		reasonHtml = `
 			<blockquote>
@@ -414,12 +413,12 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 			let confirmationRequest = {};
 			timeout += 1000; // FIXME
 			confirmationRequest.confirmer = user.username;
-			confirmationRequest.status = "pending";
+			confirmationRequest.status = 'pending';
 			Meteor.setTimeout(() => { // FIXME
 				Email.send({
 					to: user.emails[0].address,
 					from: APP_NOTIFICATION_EMAIL_ADDRESS,
-					subject: "Confirmation required",
+					subject: 'Confirmation required',
 					html: `
 						<html>
 							<head>
@@ -438,7 +437,7 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 
 								<p>${request.requestorName} has requested an I-Day for ${displayDateRange(request.requestedDate)}.</p>
 
-								<p>Please navigate to <a href="${requestUrl}">${requestUrl}</a> or the <a href="${Meteor.absoluteUrl("list")}">requests list page</a> to approve or deny this request.</p>
+								<p>Please navigate to <a href="${requestUrl}">${requestUrl}</a> or the <a href="${Meteor.absoluteUrl('list')}">requests list page</a> to approve or deny this request.</p>
 
 								<table>
 									<thead>
@@ -477,25 +476,25 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 			});
 		}
 		catch(e){
-			console.log("Error sending confirmation: " + e);
+			console.log('Error sending confirmation: ' + e);
 			errors = true;
 		}
 	}
 
 	if(sendLocationAdminNotification){
 		timeout += 1000; // FIXME
-		let confirmerList = "<ul>";
+		let confirmerList = '<ul>';
 		for(let confirmer of users){
 			confirmerList += `<li>${confirmer.name} &lt;${confirmer.emails[0].address}&gt;</li>`;
 		}
-		confirmerList += "</ul>";
+		confirmerList += '</ul>';
 
 		try{
 			Meteor.setTimeout(() => { // FIXME
 				Email.send({
 					to: locationAdmin.emails[0].address,
 					from: APP_NOTIFICATION_EMAIL_ADDRESS,
-					subject: "I-Day requested",
+					subject: 'I-Day requested',
 					html: `
 						<html>
 							<head>
@@ -514,7 +513,7 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 
 								<p>${request.requestorName} has requested an I-Day for ${displayDateRange(request.requestedDate)}.</p>
 
-								<p>Please navigate to <a href="${requestUrl}">${requestUrl}</a> or the <a href="${Meteor.absoluteUrl("list")}">requests list page</a> to view this request.</p>
+								<p>Please navigate to <a href="${requestUrl}">${requestUrl}</a> or the <a href="${Meteor.absoluteUrl('list')}">requests list page</a> to view this request.</p>
 
 								<table>
 									<thead>
@@ -557,7 +556,7 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 				}
 			});
 		} catch(e){
-			console.log("Error sending i-day notification to location admin: " + e);
+			console.log('Error sending i-day notification to location admin: ' + e);
 			errors = true;
 		}
 	}
@@ -569,7 +568,7 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 				Email.send({
 					to: request.requestorEmail,
 					from: APP_NOTIFICATION_EMAIL_ADDRESS,
-					subject: "Request Confirmation",
+					subject: 'Request Confirmation',
 					html: `
 						<html>
 							<head>
@@ -620,7 +619,7 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 			}, timeout);
 		}
 		catch(e){
-			console.log("Error sending notification: " + e);
+			console.log('Error sending notification: ' + e);
 			errors = true;
 		}
 	}
@@ -632,7 +631,7 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 
 function sendRequestApprovalNotifications(request){
 	const users = getUsersToNotify(request);
-	const requestUrl = Meteor.absoluteUrl("request/" + request._id);
+	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
 	let errors = false;
 	let timeout = 0; // FIXME
 	for(let user of users){
@@ -642,7 +641,7 @@ function sendRequestApprovalNotifications(request){
 				Email.send({
 					to: user.emails[0].address,
 					from: APP_NOTIFICATION_EMAIL_ADDRESS,
-					subject: "I-Day Request Approved",
+					subject: 'I-Day Request Approved',
 					html: `
 						<html>
 							<body>
@@ -650,7 +649,7 @@ function sendRequestApprovalNotifications(request){
 
 								<p>
 									This email is notifying you that <a href="${requestUrl}">
-									${request.requestorName}'s I-Day request for ${displayDateRange(request.requestedDate)}</a>
+									${request.requestorName}"s I-Day request for ${displayDateRange(request.requestedDate)}</a>
 									has been approved.
 								</p>
 
@@ -663,7 +662,7 @@ function sendRequestApprovalNotifications(request){
 			}, timeout);
 		}
 		catch(e){
-			console.log("Error sending approval notification: " + e);
+			console.log('Error sending approval notification: ' + e);
 			errors = true;
 		}
 	}
@@ -674,7 +673,7 @@ function sendRequestApprovalNotifications(request){
 			Email.send({
 				to: request.requestorEmail,
 				from: APP_NOTIFICATION_EMAIL_ADDRESS,
-				subject: "Request Approved!",
+				subject: 'Request Approved!',
 				html: `
 					<html>
 						<body>
@@ -693,7 +692,7 @@ function sendRequestApprovalNotifications(request){
 		}, timeout);
 	}
 	catch(e){
-		console.log("Error sending approval notification: " + e);
+		console.log('Error sending approval notification: ' + e);
 		errors = true;
 	}
 
@@ -704,7 +703,7 @@ function sendRequestApprovalNotifications(request){
 
 function sendRequestDenialNotifications(request, reason){
 	const users = getUsersToNotify(request);
-	const requestUrl = Meteor.absoluteUrl("request/" + request._id);
+	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
 	let errors = false;
 	let timeout = 0; // FIXME
 	for(let user of users){
@@ -714,7 +713,7 @@ function sendRequestDenialNotifications(request, reason){
 				Email.send({
 					to: user.emails[0].address,
 					from: APP_NOTIFICATION_EMAIL_ADDRESS,
-					subject: "I-Day Request Denied",
+					subject: 'I-Day Request Denied',
 					html: `
 						<html>
 							<body>
@@ -722,7 +721,7 @@ function sendRequestDenialNotifications(request, reason){
 
 								<p>
 									This email is notifying you that <a href="${requestUrl}">
-									${request.requestorName}'s I-Day request for ${displayDateRange(request.requestedDate)}</a>
+									${request.requestorName}"s I-Day request for ${displayDateRange(request.requestedDate)}</a>
 									has been denied by ${Meteor.user.name} for the following reason.
 								</p>
 
@@ -741,7 +740,7 @@ function sendRequestDenialNotifications(request, reason){
 			}, timeout);
 		}
 		catch(e){
-			console.log("Error sending denial notification: " + e);
+			console.log('Error sending denial notification: ' + e);
 			errors = true;
 		}
 	}
@@ -752,7 +751,7 @@ function sendRequestDenialNotifications(request, reason){
 			Email.send({
 				to: request.requestorEmail,
 				from: APP_NOTIFICATION_EMAIL_ADDRESS,
-				subject: "I-Day Request Denied",
+				subject: 'I-Day Request Denied',
 				html: `
 					<html>
 						<body>
@@ -776,7 +775,7 @@ function sendRequestDenialNotifications(request, reason){
 		}, timeout);
 	}
 	catch(e){
-		console.log("Error sending denial notification: " + e);
+		console.log('Error sending denial notification: ' + e);
 		errors = true;
 	}
 

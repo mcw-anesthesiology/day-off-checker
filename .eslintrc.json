@@ -4,6 +4,18 @@
 		"sourceType": "module"
 	},
 	"env": {
-		"meteor": true
+		"meteor": true,
+		"browser": true
+	},
+	"extends": "eslint:recommended",
+	"rules": {
+		"no-console": "off",
+		"no-var": "warn",
+		"eqeqeq": "warn",
+		"semi": ["warn", "always"],
+		"no-spaced-func": "warn",
+		"comma-style": "warn",
+		"comma-spacing": "warn",
+		"key-spacing": "warn"
 	}
 }

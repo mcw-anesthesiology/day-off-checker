@@ -3,9 +3,7 @@ import { FlowRouter } from 'meteor/kadira:flow-router';
 import { BlazeLayout } from 'meteor/kadira:blaze-layout';
 import { AccountsTemplates } from 'meteor/useraccounts:core';
 
-import { DayOffRequests } from '../../api/day-off-requests.js';
-
-import find from 'lodash/find';
+import '../../api/day-off-requests.js';
 
 import '../../ui/layouts';
 import '../../ui/templates';
@@ -31,29 +29,29 @@ FlowRouter.route('/list', {
 FlowRouter.route('/request/:_id', {
 	name: 'Request',
 	triggersEnter: [AccountsTemplates.ensureSignedIn],
-	action(params){
+	action(){
 		BlazeLayout.render('main', { main: 'singleRequestPage' });
 	}
 });
 
 FlowRouter.route('/users', {
 	name: 'Users',
-	triggersEnter: [AccountsTemplates.ensureSignedIn, (context, redirect, stop) => {
+	triggersEnter: [AccountsTemplates.ensureSignedIn, (context, redirect) => {
 		if(Meteor.user() && Meteor.user().role !== 'admin')
 			redirect('/');
 	}],
-	action(params){
+	action(){
 		BlazeLayout.render('main', { main: 'usersList' });
 	}
 });
 
 FlowRouter.route('/locations', {
 	name: 'Locations',
-	triggersEnter: [AccountsTemplates.ensureSignedIn, (context, redirect, stop) => {
+	triggersEnter: [AccountsTemplates.ensureSignedIn, (context, redirect) => {
 		if(Meteor.user() && Meteor.user().role !== 'admin')
 			redirect('/');
 	}],
-	action(params){
+	action(){
 		BlazeLayout.render('main', { main: 'locationsList' });
 	}
 });

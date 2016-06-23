@@ -1,6 +1,5 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
-import { Accounts } from 'meteor/accounts-base';
 
 import { Locations } from '../../api/locations.js';
 import '../../api/users.js';
@@ -11,7 +10,7 @@ import './locationsList.html';
 Template.locationsList.onCreated(() => {
 	Meteor.subscribe('locations');
 	Meteor.subscribe('locationAdminUserData');
-	Session.set("locationToEdit", undefined);
+	Session.set('locationToEdit', undefined);
 });
 
 Template.locationsList.helpers({
@@ -19,37 +18,28 @@ Template.locationsList.helpers({
 		return Locations.find();
 	},
 	editing(){
-		return Session.get("locationToEdit")._id;
+		return Session.get('locationToEdit')._id;
 	},
 	locationToEdit(){
-		return Session.get("locationToEdit");
+		return Session.get('locationToEdit');
 	},
 	locationsSettings(){
 		return {
 			fields: [
-				{ key: "_id", label: "ID" },
-				{ key: "name", label: "Name" },
-				{ key: "number", label: "Number" },
-				{ key: "administrator", label: "Administrator" }
+				{ key: '_id', label: 'ID' },
+				{ key: 'name', label: 'Name' },
+				{ key: 'number', label: 'Number' },
+				{ key: 'administrator', label: 'Administrator' }
 			]
 		};
 	}
 });
 
-function userName(username){
-	try {
-		return Accounts.findUserByUsername(username).name;
-	}
-	catch(e){
-		return username;
-	}
-}
-
 Template.locationsList.events({
 	'click #add-location'(){
 		Session.set('locationToEdit', {});
 	},
-	'click .reactive-table tr'(event){
+	'click .reactive-table tr'(){
 		Session.set('locationToEdit', this);
 	}
 });
@@ -60,15 +50,15 @@ Template.editLocation.helpers({
 	},
 	isSiteAdmin(location, siteAdmin){
 		if(location.administrator === siteAdmin.username)
-			return "selected";
+			return 'selected';
 	}
 });
 
 Template.editLocation.events({
 	'click .close-edit-location'(){
-		Session.set("locationToEdit", undefined);
+		Session.set('locationToEdit', undefined);
 	},
-	'submit #edit-location'(event, instance){
+	'submit #edit-location'(event){
 		event.preventDefault();
 		const form = event.target;
 		const formArray = $(form).serializeArray();
@@ -78,19 +68,19 @@ Template.editLocation.events({
 			location[i.name] = i.value;
 		}
 		if(locationId)
-			Meteor.call('updateLocation', locationId, location, (err, res) => {
+			Meteor.call('updateLocation', locationId, location, (err) => {
 				if(err){
-					console.log(err.name + ": " + err.message);
-					Session.set("errorAlert", "There was a problem updating the location. Please refresh the page and try again. If this problem continues, please let me know at " + ADMIN_EMAIL_ADDRESS + ".");
+					console.log(err.name + ': ' + err.message);
+					Session.set('errorAlert', 'There was a problem updating the location. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
 				}
 				else
 					Session.set('locationToEdit', undefined);
 			});
 		else
-			Meteor.call('addLocation', location, (err, res) => {
+			Meteor.call('addLocation', location, (err) => {
 				if(err){
-					console.log(err.name + ": " + err.message);
-					Session.set("errorAlert", "There was a problem adding the location. Please refresh the page and try again. If this problem continues, please let me know at " + ADMIN_EMAIL_ADDRESS + ".");
+					console.log(err.name + ': ' + err.message);
+					Session.set('errorAlert', 'There was a problem adding the location. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
 				}
 				else
 					Session.set('locationToEdit', undefined);

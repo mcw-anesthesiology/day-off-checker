@@ -1,5 +1,4 @@
 import { Meteor } from 'meteor/meteor';
-import { Mongo } from 'meteor/mongo';
 import { Accounts } from 'meteor/accounts-base';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 
@@ -66,34 +65,34 @@ if(Meteor.isServer){
 const userSchema = new SimpleSchema({
 	name: {
 		type: String,
-		label: "Name"
+		label: 'Name'
 	},
 	username: {
 		type: String,
-		label: "Username"
+		label: 'Username'
 	},
 	email: {
 		type: String,
-		label: "Email",
+		label: 'Email',
 		regEx: SimpleSchema.RegEx.Email
 	},
 	role: {
 		type: String,
-		label: "Role",
+		label: 'Role',
 		allowedValues: [
-			"chief",
-			"admin",
-			"location_admin"
+			'chief',
+			'admin',
+			'location_admin'
 		]
 	},
 	pager: {
 		type: String,
-		label: "Pager",
+		label: 'Pager',
 		optional: true
 	},
 	notify: {
 		type: Boolean,
-		label: "Notify",
+		label: 'Notify',
 		optional: true
 	}
 });

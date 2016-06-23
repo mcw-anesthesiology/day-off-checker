@@ -1,7 +1,5 @@
-import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import { AccountsTemplates } from 'meteor/useraccounts:core';
-import { FlowRouter } from 'meteor/kadira:flow-router';
 
 Accounts.config({
 	forbidClientAccountCreation: true
@@ -15,8 +13,8 @@ AccountsTemplates.configure({
 	defaultLayout: 'main',
 	texts: {
 		errors: {
-			loginForbidden: "Login failed",
-			mustBeLoggedIn: "Please login"
+			loginForbidden: 'Login failed',
+			mustBeLoggedIn: 'Please login'
 		}
 	}
 });
