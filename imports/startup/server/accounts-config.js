@@ -27,20 +27,20 @@ Accounts.emailTemplates.resetPassword.html = (user, url) => {
 };
 
 Accounts.emailTemplates.enrollAccount.html = (user, url) => {
-	let roleDescription = "";
+	let roleDescription = '';
 	switch(user.role){
-		case "admin":
-			roleDescription = "As an administrator, you have full access to create and manage accounts and locations, and view all day off requests.";
+		case 'admin':
+			roleDescription = 'As an administrator, you have full access to create and manage accounts and locations, and view all day off requests.';
 			if(user.notify)
-				roleDescription += " Additionally, you will also be notified of all sick day submissions and I-Day request approvals and denials.";
+				roleDescription += ' Additionally, you will also be notified of all sick day submissions and I-Day request approvals and denials.';
 			break;
-		case "chief":
-			roleDescription = "As a chief, you have full access to view all day off requests, and must approve or deny all I-Day requests. "
-				+ "You will be notified for all sick day submissions and I-Day requests."
+		case 'chief':
+			roleDescription = 'As a chief, you have full access to view all day off requests, and must approve or deny all I-Day requests. '
+				+ 'You will be notified for all sick day submissions and I-Day requests.';
 			break;
-		case "location_admin":
-			roleDescription = "As a location administrator, you have full access to view all day off requests for the site under your administration. "
-				+ "You will be notified for all sick day submissions and all I-Day requests for your location."
+		case 'location_admin':
+			roleDescription = 'As a location administrator, you have full access to view all day off requests for the site under your administration. '
+				+ 'You will be notified for all sick day submissions and all I-Day requests for your location.';
 			break;
 	}
 	return `

@@ -1,0 +1,12 @@
+{
+	"env": {
+		"MAIL_URL": "smtp://40701ebe2b9d2c3ec:18d0ca555fd201@mailtrap.io:2525/"
+	},
+	"galaxy.meteor.com": {
+		"env": {
+			"MONGO_URL": "mongodb://day-off-checker:GS4hU9ZEXe4juxEz@ds017070.mlab.com:17070/day-off-checker",
+			"ROOT_URL": "http://www.dayoff.site/",
+			"MAIL_URL": "smtp://postmaster@mg.dayoff.site:8872262b107d6386544df64f197dfc20@smtp.mailgun.org:25/"
+		}
+	}
+}

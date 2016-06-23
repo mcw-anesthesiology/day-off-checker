@@ -4,8 +4,10 @@
   "scripts": {
     "start": "MAIL_URL=smtp://40701ebe2b9d2c3ec:18d0ca555fd201@mailtrap.io:2525/ meteor run --settings settings.json",
     "deploy-galaxy": "DEPLOY_HOSTNAME=galaxy.meteor.com meteor deploy www.dayoff.site --settings settings.json",
-    "mup-deploy": "PATH=$HOME/.nvm/versions/node/v5.11.1/bin:$PATH mup deploy",
-    "mup-logs": "PATH=$HOME/.nvm/versions/node/v5.11.1/bin:$PATH mup logs"
+    "mup-testing": "cd .mup/testing/ && mup deploy",
+    "mup-production": "cd .mup/production/ && mup deploy",
+    "mup-logs-testing": "cd .mup/testing && mup logs",
+    "mup-logs": "cd .mup/production && mup logs"
   },
   "dependencies": {
     "bootstrap-daterangepicker": "^2.1.19",
@@ -16,5 +18,9 @@
     "moment-range": "^2.2.0",
     "nodep-date-input-polyfill": "^2.4.6",
     "twix": "^1.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^2.13.1",
+    "mup": "github:jacobmischka/meteor-up"
   }
 }

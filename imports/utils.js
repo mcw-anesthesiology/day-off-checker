@@ -11,7 +11,7 @@ export function alertAdministrator(){
 	Email.send({
 		from: APP_ADMIN_EMAIL_ADDRESS,
 		to: ADMIN_EMAIL_ADDRESS,
-		subject: "Day off checker error",
+		subject: 'Day off checker error',
 		text: `An error occurred at ${new Date()}. Check the logs.`
 	});
 }
@@ -21,7 +21,7 @@ export function displayDate(date){
 		return moment(date).calendar();
 	}
 	catch(e){
-		return "";
+		return '';
 	}
 }
 
@@ -30,13 +30,13 @@ export function displayDateRange(dates){
 		return moment(dates[0]).twix(dates[1], true).format();
 	}
 	catch(e){
-		return "";
+		return '';
 	}
 }
 
 export function displayNameByUsername(username){
 	if(!username)
-		return "";
+		return '';
 	const user = Meteor.users.findOne({ username: username });
 	return user.name;
 }

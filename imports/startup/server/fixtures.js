@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import { Locations } from '../../api/locations.js';
