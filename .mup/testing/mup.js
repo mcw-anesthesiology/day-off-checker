@@ -16,15 +16,10 @@ module.exports = {
             one: {}
         },
         env: {
-            // PORT: 80,
+            PORT: 3000,
             ROOT_URL: 'https://test.dayoff.site',
             MONGO_URL: 'mongodb://localhost/meteor',
             MAIL_URL: 'smtp://40701ebe2b9d2c3ec:18d0ca555fd201@mailtrap.io:2525/'
-        },
-        ssl: {
-            crt: '../../fullchain.pem',
-            key: '../../privkey.pem',
-            port: 443
         }
     },
 
