@@ -48,3 +48,13 @@ export function nl2br(text){
 export function capitalizeFirstLetter(string){
 	return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
+export function isFellow(connection){
+	let hostname;
+	if(Meteor.isClient)
+		hostname = document.location.host;
+	else
+		hostname = connection.httpHeaders.host;
+
+	return hostname.split('.')[0] === 'fellow';
+}

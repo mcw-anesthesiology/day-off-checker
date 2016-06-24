@@ -3,6 +3,8 @@ import { FlowRouter } from 'meteor/kadira:flow-router';
 import { BlazeLayout } from 'meteor/kadira:blaze-layout';
 import { AccountsTemplates } from 'meteor/useraccounts:core';
 
+import { isFellow } from '../../utils.js';
+
 import '../../api/day-off-requests.js';
 
 import '../../ui/layouts';
@@ -47,11 +49,36 @@ FlowRouter.route('/users', {
 
 FlowRouter.route('/locations', {
 	name: 'Locations',
-	triggersEnter: [AccountsTemplates.ensureSignedIn, (context, redirect) => {
-		if(Meteor.user() && Meteor.user().role !== 'admin')
-			redirect('/');
-	}],
+	triggersEnter: [
+		AccountsTemplates.ensureSignedIn,
+		(context, redirect) => {
+			if(Meteor.user() && Meteor.user().role !== 'admin')
+				redirect('/');
+		},
+		(context, redirect) => {
+			if(isFellow())
+				redirect("/fellowships");
+		}
+	],
 	action(){
 		BlazeLayout.render('main', { main: 'locationsList' });
+	}
+});
+
+FlowRouter.route('/fellowships', {
+	name: 'Fellowships',
+	triggersEnter: [
+		AccountsTemplates.ensureSignedIn,
+		(context, redirect) => {
+			if(Meteor.user() && Meteor.user().role !== 'admin')
+				redirect('/');
+		},
+		(context, redirect) => {
+			if(!isFellow())
+				redirect('/locations');
+		}
+	],
+	action(){
+		BlazeLayout.render('main', { main: 'fellowshipsList' });
 	}
 });

@@ -9,7 +9,8 @@ import './usersList.html';
 const roleNames = {
 	admin: 'Administrator',
 	location_admin: 'Site Administrator',
-	chief: 'Chief'
+	chief: 'Chief',
+	fellowship_admin: 'Fellowship Administrator'
 };
 
 Template.usersList.onCreated(() => {

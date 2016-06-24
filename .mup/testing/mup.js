@@ -17,6 +17,7 @@ module.exports = {
         },
         env: {
             PORT: 3000,
+            NODE_ENV: 'testing',
             ROOT_URL: 'https://test.dayoff.site',
             MONGO_URL: 'mongodb://localhost/meteor',
             MAIL_URL: 'smtp://40701ebe2b9d2c3ec:18d0ca555fd201@mailtrap.io:2525/'

@@ -1,12 +1,18 @@
 body {
 
 	footer {
-		text-align: right;
+		text-align: left;
+		margin-left: 1em;
 		margin-right: 1em;
 
-		a {
-			& + a {
-				margin-left: 1em;
+		nav {
+			display: inline-block;
+			float: right;
+
+			a {
+				& + a {
+					margin-left: 1em;
+				}
 			}
 		}
 	}

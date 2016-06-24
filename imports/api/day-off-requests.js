@@ -5,10 +5,11 @@ import { Accounts } from 'meteor/accounts-base';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 
 import { Locations } from './locations.js';
+import { Fellowships } from './fellowships.js';
 
 import { APP_NOTIFICATION_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS } from '../constants.js';
 
-import { alertAdministrator, displayDateRange, nl2br } from '../utils.js';
+import { alertAdministrator, displayDateRange, nl2br, isFellow } from '../utils.js';
 
 import map from 'lodash/map';
 import moment from 'moment';
@@ -20,15 +21,25 @@ if(Meteor.isServer){
 	Meteor.publish('dayOffRequests', function(){
 		if(!this.userId)
 			return;
+
 		const user = Meteor.users.findOne(this.userId);
+		const fellow = isFellow(this.connection);
+
 		if(user.role === 'admin'){
-			return DayOffRequests.find({});
+			return DayOffRequests.find({ fellow: fellow });
 		}
 		else{
 			return DayOffRequests.find({
-				$or: [
-					{ usersNotified: user.username },
-					{ 'confirmationRequests.confirmer': user.username }
+				$and: [
+					{
+						fellow: fellow
+					},
+					{
+						$or: [
+							{ usersNotified: user.username },
+							{ 'confirmationRequests.confirmer': user.username }
+						]
+					}
 				]
 			});
 		}
@@ -42,13 +53,10 @@ if(Meteor.isClient){
 
 Meteor.methods({
 	'dayOffRequests.insert'(request){
-		const locations = Locations.find({}).fetch();
-		const locationAdmins = Meteor.users.find({ role: 'location_admin' }).fetch();
-
 		if(request.requestReason === '(None)')
 			request.requestReason = '';
 
-		new SimpleSchema({
+		let schema = {
 			dayOffType: {
 				type: String,
 				label: 'Day off type',
@@ -71,35 +79,81 @@ Meteor.methods({
 				label: 'Requested date range',
 				min: moment().startOf('day').toDate()
 			},
-			requestedLocation: {
-				type: Object,
-				label: 'Location'
-			},
-			'requestedLocation._id': {
-				type: String,
-				label: 'Location ID',
-				allowedValues: map(locations, '_id')
-			},
-			'requestedLocation.name': {
-				type: String,
-				label: 'Location name',
-				allowedValues: map(locations, 'name')
-			},
-			'requestedLocation.number': {
-				type: String,
-				label: 'Location number',
-				allowedValues: map(locations, 'number')
-			},
-			'requestedLocation.administrator': {
-				type: String,
-				label: 'Location administrator',
-				allowedValues: map(locationAdmins, 'username')
-			},
 			requestReason: {
 				type: String,
 				label: 'Reason'
 			}
-		}).validate(request);
+		};
+
+		if(isFellow(this.connection)){
+			const fellowships = Fellowships.find().fetch();
+			const fellowshipAdmins = Meteor.users.find({ role: 'fellowship_admin' }).fetch();
+			let fellowSchema = {
+				requestedFellowship: {
+					type: Object,
+					label: 'Fellowship'
+				},
+				'requestedFellowship._id': {
+					type: String,
+					label: 'Fellowship ID',
+					allowedValues: map(fellowships, '_id')
+				},
+				'requestedFellowship.name': {
+					type: String,
+					label: 'Fellowship name',
+					allowedValues: map(fellowships, 'name')
+				},
+				'requestedFellowship.number': {
+					type: String,
+					label: 'Fellowship number',
+					allowedValues: map(fellowships, 'number')
+				},
+				'requestedFellowship.administrator': {
+					type: String,
+					label: 'Fellowship administrator',
+					allowedValues: map(fellowshipAdmins, 'username')
+				}
+			};
+
+			for(let i in fellowSchema)
+				schema[i] = fellowSchema[i];
+		}
+		else {
+			const locations = Locations.find({}).fetch();
+			const locationAdmins = Meteor.users.find({ role: 'location_admin' }).fetch();
+
+			let residentSchema = {
+				requestedLocation: {
+					type: Object,
+					label: 'Location'
+				},
+				'requestedLocation._id': {
+					type: String,
+					label: 'Location ID',
+					allowedValues: map(locations, '_id')
+				},
+				'requestedLocation.name': {
+					type: String,
+					label: 'Location name',
+					allowedValues: map(locations, 'name')
+				},
+				'requestedLocation.number': {
+					type: String,
+					label: 'Location number',
+					allowedValues: map(locations, 'number')
+				},
+				'requestedLocation.administrator': {
+					type: String,
+					label: 'Location administrator',
+					allowedValues: map(locationAdmins, 'username')
+				}
+			};
+
+			for(let i in residentSchema)
+				schema[i] = residentSchema[i];
+		}
+
+		new SimpleSchema(schema).validate(request);
 
 		if(request.dayOffType === 'iDay')
 			request.status = 'pending';
@@ -232,14 +286,21 @@ Meteor.methods({
 	}
 });
 
-function getUsersToNotify(request){
-	return Meteor.users.find({
-		$or: [
-			{ notify: true },
-			{ role: 'chief' },
-			{ role: 'location_admin', username: request.requestedLocation.administrator }
-		]
-	}).fetch();
+function getUsersToNotify(request, connection){
+	if(isFellow(connection)){
+		return Meteor.users.find({
+			role: 'fellowship_admin', username: request.fellowship.administrator
+		});
+	}
+	else {
+		return Meteor.users.find({
+			$or: [
+				{ notify: true },
+				{ role: 'chief' },
+				{ role: 'location_admin', username: request.requestedLocation.administrator }
+			]
+		}).fetch();
+	}
 }
 
 function sendNotifications(request, users, sendRequestorNotification = true){

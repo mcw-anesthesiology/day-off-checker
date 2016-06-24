@@ -302,15 +302,16 @@ footer.Home {
 	position: absolute;
 	bottom: 20px;
 	right: 40px;
+	left: 40px;
 
 	@include mobile() {
 		font-size: 4em;
 	}
 
-	a {
-
-		& + a {
-			margin-left: 1em;
-		}
-	}
+	// a {
+	//
+	// 	& + a {
+	// 		margin-left: 1em;
+	// 	}
+	// }
 }
