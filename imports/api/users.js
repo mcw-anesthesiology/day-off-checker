@@ -43,6 +43,15 @@ if(Meteor.isServer){
 		}});
 	});
 
+	Meteor.publish('fellowshipAdminUserData', function(){
+		return Meteor.users.find({ role: 'fellowship_admin' }, { fields: {
+			_id: 1,
+			username: 1,
+			role: 1,
+			name: 1
+		}});
+	});
+
 	Meteor.publish('basicUserData', function(){
 		return Meteor.users.find({}, { fields: {
 			_id: 1,
@@ -82,7 +91,8 @@ const userSchema = new SimpleSchema({
 		allowedValues: [
 			'chief',
 			'admin',
-			'location_admin'
+			'location_admin',
+			'fellowship_admin'
 		]
 	},
 	pager: {
@@ -93,6 +103,11 @@ const userSchema = new SimpleSchema({
 	notify: {
 		type: Boolean,
 		label: 'Notify',
+		optional: true
+	},
+	fellow: {
+		type: Boolean,
+		label: 'Fellow',
 		optional: true
 	}
 });

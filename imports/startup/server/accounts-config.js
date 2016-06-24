@@ -7,6 +7,7 @@ Accounts.onCreateUser((options, user) => {
 	user.role = options.role;
 	user.notify = options.notify;
 	user.pager = options.pager;
+	user.fellow = options.fellow;
 	return user;
 });
 
@@ -41,6 +42,10 @@ Accounts.emailTemplates.enrollAccount.html = (user, url) => {
 		case 'location_admin':
 			roleDescription = 'As a location administrator, you have full access to view all day off requests for the site under your administration. '
 				+ 'You will be notified for all sick day submissions and all I-Day requests for your location.';
+			break;
+		case 'fellowship_admin':
+			roleDescription = 'As a fellowship administrator, you have full access to view all requests for your fellowship. '
+				+ 'You will be notified for all sick day submissions and all day off requests for your fellowship.';
 			break;
 	}
 	return `

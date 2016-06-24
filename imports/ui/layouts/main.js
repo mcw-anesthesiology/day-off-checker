@@ -1,4 +1,5 @@
 import { Meteor } from 'meteor/meteor';
+import { FlowRouter } from 'meteor/kadira:flow-router';
 import { AccountsTemplates } from 'meteor/useraccounts:core';
 
 import './main.html';
@@ -10,6 +11,15 @@ Template.main.onRendered(function(){
 Template.main.helpers({
 	errorAlert(){
 		return Session.get('errorAlert');
+	},
+	residentUrl(){
+		FlowRouter.watchPathChange();
+		return document.location.host.substring(document.location.host.indexOf('.') + 1)
+			+ FlowRouter.current().path;
+	},
+	fellowUrl(){
+		FlowRouter.watchPathChange();
+		return 'fellow.' + document.location.host + FlowRouter.current().path;
 	}
 });
 

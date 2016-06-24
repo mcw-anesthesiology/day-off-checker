@@ -13,6 +13,7 @@ import 'bootstrap-daterangepicker';
 import 'bootstrap-daterangepicker/daterangepicker.css';
 
 import { ADMIN_EMAIL_ADDRESS } from '../../constants.js';
+import { isFellow } from '../../utils.js';
 
 import './home.html';
 
@@ -48,6 +49,7 @@ const dayOffButtons = [
 
 function insertEntries(){
 	let request = {};
+	request.fellow = isFellow();
 	for(let entry of entries){
 		let value = Session.get(entry);
 		if(!value){

@@ -133,16 +133,23 @@ const accounts = [
 	}
 ];
 
+const fellowships = [
+
+];
 
 
-// Meteor.startup(() => { // FIXME: Remove this
-// 	Locations.remove({});
-// 	for(let location of locations){
-// 		Locations.insert(location);
-// 	}
-//
-// 	Meteor.users.remove({});
-// 	for(let account of accounts){
-// 		Accounts.createUser(account);
-// 	}
-// });
+Meteor.startup(() => {
+	if(Meteor.isDevelopment){
+		if(Locations.find().count() === 0){
+			for(let location of locations){
+				Locations.insert(location);
+			}
+		}
+
+		if(Meteor.users.find().count() === 0){
+			for(let account of accounts){
+				Accounts.createUser(account);
+			}
+		}
+	}
+});

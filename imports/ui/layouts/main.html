@@ -1,7 +1,7 @@
 <template name="main">
 {{#if errorAlert}}
 	<header>
-		<div class="container">			
+		<div class="container">
 			<div class="alert alert-danger alert-dismissable error-alert" role="alert">
 				<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 				<strong>Error:</strong> {{errorAlert}}
@@ -13,24 +13,34 @@
 		{{> Template.dynamic template=main}}
 	</main>
 	<footer class="{{routeName}}">
+{{#if isFellow}}
+	<a href="//{{residentUrl}}">Resident site</a>
+{{else}}
+	<a href="//{{fellowUrl}}">Fellowship site</a>
+{{/if}}
+		<nav>
 {{#unless routeIs "Home"}}
-		<a href="/">Home</a>
+			<a href="/">Home</a>
 {{/unless}}
 {{#if currentUser}}
 	{{#if currentUserAdmin}}
 		{{#unless routeIs "Users"}}
-		<a href="/users">User administration</a>
+			<a href="/users">User administration</a>
 		{{/unless}}
-		{{#unless routeIs "Locations"}}
-		<a href="/locations">Locations</a>
-		{{/unless}}
+		{{#unless routeIs "Locations"}}{{#unless isFellow}}
+			<a href="/locations">Locations</a>
+		{{/unless}}{{/unless}}
+		{{#unless routeIs "Fellowships"}}{{#if isFellow}}
+			<a href="/fellowships">Fellowships</a>
+		{{/if}}{{/unless}}
 	{{/if}}
 	{{#unless routeIs "List"}}
-		<a href="/list">Request List</a>
+			<a href="/list">Request List</a>
 	{{/unless}}
-		<a href="#" id="logout">Logout</a>
+			<a href="#" id="logout">Logout</a>
 {{else}}
-		<a href="/login">Login</a>
+			<a href="/login">Login</a>
 {{/if}}
+		</nav>
 	</footer>
 </template>
