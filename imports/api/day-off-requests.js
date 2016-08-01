@@ -254,7 +254,7 @@ Meteor.methods({
 		}}).fetch();
 
 		if(Meteor.isServer){
-			sendConfirmationRequests(request, resendUsers, false);
+			sendConfirmationRequests(request, resendUsers, false, false);
 		}
 	},
 	'dayOffRequests.editApprovalNote'(requestId, note){

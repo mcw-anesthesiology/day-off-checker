@@ -147,11 +147,13 @@
 		{{/let}}
 	{{/if}}{{/if}}{{/if}}
 
-	{{#if currentUserAdmin}}
+	{{#if currentUserAdmin}}{{#if isIDay request}}
 		<button type="button" class="btn btn-warning" id="resend-confirmation-requests">Resend confirmation requests</button>
-	{{/if}}
+	{{/if}}{{/if}}
 
-	{{#if currentUserAdmin}}{{#if resendConfirmationRequests}}
+	{{! TODO: Add button to schedule reminders }}
+
+	{{#if currentUserAdmin}}{{#if resendConfirmationRequests}}{{#if isIDay request}}
 		<div class="panel panel-default resend-confirmation-requests-container">
 			<div class="panel-heading">
 				<h1 class="panel-title">Resend Confirmation Requests <button type="button" class="close" aria-label="Close" id="close-resend-confirmation-requests"><span aria-hidden="true">&times;</span></button></h1>
@@ -174,7 +176,7 @@
 				</form>
 			</div>
 		</div>
-	{{/if}}{{/if}}
+	{{/if}}{{/if}}{{/if}}
 {{else}}
 		<p>
 			It looks like you're not allowed to view this request.
