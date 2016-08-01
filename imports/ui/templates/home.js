@@ -49,7 +49,6 @@ const dayOffButtons = [
 
 function insertEntries(){
 	let request = {};
-	request.fellow = isFellow();
 	for(let entry of entries){
 		let value = Session.get(entry);
 		if(!value){
@@ -57,6 +56,10 @@ function insertEntries(){
 			return;
 		}
 		request[entry] = value;
+	}
+	if(isFellow()){
+		alert('Submitting fellowship requests is not allowed yet');
+		return;
 	}
 	Meteor.call('dayOffRequests.insert', request, (err) => {
 		if(err){

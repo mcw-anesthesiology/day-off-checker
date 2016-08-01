@@ -7,8 +7,8 @@ import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 import { Locations } from './locations.js';
 import { Fellowships } from './fellowships.js';
 
+import { scheduleReminder } from '../api/reminder-emails.js';
 import { APP_NOTIFICATION_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS } from '../constants.js';
-
 import { alertAdministrator, displayDateRange, nl2br, isFellow } from '../utils.js';
 
 import map from 'lodash/map';
@@ -23,23 +23,15 @@ if(Meteor.isServer){
 			return;
 
 		const user = Meteor.users.findOne(this.userId);
-		const fellow = isFellow(this.connection);
 
 		if(user.role === 'admin'){
-			return DayOffRequests.find({ fellow: fellow });
+			return DayOffRequests.find();
 		}
 		else{
 			return DayOffRequests.find({
-				$and: [
-					{
-						fellow: fellow
-					},
-					{
-						$or: [
-							{ usersNotified: user.username },
-							{ 'confirmationRequests.confirmer': user.username }
-						]
-					}
+				$or: [
+					{ usersNotified: user.username },
+					{ 'confirmationRequests.confirmer': user.username }
 				]
 			});
 		}
@@ -85,7 +77,7 @@ Meteor.methods({
 			}
 		};
 
-		if(isFellow(this.connection)){
+		if(isFellow(this.connection)){ // FIXME
 			const fellowships = Fellowships.find().fetch();
 			const fellowshipAdmins = Meteor.users.find({ role: 'fellowship_admin' }).fetch();
 			let fellowSchema = {
@@ -286,21 +278,14 @@ Meteor.methods({
 	}
 });
 
-function getUsersToNotify(request, connection){
-	if(isFellow(connection)){
-		return Meteor.users.find({
-			role: 'fellowship_admin', username: request.fellowship.administrator
-		});
-	}
-	else {
-		return Meteor.users.find({
-			$or: [
-				{ notify: true },
-				{ role: 'chief' },
-				{ role: 'location_admin', username: request.requestedLocation.administrator }
-			]
-		}).fetch();
-	}
+function getUsersToNotify(request){
+	return Meteor.users.find({
+		$or: [
+			{ notify: true },
+			{ role: 'chief' },
+			{ role: 'location_admin', username: request.requestedLocation.administrator }
+		]
+	}).fetch();
 }
 
 function sendNotifications(request, users, sendRequestorNotification = true){
@@ -710,7 +695,7 @@ function sendRequestApprovalNotifications(request){
 
 								<p>
 									This email is notifying you that <a href="${requestUrl}">
-									${request.requestorName}"s I-Day request for ${displayDateRange(request.requestedDate)}</a>
+									${request.requestorName}'s I-Day request for ${displayDateRange(request.requestedDate)}</a>
 									has been approved.
 								</p>
 
@@ -721,6 +706,12 @@ function sendRequestApprovalNotifications(request){
 						</html>`
 				});
 			}, timeout);
+
+			if(user.role === 'location_admin'){
+				let remindTime = moment(request.requestedDate[0]).subtract(3, 'days').startOf('day');
+				if(moment() < moment(remindTime).subtract(1, 'day'))
+					scheduleReminder(request, user, remindTime.toDate());
+			}
 		}
 		catch(e){
 			console.log('Error sending approval notification: ' + e);
@@ -782,7 +773,7 @@ function sendRequestDenialNotifications(request, reason){
 
 								<p>
 									This email is notifying you that <a href="${requestUrl}">
-									${request.requestorName}"s I-Day request for ${displayDateRange(request.requestedDate)}</a>
+									${request.requestorName}'s I-Day request for ${displayDateRange(request.requestedDate)}</a>
 									has been denied by ${Meteor.user.name} for the following reason.
 								</p>
 
