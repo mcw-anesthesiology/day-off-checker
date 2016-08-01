@@ -112,6 +112,7 @@ Template.editUser.events({
 		for(let i of formArray){
 			user[i.name] = i.value;
 		}
+		user.notify = Boolean(user.notify);
 		if(userId)
 			Meteor.call('updateUser', userId, user, (err) => {
 				if(err){

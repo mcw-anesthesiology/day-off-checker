@@ -86,7 +86,6 @@ function iDayNeedsResponse(confirmationRequests, request){
 	try {
 		const confirmationRequest = find(confirmationRequests, { confirmer: Meteor.user().username });
 		if(confirmationRequest.status === 'pending' && request.status === 'pending'){
-			console.log('okay');
 			return Spacebars.SafeString('<span class="i-day-needs-response-icon"></span>');
 		}
 	}
