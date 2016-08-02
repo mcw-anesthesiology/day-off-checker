@@ -97,6 +97,19 @@
 					</div>
 					<div class="panel-body">
 						<span class="label label-success">Notified</span>
+		{{#if isIDay request}}
+			{{#let scheduledReminder=(userReminderScheduled userNotified request)}}
+			{{#let sentReminder=(userReminderSent userNotified request)}}
+			{{#if scheduledReminder}}
+						<span class="label label-info">Reminder scheduled for {{ displayDate scheduledReminder.remindTime }}</span>
+			{{else}}
+				{{#if sentReminder}}
+						<span class="label label-success">Reminder sent at {{ displayDate sentReminder.remindTime }}</span>
+				{{else}}{{#if currentUserAdmin}}{{#if reminderCanBeScheduled request}}
+						<button type="button" class="btn btn-info" id="schedule-reminder-button" data-request-id="{{ request._id }}" data-username="{{ userNotified }}">Schedule reminder</button>
+				{{/if}}{{/if}}{{/if}}
+			{{/if}}{{/let}}{{/let}}
+		{{/if}}
 					</div>
 				</div>
 	{{/each}}

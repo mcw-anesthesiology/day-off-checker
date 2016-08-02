@@ -8,7 +8,8 @@ import { Locations } from './locations.js';
 import { Fellowships } from './fellowships.js';
 
 import { scheduleReminder } from '../api/reminder-emails.js';
-import { APP_NOTIFICATION_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS } from '../constants.js';
+import { APP_NOTIFICATION_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS,
+	DAYS_BEFORE_I_DAY_TO_SEND_REMINDER } from '../constants.js';
 import { alertAdministrator, displayDateRange, nl2br, isFellow } from '../utils.js';
 
 import map from 'lodash/map';
@@ -708,7 +709,7 @@ function sendRequestApprovalNotifications(request){
 			}, timeout);
 
 			if(user.role === 'location_admin'){
-				let remindTime = moment(request.requestedDate[0]).subtract(3, 'days').startOf('day');
+				let remindTime = moment(request.requestedDate[0]).subtract(DAYS_BEFORE_I_DAY_TO_SEND_REMINDER, 'days').startOf('day');
 				if(moment() < moment(remindTime).subtract(1, 'day'))
 					scheduleReminder(request, user, remindTime.toDate());
 			}

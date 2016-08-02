@@ -8,13 +8,35 @@ import { alertAdministrator, displayDateRange } from '../utils.js';
 
 export const ReminderEmails = new Mongo.Collection('reminderEmails');
 
-export function scheduleReminder(request, user, remindTime){
-	if(Meteor.isClient)
-		return;
+if(Meteor.isServer){
+	Meteor.publish('reminderEmails', function(){
+		// TODO: Restrict this to user's requests
+		if(!this.userId)
+			return;
+		const user = Meteor.users.findOne(this.userId);
 
+		if(!user)
+			return;
+
+		return ReminderEmails.find();
+	});
+}
+
+Meteor.methods({
+	'reminderEmails.scheduleReminder'(request, user, remindTime){
+		if(Meteor.user().role !== 'admin')
+			throw new Meteor.Error('reminderEmails.scheduleReminder.unauthorized');
+
+		scheduleReminder(request, user, remindTime);
+	}
+});
+
+export function scheduleReminder(request, user, remindTime){
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
 	ReminderEmails.insert({
+		requestId: request._id,
 		remindTime: remindTime,
+		remindedUser: user.username,
 		email: {
 			to: user.emails[0].address,
 			from: APP_NOTIFICATION_EMAIL_ADDRESS,
