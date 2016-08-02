@@ -2,11 +2,13 @@ import { Meteor } from 'meteor/meteor';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 
 import { DayOffRequests } from '../../api/day-off-requests.js';
+import { ReminderEmails } from '../../api/reminder-emails.js';
 
 import find from 'lodash/find';
+import moment from 'moment';
 import 'twix';
 
-import { ADMIN_EMAIL_ADDRESS } from '../../constants.js';
+import { ADMIN_EMAIL_ADDRESS, DAYS_BEFORE_I_DAY_TO_SEND_REMINDER } from '../../constants.js';
 import { displayDate, displayDateRange, capitalizeFirstLetter } from '../../utils.js';
 
 import './requests.html';
@@ -33,6 +35,7 @@ function displaySortableDateRange(dates){
 
 Template.requestsList.onCreated(function(){
 	Meteor.subscribe('dayOffRequests');
+	Meteor.subscribe('allUserData');
 });
 
 Template.requestsList.helpers({
@@ -125,6 +128,7 @@ Template.singleRequestPage.helpers({
 
 Template.requestDetails.onCreated(function(){
 	Meteor.subscribe('dayOffRequests');
+	Meteor.subscribe('reminderEmails');
 });
 
 // Template.requestDetails.onRendered(function(){
@@ -151,6 +155,29 @@ Template.requestDetails.helpers({
 	},
 	isPending(confirmationRequest){
 		return (confirmationRequest.status === 'pending');
+	},
+	userIsLocationAdmin(user){
+		return (user.role === 'location_admin');
+	},
+	userReminderScheduled(username, request){
+		return ReminderEmails.findOne({
+			requestId: request._id,
+			remindedUser: username,
+			status: 'pending'
+		});
+	},
+	userReminderSent(username, request){
+		const reminder = ReminderEmails.findOne({
+			requestId: request._id,
+			remindedUser: username,
+			status: 'sent'
+		});
+		return reminder;
+	},
+	reminderCanBeScheduled(request){
+		return (request.requestedDate[0] > moment()
+				.add(DAYS_BEFORE_I_DAY_TO_SEND_REMINDER, 'days')
+			&& request.status === 'approved');
 	},
 	statusLabelType(status){
 		const labelTypes = {
@@ -256,6 +283,22 @@ Template.requestDetails.events({
 			if(err){
 				console.log(err.name + ': ' + err.message);
 				Session.set('errorAlert', 'There was a problem editing the approval note. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
+			}
+		});
+	},
+	'click #schedule-reminder-button'(event, instance){
+		const button = event.target;
+		const requestId = instance.$(button).data('requestId');
+		const username = instance.$(button).data('username');
+		const request = DayOffRequests.findOne({ _id: requestId });
+		const user = Meteor.users.findOne({ username: username });
+
+		let remindTime = moment(request.requestedDate[0]).subtract(DAYS_BEFORE_I_DAY_TO_SEND_REMINDER, 'days').startOf('day');
+
+		Meteor.call('reminderEmails.scheduleReminder', request, user, remindTime.toDate(), (err) => {
+			if(err){
+				console.log(err.name, err.message);
+				Session.set('errorAlert', 'There was a problem scheduling the reminder. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
 			}
 		});
 	}
