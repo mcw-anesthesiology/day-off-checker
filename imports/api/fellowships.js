@@ -4,8 +4,7 @@ import { Email } from 'meteor/email';
 import { Accounts } from 'meteor/accounts-base';
 
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
-
-import { alertAdministrator } from '../utils.js';
+import { handleError } from 'meteor/saucecode:rollbar';
 
 import map from 'lodash/map';
 
@@ -114,6 +113,6 @@ function notifyNewFellowshipAdmin(fellowship){
 		});
 	} catch(e){
 		console.log('Error notifying new fellowship admin: ' + e);
-		alertAdministrator();
+		handleError(e);
 	}
 }

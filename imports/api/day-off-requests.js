@@ -2,7 +2,9 @@ import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import { Email } from 'meteor/email';
 import { Accounts } from 'meteor/accounts-base';
+
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
+import { handleError } from 'meteor/saucecode:rollbar';
 
 import { Locations } from './locations.js';
 import { Fellowships } from './fellowships.js';
@@ -10,7 +12,7 @@ import { Fellowships } from './fellowships.js';
 import { scheduleReminder } from '../api/reminder-emails.js';
 import { APP_NOTIFICATION_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS,
 	DAYS_BEFORE_I_DAY_TO_SEND_REMINDER } from '../constants.js';
-import { alertAdministrator, displayDateRange, nl2br, isFellow } from '../utils.js';
+import { displayDateRange, nl2br, isFellow } from '../utils.js';
 
 import map from 'lodash/map';
 import moment from 'moment';
@@ -292,7 +294,6 @@ function getUsersToNotify(request){
 function sendNotifications(request, users, sendRequestorNotification = true){
 	users = typeof users !== 'undefined' ? users : getUsersToNotify(request);
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
-	let errors = false;
 	const locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
 
 	let reasonHtml = '';
@@ -368,7 +369,7 @@ function sendNotifications(request, users, sendRequestorNotification = true){
 		}
 		catch(e){
 			console.log('Error sending notification: ' + e);
-			errors = true;
+			handleError(e);
 		}
 	}
 
@@ -427,12 +428,8 @@ function sendNotifications(request, users, sendRequestorNotification = true){
 		}
 		catch(e){
 			console.log('Error sending notification: ' + e);
-			errors = true;
+			handleError(e);
 		}
-	}
-
-	if(errors){
-		alertAdministrator();
 	}
 }
 
@@ -444,7 +441,6 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 	users = typeof users !== 'undefined' ? users : getUsersForConfirmation(request);
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
 	const locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
-	let errors = false;
 
 	let reasonHtml = '';
 	if(request.requestReason){
@@ -524,7 +520,7 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 		}
 		catch(e){
 			console.log('Error sending confirmation: ' + e);
-			errors = true;
+			handleError(e);
 		}
 	}
 
@@ -604,7 +600,7 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 			});
 		} catch(e){
 			console.log('Error sending i-day notification to location admin: ' + e);
-			errors = true;
+			handleError(e);
 		}
 	}
 
@@ -667,19 +663,14 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 		}
 		catch(e){
 			console.log('Error sending notification: ' + e);
-			errors = true;
+			handleError(e);
 		}
-	}
-
-	if(errors){
-		alertAdministrator();
 	}
 }
 
 function sendRequestApprovalNotifications(request){
 	const users = getUsersToNotify(request);
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
-	let errors = false;
 	let timeout = 0; // FIXME
 	for(let user of users){
 		try {
@@ -716,7 +707,7 @@ function sendRequestApprovalNotifications(request){
 		}
 		catch(e){
 			console.log('Error sending approval notification: ' + e);
-			errors = true;
+			handleError(e);
 		}
 	}
 
@@ -746,18 +737,13 @@ function sendRequestApprovalNotifications(request){
 	}
 	catch(e){
 		console.log('Error sending approval notification: ' + e);
-		errors = true;
-	}
-
-	if(errors){
-		alertAdministrator();
+		handleError(e);
 	}
 }
 
 function sendRequestDenialNotifications(request, reason){
 	const users = getUsersToNotify(request);
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
-	let errors = false;
 	let timeout = 0; // FIXME
 	for(let user of users){
 		try{
@@ -794,7 +780,7 @@ function sendRequestDenialNotifications(request, reason){
 		}
 		catch(e){
 			console.log('Error sending denial notification: ' + e);
-			errors = true;
+			handleError(e);
 		}
 	}
 
@@ -829,10 +815,6 @@ function sendRequestDenialNotifications(request, reason){
 	}
 	catch(e){
 		console.log('Error sending denial notification: ' + e);
-		errors = true;
-	}
-
-	if(errors){
-		alertAdministrator();
+		handleError(e);
 	}
 }

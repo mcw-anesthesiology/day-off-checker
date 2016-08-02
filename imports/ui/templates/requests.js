@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { FlowRouter } from 'meteor/kadira:flow-router';
+import { throwError } from 'meteor/saucecode:rollbar';
 
 import { DayOffRequests } from '../../api/day-off-requests.js';
 import { ReminderEmails } from '../../api/reminder-emails.js';
@@ -229,6 +230,7 @@ Template.requestDetails.events({
 			if(err){
 				console.log(err.name + ': ' + err.message);
 				Session.set('errorAlert', 'There was a problem approving the request. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
+				throwError(err.message);
 			}
 		});
 	},
@@ -245,6 +247,7 @@ Template.requestDetails.events({
 			if(err){
 				console.log(err.name + ': ' + err.message);
 				Session.set('errorAlert', 'There was a problem denying the request. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
+				throwError(err.message);
 			}
 		});
 	},
@@ -269,6 +272,7 @@ Template.requestDetails.events({
 				if(err){
 					console.log(err.name + ': ' + err.message);
 					Session.set('errorAlert', 'There was a problem resending the requests. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
+					throwError(err.message);
 				}
 				else
 					Session.set('requestDetailAdminAction', undefined);
@@ -283,6 +287,7 @@ Template.requestDetails.events({
 			if(err){
 				console.log(err.name + ': ' + err.message);
 				Session.set('errorAlert', 'There was a problem editing the approval note. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
+				throwError(err.message);
 			}
 		});
 	},
@@ -299,6 +304,7 @@ Template.requestDetails.events({
 			if(err){
 				console.log(err.name, err.message);
 				Session.set('errorAlert', 'There was a problem scheduling the reminder. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
+				throwError(err.message);
 			}
 		});
 	}

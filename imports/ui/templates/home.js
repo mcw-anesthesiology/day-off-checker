@@ -2,6 +2,8 @@ import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { Session } from 'meteor/session';
 
+import { throwError } from 'meteor/saucecode:rollbar';
+
 import { Locations } from '../../api/locations.js';
 
 import validator from 'email-validator';
@@ -65,6 +67,7 @@ function insertEntries(){
 		if(err){
 			console.log(err.name + ': ' + err.message);
 			Session.set('errorAlert', 'Problem creating a request. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
+			throwError(err.message);
 		}
 		else
 			Session.set('submissionConfirmation', true);
