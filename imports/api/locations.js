@@ -4,12 +4,11 @@ import { Email } from 'meteor/email';
 import { Accounts } from 'meteor/accounts-base';
 
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
+import { handleError } from 'meteor/saucecode:rollbar';
 
 import map from 'lodash/map';
 
 import { APP_ACCOUNTS_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS } from '../constants.js';
-
-import { alertAdministrator } from '../utils.js';
 
 export const Locations = new Mongo.Collection('locations');
 
@@ -117,6 +116,6 @@ function notifyNewLocationAdmin(location){
 	}
 	catch(e){
 		console.log('Error notifying new location admin: ' + e);
-		alertAdministrator();
+		handleError(e);
 	}
 }

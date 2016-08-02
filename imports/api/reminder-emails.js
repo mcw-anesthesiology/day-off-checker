@@ -2,8 +2,10 @@ import { Meteor } from 'meteor/meteor';
 import { Email } from 'meteor/email';
 import { Mongo } from 'meteor/mongo';
 
+import { handleError } from 'meteor/saucecode:rollbar';
+
 import { ADMIN_EMAIL_ADDRESS, APP_NOTIFICATION_EMAIL_ADDRESS } from '../constants.js';
-import { alertAdministrator, displayDateRange } from '../utils.js';
+import { displayDateRange } from '../utils.js';
 
 
 export const ReminderEmails = new Mongo.Collection('reminderEmails');
@@ -86,15 +88,13 @@ export function sendReminders(){
 			ReminderEmails.update({ _id: reminder._id }, reminder);
 		} catch(e){
 			console.log('Error sending denial notification:', e);
+			handleError(e);
 
 			remindersFailed++;
 			reminder.status = 'failed';
 			ReminderEmails.update({ _id: reminder._id }, reminder);
 		}
 	}
-
-	if(remindersFailed > 0)
-		alertAdministrator();
 
 	return { // Always going to return 0, 0. Need await.
 		sent: remindersSent,

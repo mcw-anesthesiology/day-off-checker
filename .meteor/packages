@@ -38,3 +38,4 @@ tomwasd:history-polyfill
 force-ssl@1.0.12
 percolate:synced-cron
 fourseven:scss
+saucecode:rollbar

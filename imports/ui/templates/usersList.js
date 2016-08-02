@@ -1,6 +1,8 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 
+import { throwError } from 'meteor/saucecode:rollbar';
+
 import '../../api/users.js';
 import { ADMIN_EMAIL_ADDRESS } from '../../constants.js';
 
@@ -98,6 +100,7 @@ Template.editUser.events({
 			if(err){
 				console.log(err.name + ': ' + err.message);
 				Session.set('errorAlert', 'There was a problem resending the enrollment email. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
+				throwError(err.message);
 			}
 			else
 				Session.set('userToEdit', undefined);
@@ -118,6 +121,7 @@ Template.editUser.events({
 				if(err){
 					console.log(err.name + ': ' + err.message);
 					Session.set('errorAlert', 'There was a problem updating the user. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
+					throwError(err.message);
 				}
 				else
 					Session.set('userToEdit', undefined);
@@ -127,6 +131,7 @@ Template.editUser.events({
 				if(err){
 					console.log(err.name + ': ' + err.message);
 					Session.set('errorAlert', 'There was a problem adding the user. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
+					throwError(err.message);
 				}
 				else
 					Session.set('userToEdit', undefined);

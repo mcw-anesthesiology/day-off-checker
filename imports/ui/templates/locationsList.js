@@ -1,6 +1,8 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 
+import { throwError } from 'meteor/saucecode:rollbar';
+
 import { Locations } from '../../api/locations.js';
 import '../../api/users.js';
 import { ADMIN_EMAIL_ADDRESS } from '../../constants.js';
@@ -72,6 +74,7 @@ Template.editLocation.events({
 				if(err){
 					console.log(err.name + ': ' + err.message);
 					Session.set('errorAlert', 'There was a problem updating the location. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
+					throwError(err.message);
 				}
 				else
 					Session.set('locationToEdit', undefined);
@@ -81,6 +84,7 @@ Template.editLocation.events({
 				if(err){
 					console.log(err.name + ': ' + err.message);
 					Session.set('errorAlert', 'There was a problem adding the location. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
+					throwError(err.message);
 				}
 				else
 					Session.set('locationToEdit', undefined);
