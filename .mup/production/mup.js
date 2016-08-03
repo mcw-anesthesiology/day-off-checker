@@ -24,6 +24,7 @@ module.exports = {
 			ROLLBAR_SERVER_ACCESS_TOKEN: '78075ed24ab0423eb522767d97aaca22',
 			ROLLBAR_CLIENT_ACCESS_TOKEN: '3e1208eaf43a4e9c86f74b95fab4d4f0',
 			ROLLBAR_ENVIRONMENT: 'production'
-        }
+        },
+		dockerImage: 'abernix/meteord:base'
     }
 };
