@@ -36,8 +36,8 @@
 					<label for="administrator">Administrator</label>
 					<select class="form-control" id="administrator" name="administrator" required>
 						<option value="" selected disabled hidden>Select an administrator</option>
-{{#each siteAdmin in siteAdmins}}
-						<option value="{{siteAdmin.username}}" {{isSiteAdmin fellowship siteAdmin}}>{{siteAdmin.name}}</option>
+{{#each fellowshipAdmin in fellowshipAdmins}}
+						<option value="{{fellowshipAdmin.username}}" {{isFellowshipAdmin fellowship fellowshipAdmin}}>{{fellowshipAdmin.name}}</option>
 {{/each}}
 					</select>
 				</div>

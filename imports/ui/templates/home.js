@@ -14,7 +14,7 @@ import 'twix';
 import 'bootstrap-daterangepicker';
 import 'bootstrap-daterangepicker/daterangepicker.css';
 
-import { ADMIN_EMAIL_ADDRESS } from '../../constants.js';
+import { ADMIN_EMAIL_ADDRESS, DAY_OFF_TYPE_NAMES, RESIDENT_DAY_OFF_TYPES, FELLOW_DAY_OFF_TYPES } from '../../constants.js';
 import { isFellow } from '../../utils.js';
 
 import './home.html';
@@ -38,17 +38,6 @@ const entryNames = {
 	requestReason: 'Reason'
 };
 
-const dayOffTypeNames = {
-	sick: 'Sick day',
-	iDay: 'I-Day'
-};
-
-const dayOffButtons = [
-	{ text: 'Sick day', value: 'sick' },
-	{ text: 'I-Day', value: 'iDay' }
-];
-
-
 function insertEntries(){
 	let request = {};
 	for(let entry of entries){
@@ -59,10 +48,7 @@ function insertEntries(){
 		}
 		request[entry] = value;
 	}
-	if(isFellow()){
-		alert('Submitting fellowship requests is not allowed yet');
-		return;
-	}
+	
 	Meteor.call('dayOffRequests.insert', request, (err) => {
 		if(err){
 			console.log(err.name + ': ' + err.message);
@@ -92,7 +78,7 @@ Template.home.helpers({
 		if(entry){
 			switch(id){
 				case 'dayOffType':
-					return dayOffTypeNames[entry];
+					return DAY_OFF_TYPE_NAMES[entry];
 				case 'requestedLocation':
 					return entry.name;
 				case 'requestedDate':
@@ -142,7 +128,9 @@ Template.dayOffEntry.events({
 
 		const button = event.target;
 
-		if(['sick', 'iDay'].indexOf(button.value) !== -1){
+		const allowedTypes = isFellow() ? FELLOW_DAY_OFF_TYPES : RESIDENT_DAY_OFF_TYPES;
+
+		if(allowedTypes.indexOf(button.value) !== -1){
 			Session.set('dayOffType', button.value);
 		}
 	},
@@ -154,12 +142,14 @@ Template.dayOffEntry.events({
 
 		let value;
 		switch(input.name){
-			case 'dayOffType':
-				if(['sick', 'iDay'].indexOf(input.value) !== -1)
+			case 'dayOffType': {
+				const allowedTypes = isFellow() ? FELLOW_DAY_OFF_TYPES : RESIDENT_DAY_OFF_TYPES;
+				if(allowedTypes.indexOf(input.value) !== -1)
 					value = input.value;
 				else
 					Session.set('errorAlert', 'Unknown day off type');
 				break;
+			}
 			case 'requestorName':
 				if(input.value.trim() === '')
 					Session.set('errorAlert', 'Name looks empty. Please double check your name.');
@@ -210,7 +200,19 @@ Template.dayOffEntry.events({
 });
 
 Template.dayOffType.helpers({
-	dayOffButtons: dayOffButtons
+	dayOffButtons(){
+		let buttons = [];
+		const types = isFellow() ? FELLOW_DAY_OFF_TYPES : RESIDENT_DAY_OFF_TYPES;
+		for(let type of types){
+			let button = {
+				value: type,
+				text: DAY_OFF_TYPE_NAMES[type]
+			};
+			buttons.push(button);
+		}
+
+		return buttons;
+	}
 });
 
 Template.requestorName.onRendered(function(){

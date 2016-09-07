@@ -83,6 +83,62 @@
 		}
 	}
 
+	&.meeting {
+		// background-color: $i-day-background-color;
+
+		.entry-form {
+
+			.btn-primary {
+				background-color: $meeting-button-color;
+				border-color: $meeting-button-border-color;
+
+				&:hover {
+					background-color: $meeting-button-hover-color;
+				}
+			}
+		}
+
+		.submission-confirmation {
+
+			.btn-primary {
+				background-color: $meeting-button-color;
+				border-color: $meeting-button-border-color;
+
+				&:hover {
+					background-color: $meeting-button-hover-color;
+				}
+			}
+		}
+	}
+
+	&.vacation {
+		// background-color: $i-day-background-color;
+
+		.entry-form {
+
+			.btn-primary {
+				background-color: $vacation-button-color;
+				border-color: $vacation-button-border-color;
+
+				&:hover {
+					background-color: $vacation-button-hover-color;
+				}
+			}
+		}
+
+		.submission-confirmation {
+
+			.btn-primary {
+				background-color: $vacation-button-color;
+				border-color: $vacation-button-border-color;
+
+				&:hover {
+					background-color: $vacation-button-hover-color;
+				}
+			}
+		}
+	}
+
 	header {
 		margin-bottom: 1em;
 
@@ -178,6 +234,24 @@
 
 					&:hover {
 						background-color: $i-day-button-hover-color;
+					}
+				}
+
+				&.meeting {
+					background-color: $meeting-button-color;
+					border-color: $meeting-button-border-color;
+
+					&:hover {
+						background-color: $meeting-button-hover-color;
+					}
+				}
+
+				&.vacation {
+					background-color: $vacation-button-color;
+					border-color: $vacation-button-border-color;
+
+					&:hover {
+						background-color: $vacation-button-hover-color;
 					}
 				}
 			}

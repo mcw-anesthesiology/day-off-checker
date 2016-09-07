@@ -11,7 +11,7 @@ import { Fellowships } from './fellowships.js';
 
 import { scheduleReminder } from '../api/reminder-emails.js';
 import { APP_NOTIFICATION_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS,
-	DAYS_BEFORE_I_DAY_TO_SEND_REMINDER } from '../constants.js';
+	DAYS_BEFORE_I_DAY_TO_SEND_REMINDER, RESIDENT_DAY_OFF_TYPES, FELLOW_DAY_OFF_TYPES } from '../constants.js';
 import { displayDateRange, nl2br, isFellow } from '../utils.js';
 
 import map from 'lodash/map';
@@ -55,10 +55,7 @@ Meteor.methods({
 			dayOffType: {
 				type: String,
 				label: 'Day off type',
-				allowedValues: [
-					'sick',
-					'iDay'
-				]
+				allowedValues: RESIDENT_DAY_OFF_TYPES
 			},
 			requestorName: {
 				type: String,
@@ -84,6 +81,11 @@ Meteor.methods({
 			const fellowships = Fellowships.find().fetch();
 			const fellowshipAdmins = Meteor.users.find({ role: 'fellowship_admin' }).fetch();
 			let fellowSchema = {
+				dayOffType: {
+					type: String,
+					label: 'Day off type',
+					allowedValues: FELLOW_DAY_OFF_TYPES
+				},
 				requestedFellowship: {
 					type: Object,
 					label: 'Fellowship'
@@ -150,7 +152,7 @@ Meteor.methods({
 
 		new SimpleSchema(schema).validate(request);
 
-		if(request.dayOffType === 'iDay')
+		if(request.dayOffType !== DAY_OFF_TYPES.SICK)
 			request.status = 'pending';
 
 		if(Meteor.isServer){
@@ -281,7 +283,14 @@ Meteor.methods({
 	}
 });
 
-function getUsersToNotify(request){
+function getUsersToNotify(request, connection){
+	if(isFellow(connection)) {
+		return Meteor.users.find({
+			role: 'fellowship_admin',
+			username: request.requestedFellowship.administrator
+		});
+	}
+
 	return Meteor.users.find({
 		$or: [
 			{ notify: true },
@@ -433,7 +442,11 @@ function sendNotifications(request, users, sendRequestorNotification = true){
 	}
 }
 
-function getUsersForConfirmation(){
+function getUsersForConfirmation(request){
+	if(request.hasOwnProperty('requestedFellowship')){
+		return Accounts.findUserByUsername(request.requestedFellowship.administrator);
+	}
+
 	return Meteor.users.find({ role: 'chief' }).fetch();
 }
 

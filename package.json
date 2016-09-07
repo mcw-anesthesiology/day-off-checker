@@ -12,6 +12,7 @@
     "mup-logs-production": "cd .mup/production/ && mup logs"
   },
   "dependencies": {
+    "bcrypt": "^0.8.7",
     "bootstrap-daterangepicker": "^2.1.19",
     "email-validator": "^1.0.4",
 	"jquery": "<3.0.0",
@@ -19,11 +20,11 @@
     "meteor-node-stubs": "~0.2.0",
     "moment": "^2.12.0",
     "moment-range": "^2.2.0",
-    "nodep-date-input-polyfill": "^2.4.6",
+    "nodep-date-input-polyfill": "^4.0.6",
     "twix": "^1.0.0"
   },
   "devDependencies": {
-    "eslint": "^2.13.1",
+    "eslint": "^3.4.0",
     "mup": "github:jacobmischka/meteor-up"
   }
 }
