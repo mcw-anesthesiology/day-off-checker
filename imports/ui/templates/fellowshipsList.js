@@ -7,6 +7,7 @@ import '../../api/users.js';
 
 import { Fellowships } from '../../api/fellowships.js';
 import { ADMIN_EMAIL_ADDRESS } from '../../constants.js';
+import { displayNameByUsername } from '../../utils.js';
 
 import './fellowshipsList.html';
 
@@ -32,7 +33,7 @@ Template.fellowshipsList.helpers({
 				{ key: '_id', label: 'ID' },
 				{ key: 'name', label: 'Name' },
 				{ key: 'number', label: 'Number' },
-				{ key: 'administrator', label: 'Administrator' }
+				{ key: 'administrator', label: 'Director', fn: displayNameByUsername }
 			]
 		};
 	}

@@ -10,10 +10,20 @@ import { Locations } from './locations.js';
 import { Fellowships } from './fellowships.js';
 
 import { scheduleReminder } from '../api/reminder-emails.js';
-import { APP_NOTIFICATION_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS,
-	DAYS_BEFORE_I_DAY_TO_SEND_REMINDER, RESIDENT_DAY_OFF_TYPES, FELLOW_DAY_OFF_TYPES } from '../constants.js';
-import { displayDateRange, nl2br, isFellow } from '../utils.js';
+import {
+	APP_NOTIFICATION_EMAIL_ADDRESS,
+	ADMIN_EMAIL_ADDRESS,
+	DAYS_BEFORE_I_DAY_TO_SEND_REMINDER,
+	DAY_OFF_FIELDS,
+	DAY_OFF_TYPES,
+	RESIDENT_DAY_OFF_TYPES,
+	FELLOW_DAY_OFF_TYPES,
+	DAY_OFF_TYPE_NAMES,
+	USER_ROLES
+} from '../constants.js';
+import { displayDateRange, nl2br, isFellow, isFellowRequest } from '../utils.js';
 
+import Noun from 'nlp_compromise/src/term/noun/noun.js';
 import map from 'lodash/map';
 import moment from 'moment';
 import 'twix';
@@ -26,18 +36,33 @@ if(Meteor.isServer){
 			return;
 
 		const user = Meteor.users.findOne(this.userId);
+		const fellow = isFellow(this.connection);
 
 		if(user.role === 'admin'){
-			return DayOffRequests.find();
+			return DayOffRequests.find({
+				[DAY_OFF_FIELDS.FELLOWSHIP]: {
+					$exists: fellow
+				}
+			});
 		}
 		else{
 			return DayOffRequests.find({
-				$or: [
-					{ usersNotified: user.username },
-					{ 'confirmationRequests.confirmer': user.username }
+				$and: [
+					{
+						[DAY_OFF_FIELDS.FELLOWSHIP]: {
+							$exists: fellow
+						}
+					},
+					{
+						$or: [
+							{ usersNotified: user.username },
+							{ 'confirmationRequests.confirmer': user.username }
+						]
+					}
 				]
 			});
 		}
+
 	});
 }
 
@@ -50,6 +75,9 @@ Meteor.methods({
 	'dayOffRequests.insert'(request){
 		if(request.requestReason === '(None)')
 			request.requestReason = '';
+
+		const locations = Locations.find({}).fetch();
+		const locationAdmins = Meteor.users.find({ role: 'location_admin' }).fetch();
 
 		let schema = {
 			dayOffType: {
@@ -71,13 +99,37 @@ Meteor.methods({
 				label: 'Requested date range',
 				min: moment().startOf('day').toDate()
 			},
+			requestedLocation: {
+				type: Object,
+				label: 'Location'
+			},
+			'requestedLocation._id': {
+				type: String,
+				label: 'Location ID',
+				allowedValues: map(locations, '_id')
+			},
+			'requestedLocation.name': {
+				type: String,
+				label: 'Location name',
+				allowedValues: map(locations, 'name')
+			},
+			'requestedLocation.number': {
+				type: String,
+				label: 'Location number',
+				allowedValues: map(locations, 'number')
+			},
+			'requestedLocation.administrator': {
+				type: String,
+				label: 'Location administrator',
+				allowedValues: map(locationAdmins, 'username')
+			},
 			requestReason: {
 				type: String,
 				label: 'Reason'
 			}
 		};
 
-		if(isFellow(this.connection)){ // FIXME
+		if(isFellow(this.connection)){
 			const fellowships = Fellowships.find().fetch();
 			const fellowshipAdmins = Meteor.users.find({ role: 'fellowship_admin' }).fetch();
 			let fellowSchema = {
@@ -115,40 +167,6 @@ Meteor.methods({
 			for(let i in fellowSchema)
 				schema[i] = fellowSchema[i];
 		}
-		else {
-			const locations = Locations.find({}).fetch();
-			const locationAdmins = Meteor.users.find({ role: 'location_admin' }).fetch();
-
-			let residentSchema = {
-				requestedLocation: {
-					type: Object,
-					label: 'Location'
-				},
-				'requestedLocation._id': {
-					type: String,
-					label: 'Location ID',
-					allowedValues: map(locations, '_id')
-				},
-				'requestedLocation.name': {
-					type: String,
-					label: 'Location name',
-					allowedValues: map(locations, 'name')
-				},
-				'requestedLocation.number': {
-					type: String,
-					label: 'Location number',
-					allowedValues: map(locations, 'number')
-				},
-				'requestedLocation.administrator': {
-					type: String,
-					label: 'Location administrator',
-					allowedValues: map(locationAdmins, 'username')
-				}
-			};
-
-			for(let i in residentSchema)
-				schema[i] = residentSchema[i];
-		}
 
 		new SimpleSchema(schema).validate(request);
 
@@ -163,14 +181,10 @@ Meteor.methods({
 		request._id = DayOffRequests.insert(request);
 
 		if(Meteor.isServer){
-			switch(request.dayOffType){
-				case 'sick':
-					sendNotifications(request);
-					break;
-				case 'iDay':
-					sendConfirmationRequests(request);
-					break;
-			}
+			if(request.dayOffType === DAY_OFF_TYPES.SICK)
+				sendNotifications(request);
+			else
+				sendConfirmationRequests(request);
 		}
 	},
 	'dayOffRequests.approveRequest'(requestId, note){
@@ -183,7 +197,6 @@ Meteor.methods({
 
 		DayOffRequests.update({
 			_id: requestId,
-			dayOffType: 'iDay',
 			status: 'pending',
 			'confirmationRequests.confirmer': Meteor.user().username
 		}, {
@@ -219,7 +232,6 @@ Meteor.methods({
 
 		DayOffRequests.update({
 			_id: requestId,
-			dayOffType: 'iDay',
 			status: 'pending',
 			'confirmationRequests.confirmer': Meteor.user().username
 		}, {
@@ -272,7 +284,6 @@ Meteor.methods({
 
 		DayOffRequests.update({
 			_id: requestId,
-			dayOffType: 'iDay',
 			status: 'pending',
 			'confirmationRequests.confirmer': Meteor.user().username
 		}, {
@@ -283,25 +294,36 @@ Meteor.methods({
 	}
 });
 
-function getUsersToNotify(request, connection){
-	if(isFellow(connection)) {
+function getUsersToNotify(request){
+	if(isFellowRequest(request)){
 		return Meteor.users.find({
-			role: 'fellowship_admin',
-			username: request.requestedFellowship.administrator
-		});
+			$or: [
+				{
+					role: USER_ROLES.FELLOWSHIP_ADMIN,
+					username: request.requestedFellowship.administrator
+				},
+				{ role: USER_ROLES.FELLOWSHIP_COORDINATOR },
+				{
+					role: USER_ROLES.LOCATION_ADMIN,
+					username: request.requestedLocation.administrator
+				}
+			]
+		}).fetch();
 	}
 
 	return Meteor.users.find({
 		$or: [
-			{ notify: true },
-			{ role: 'chief' },
-			{ role: 'location_admin', username: request.requestedLocation.administrator }
+			{ role: USER_ROLES.RESIDENCY_COORDINATOR },
+			{ role: USER_ROLES.CHIEF },
+			{
+				role: USER_ROLES.LOCATION_ADMIN,
+				username: request.requestedLocation.administrator
+			}
 		]
 	}).fetch();
 }
 
-function sendNotifications(request, users, sendRequestorNotification = true){
-	users = typeof users !== 'undefined' ? users : getUsersToNotify(request);
+function sendNotifications(request, users = getUsersToNotify(request), sendRequestorNotification = true){
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
 	const locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
 
@@ -443,15 +465,14 @@ function sendNotifications(request, users, sendRequestorNotification = true){
 }
 
 function getUsersForConfirmation(request){
-	if(request.hasOwnProperty('requestedFellowship')){
-		return Accounts.findUserByUsername(request.requestedFellowship.administrator);
+	if(isFellowRequest(request)){
+		return [Accounts.findUserByUsername(request.requestedFellowship.administrator)];
 	}
 
 	return Meteor.users.find({ role: 'chief' }).fetch();
 }
 
-function sendConfirmationRequests(request, users, sendRequestorNotification = true, sendLocationAdminNotification = true){
-	users = typeof users !== 'undefined' ? users : getUsersForConfirmation(request);
+function sendConfirmationRequests(request, users = getUsersForConfirmation(request), sendRequestorNotification = true, sendLocationAdminNotification = true){
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
 	const locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
 
@@ -462,7 +483,8 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 				<p>${nl2br(request.requestReason)}</p>
 			</blockquote>`;
 	}
-
+	let typeName = DAY_OFF_TYPE_NAMES[request[DAY_OFF_FIELDS.TYPE]];
+	let typeArticle = new Noun(typeName).article();
 	let timeout = 0; // FIXME
 	for(let user of users){
 		try {
@@ -491,13 +513,14 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 							<body>
 								<h1>Hello ${user.name}</h1>
 
-								<p>${request.requestorName} has requested an I-Day for ${displayDateRange(request.requestedDate)}.</p>
+								<p>${request.requestorName} made ${typeArticle} ${typeName} request for ${displayDateRange(request.requestedDate)}.</p>
 
 								<p>Please navigate to <a href="${requestUrl}">${requestUrl}</a> or the <a href="${Meteor.absoluteUrl('list')}">requests list page</a> to approve or deny this request.</p>
 
 								<table>
 									<thead>
 										<tr>
+											<th>Type</th>
 											<th>Name</th>
 											<th>Date</th>
 											<th>Location</th>
@@ -506,6 +529,7 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 									</thead>
 									<tbody>
 										<tr>
+											<td>${typeName}</td>
 											<td>${request.requestorName}</td>
 											<td>${displayDateRange(request.requestedDate)}</td>
 											<td>${request.requestedLocation.name}</td>
@@ -550,7 +574,7 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 				Email.send({
 					to: locationAdmin.emails[0].address,
 					from: APP_NOTIFICATION_EMAIL_ADDRESS,
-					subject: 'I-Day requested',
+					subject: `${typeName} requested`,
 					html: `
 						<html>
 							<head>
@@ -567,13 +591,14 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 							<body>
 								<h1>Hello ${locationAdmin.name}</h1>
 
-								<p>${request.requestorName} has requested an I-Day for ${displayDateRange(request.requestedDate)}.</p>
+								<p>${request.requestorName} made ${typeArticle} ${typeName} request for ${displayDateRange(request.requestedDate)}.</p>
 
 								<p>Please navigate to <a href="${requestUrl}">${requestUrl}</a> or the <a href="${Meteor.absoluteUrl('list')}">requests list page</a> to view this request.</p>
 
 								<table>
 									<thead>
 										<tr>
+											<th>Type</th>
 											<th>Name</th>
 											<th>Date</th>
 											<th>Location</th>
@@ -582,6 +607,7 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 									</thead>
 									<tbody>
 										<tr>
+											<td>${typeName}</td>
 											<td>${request.requestorName}</td>
 											<td>${displayDateRange(request.requestedDate)}</td>
 											<td>${request.requestedLocation.name}</td>
@@ -612,7 +638,7 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 				}
 			});
 		} catch(e){
-			console.log('Error sending i-day notification to location admin: ' + e);
+			console.log('Error sending request notification to location admin: ' + e);
 			handleError(e);
 		}
 	}
@@ -684,6 +710,7 @@ function sendConfirmationRequests(request, users, sendRequestorNotification = tr
 function sendRequestApprovalNotifications(request){
 	const users = getUsersToNotify(request);
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
+	let typeName = DAY_OFF_TYPE_NAMES[request[DAY_OFF_FIELDS.TYPE]];
 	let timeout = 0; // FIXME
 	for(let user of users){
 		try {
@@ -692,7 +719,7 @@ function sendRequestApprovalNotifications(request){
 				Email.send({
 					to: user.emails[0].address,
 					from: APP_NOTIFICATION_EMAIL_ADDRESS,
-					subject: 'I-Day Request Approved',
+					subject: `${typeName} Request Approved`,
 					html: `
 						<html>
 							<body>
@@ -700,7 +727,7 @@ function sendRequestApprovalNotifications(request){
 
 								<p>
 									This email is notifying you that <a href="${requestUrl}">
-									${request.requestorName}'s I-Day request for ${displayDateRange(request.requestedDate)}</a>
+									${request.requestorName}'s ${typeName} request for ${displayDateRange(request.requestedDate)}</a>
 									has been approved.
 								</p>
 
@@ -736,7 +763,7 @@ function sendRequestApprovalNotifications(request){
 						<body>
 							<h1>Hello ${request.requestorName}</h1>
 
-							<p>Your I-Day request for ${displayDateRange(request.requestedDate)} has been approved!</p>
+							<p>Your ${typeName} request for ${displayDateRange(request.requestedDate)} has been approved!</p>
 
 							<p>Be sure to remind your site location administrator 1-2 days prior to your absence.</p>
 
@@ -757,6 +784,7 @@ function sendRequestApprovalNotifications(request){
 function sendRequestDenialNotifications(request, reason){
 	const users = getUsersToNotify(request);
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
+	let typeName = DAY_OFF_TYPE_NAMES[request[DAY_OFF_FIELDS.TYPE]];
 	let timeout = 0; // FIXME
 	for(let user of users){
 		try{
@@ -765,7 +793,7 @@ function sendRequestDenialNotifications(request, reason){
 				Email.send({
 					to: user.emails[0].address,
 					from: APP_NOTIFICATION_EMAIL_ADDRESS,
-					subject: 'I-Day Request Denied',
+					subject: `${typeName} Request Denied`,
 					html: `
 						<html>
 							<body>
@@ -773,7 +801,7 @@ function sendRequestDenialNotifications(request, reason){
 
 								<p>
 									This email is notifying you that <a href="${requestUrl}">
-									${request.requestorName}'s I-Day request for ${displayDateRange(request.requestedDate)}</a>
+									${request.requestorName}'s ${typeName} request for ${displayDateRange(request.requestedDate)}</a>
 									has been denied by ${Meteor.user.name} for the following reason.
 								</p>
 
@@ -803,14 +831,14 @@ function sendRequestDenialNotifications(request, reason){
 			Email.send({
 				to: request.requestorEmail,
 				from: APP_NOTIFICATION_EMAIL_ADDRESS,
-				subject: 'I-Day Request Denied',
+				subject: `${typeName} Request Denied`,
 				html: `
 					<html>
 						<body>
 							<h1>Hello ${request.requestorName}</h1>
 
 							<p>
-								This email is notifying you that your I-Day request for ${displayDateRange(request.requestedDate)}
+								This email is notifying you that your ${typeName} request for ${displayDateRange(request.requestedDate)}
 								has been denied by ${Meteor.user.name} for the following reason.
 							</p>
 

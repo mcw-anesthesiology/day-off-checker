@@ -2,6 +2,8 @@ import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 
+import { USER_ROLES } from '../constants.js';
+
 if(Meteor.isServer){
 	Meteor.publish('currentUserData', function(){
 		if(this.userId)
@@ -29,8 +31,7 @@ if(Meteor.isServer){
 			name: 1,
 			role: 1,
 			pager: 1,
-			emails: 1,
-			notify: 1
+			emails: 1
 		}});
 	});
 
@@ -61,14 +62,6 @@ if(Meteor.isServer){
 			pager: 1
 		}});
 	});
-
-	Meteor.publish('notifyUserData', function(){
-		return Meteor.users.find({ notify: true }, { fields: {
-			username: 1,
-			name: 1,
-			notify: 1
-		}});
-	});
 }
 
 const userSchema = new SimpleSchema({
@@ -88,26 +81,11 @@ const userSchema = new SimpleSchema({
 	role: {
 		type: String,
 		label: 'Role',
-		allowedValues: [
-			'chief',
-			'admin',
-			'location_admin',
-			'fellowship_admin'
-		]
+		allowedValues: Object.values(USER_ROLES)
 	},
 	pager: {
 		type: String,
 		label: 'Pager',
-		optional: true
-	},
-	notify: {
-		type: Boolean,
-		label: 'Notify',
-		optional: true
-	},
-	fellow: {
-		type: Boolean,
-		label: 'Fellow',
 		optional: true
 	}
 });
@@ -116,9 +94,6 @@ Meteor.methods({
 	'addUser'(user){
 		if(Meteor.user().role !== 'admin')
 			throw new Meteor.Error('addUser.unauthorized');
-
-		if(user.notify)
-			user.notify = true;
 
 		userSchema.validate(user);
 
@@ -130,9 +105,6 @@ Meteor.methods({
 	'updateUser'(userId, user){
 		if(Meteor.user().role !== 'admin')
 			throw new Meteor.Error('updateUser.unauthorized');
-
-		if(user.notify)
-			user.notify = true;
 
 		userSchema.validate(user);
 

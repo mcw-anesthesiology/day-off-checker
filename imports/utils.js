@@ -4,7 +4,11 @@ import { Email } from 'meteor/email';
 import moment from 'moment';
 import 'twix';
 
-import { APP_ADMIN_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS } from './constants.js';
+import {
+	APP_ADMIN_EMAIL_ADDRESS,
+	ADMIN_EMAIL_ADDRESS,
+	DAY_OFF_FIELDS
+} from './constants.js';
 
 
 export function alertAdministrator(){
@@ -57,4 +61,8 @@ export function isFellow(connection){
 		hostname = connection.httpHeaders.host;
 
 	return hostname.split('.')[0] === 'fellow';
+}
+
+export function isFellowRequest(request){
+	return request.hasOwnProperty(DAY_OFF_FIELDS.FELLOWSHIP);
 }

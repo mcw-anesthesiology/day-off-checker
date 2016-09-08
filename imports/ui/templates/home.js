@@ -4,6 +4,7 @@ import { Session } from 'meteor/session';
 
 import { throwError } from 'meteor/saucecode:rollbar';
 
+import { Fellowships } from '../../api/fellowships.js';
 import { Locations } from '../../api/locations.js';
 
 import validator from 'email-validator';
@@ -14,41 +15,37 @@ import 'twix';
 import 'bootstrap-daterangepicker';
 import 'bootstrap-daterangepicker/daterangepicker.css';
 
-import { ADMIN_EMAIL_ADDRESS, DAY_OFF_TYPE_NAMES, RESIDENT_DAY_OFF_TYPES, FELLOW_DAY_OFF_TYPES } from '../../constants.js';
+import {
+	ADMIN_EMAIL_ADDRESS,
+	DAY_OFF_TYPE_NAMES,
+	RESIDENT_DAY_OFF_TYPES,
+	FELLOW_DAY_OFF_TYPES,
+	DAY_OFF_FIELDS,
+	DAY_OFF_FIELD_NAMES
+} from '../../constants.js';
 import { isFellow } from '../../utils.js';
 
 import './home.html';
 
+let fields = Object.values(DAY_OFF_FIELDS).filter(field => {
+	if(field === DAY_OFF_FIELDS.FELLOWSHIP){
+		return isFellow();
+	}
 
-const entries = [
-	'dayOffType',
-	'requestorName',
-	'requestorEmail',
-	'requestedDate',
-	'requestedLocation',
-	'requestReason'
-];
-
-const entryNames = {
-	dayOffType: 'Type',
-	requestorName: 'Name',
-	requestorEmail: 'Email',
-	requestedDate: 'Date',
-	requestedLocation: 'Location',
-	requestReason: 'Reason'
-};
+	return true;
+});
 
 function insertEntries(){
 	let request = {};
-	for(let entry of entries){
-		let value = Session.get(entry);
+	for(let field of fields){
+		let value = Session.get(field);
 		if(!value){
-			Session.set('errorAlert', 'Please complete all entries');
+			Session.set('errorAlert', 'Please complete all fields');
 			return;
 		}
-		request[entry] = value;
+		request[field] = value;
 	}
-	
+
 	Meteor.call('dayOffRequests.insert', request, (err) => {
 		if(err){
 			console.log(err.name + ': ' + err.message);
@@ -61,7 +58,7 @@ function insertEntries(){
 }
 
 Template.home.helpers({
-	entries: entries,
+	fields: fields,
 	currentUserAdmin(){
 		return (Meteor.user().role === 'admin');
 	},
@@ -72,26 +69,27 @@ Template.home.helpers({
 		if(!Session.equals('submissionConfirmation', true))
 			return 'editable';
 	},
-	getEntry(id){
-		const entry = Session.get(id);
+	getField(id){
+		const field = Session.get(id);
 
-		if(entry){
+		if(field){
 			switch(id){
-				case 'dayOffType':
-					return DAY_OFF_TYPE_NAMES[entry];
-				case 'requestedLocation':
-					return entry.name;
-				case 'requestedDate':
-					return moment(entry[0]).twix(entry[1], true).format();
-				case 'requestReason':
-					return entry;
+				case DAY_OFF_FIELDS.TYPE:
+					return DAY_OFF_TYPE_NAMES[field];
+				case DAY_OFF_FIELDS.FELLOWSHIP:
+				case DAY_OFF_FIELDS.LOCATION:
+					return field.name;
+				case DAY_OFF_FIELDS.DATE:
+					return moment(field[0]).twix(field[1], true).format();
+				case DAY_OFF_FIELDS.REASON:
+					return field;
 				default:
-					return entry;
+					return field;
 			}
 		}
 	},
-	entryName(entry){
-		return entryNames[entry];
+	fieldName(field){
+		return DAY_OFF_FIELD_NAMES[field];
 	},
 	hint(){
 		return Session.get('hint');
@@ -102,18 +100,18 @@ Template.home.events({
 	'click .completed-entry.editable th, click .completed-entry.editable td'(event) {
 		const target = event.target;
 		const parent = $(target).parent();
-		const entry = parent.data('id');
-		const oldValue = Session.get(entry);
-		Session.set('old_' + entry, oldValue);
-		Session.set(entry, undefined);
+		const field = parent.data('id');
+		const oldValue = Session.get(field);
+		Session.set('old_' + field, oldValue);
+		Session.set(field, undefined);
 	}
 });
 
 Template.dayOffEntry.helpers({
-	nextEntry(){
-		for(let entry of entries){
-			if(!Session.get(entry)){
-				return entry;
+	nextField(){
+		for(let field of fields){
+			if(!Session.get(field)){
+				return field;
 			}
 		}
 		if(!Session.get('requestConfirmation'))
@@ -142,7 +140,7 @@ Template.dayOffEntry.events({
 
 		let value;
 		switch(input.name){
-			case 'dayOffType': {
+			case DAY_OFF_FIELDS.TYPE: {
 				const allowedTypes = isFellow() ? FELLOW_DAY_OFF_TYPES : RESIDENT_DAY_OFF_TYPES;
 				if(allowedTypes.indexOf(input.value) !== -1)
 					value = input.value;
@@ -150,19 +148,19 @@ Template.dayOffEntry.events({
 					Session.set('errorAlert', 'Unknown day off type');
 				break;
 			}
-			case 'requestorName':
+			case DAY_OFF_FIELDS.NAME:
 				if(input.value.trim() === '')
 					Session.set('errorAlert', 'Name looks empty. Please double check your name.');
 				else
 					value = input.value;
 				break;
-			case 'requestorEmail':
+			case DAY_OFF_FIELDS.EMAIL:
 				if(validator.validate(input.value))
 					value = input.value;
 				else
 					Session.set('errorAlert', 'Email address seems wrong. Please make sure to enter a valid email address.');
 				break;
-			case 'requestedDate': {
+			case DAY_OFF_FIELDS.DATE: {
 				let dates = input.value.split(' - ');
 				let startDate = moment(dates[0], 'MM/DD/YYYY');
 				let endDate = moment(dates[1], 'MM/DD/YYYY');
@@ -175,10 +173,13 @@ Template.dayOffEntry.events({
 					value = [ startDate.toDate(), endDate.toDate() ];
 				break;
 			}
-			case 'requestedLocation':
+			case DAY_OFF_FIELDS.FELLOWSHIP:
+				value = Fellowships.findOne(input.value);
+				break;
+			case DAY_OFF_FIELDS.LOCATION:
 				value = Locations.findOne(input.value);
 				break;
-			case 'requestReason':
+			case DAY_OFF_FIELDS.REASON:
 				value = input.value.trim();
 				if(!value)
 					value = '(None)';
@@ -253,6 +254,25 @@ Template.requestedDate.helpers({
 	}
 });
 
+Template.requestedFellowship.onCreated(function(){
+	Meteor.subscribe('fellowships');
+});
+
+Template.requestedFellowship.helpers({
+	fellowships(){
+		return Fellowships.find({}, { sort: { name: 1 } });
+	},
+	oldValueSelected(fellowship){
+		try{
+			if(Session.get('old_requestedFellowship')._id === fellowship._id)
+				return 'selected';
+		}
+		catch(e){
+			console.log(e);
+		}
+	}
+});
+
 Template.requestedLocation.onCreated(function(){
 	Meteor.subscribe('locations');
 });
@@ -307,8 +327,8 @@ Template.submissionConfirmation.events({
 	'click #restart'(){
 		Session.set('submissionConfirmation', undefined);
 		Session.set('requestConfirmation', undefined);
-		for(let entry of entries){
-			Session.set(entry, undefined);
+		for(let field of fields){
+			Session.set(field, undefined);
 		}
 	}
 });

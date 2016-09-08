@@ -6,6 +6,7 @@ import { throwError } from 'meteor/saucecode:rollbar';
 import { Locations } from '../../api/locations.js';
 import '../../api/users.js';
 import { ADMIN_EMAIL_ADDRESS } from '../../constants.js';
+import { displayNameByUsername } from '../../utils.js';
 
 import './locationsList.html';
 
@@ -31,7 +32,7 @@ Template.locationsList.helpers({
 				{ key: '_id', label: 'ID' },
 				{ key: 'name', label: 'Name' },
 				{ key: 'number', label: 'Number' },
-				{ key: 'administrator', label: 'Administrator' }
+				{ key: 'administrator', label: 'Administrator', fn: displayNameByUsername }
 			]
 		};
 	}
