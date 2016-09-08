@@ -9,7 +9,13 @@ import find from 'lodash/find';
 import moment from 'moment';
 import 'twix';
 
-import { ADMIN_EMAIL_ADDRESS, DAYS_BEFORE_I_DAY_TO_SEND_REMINDER } from '../../constants.js';
+import {
+	ADMIN_EMAIL_ADDRESS,
+	DAYS_BEFORE_I_DAY_TO_SEND_REMINDER,
+	DAY_OFF_FIELDS,
+	DAY_OFF_TYPES,
+	DAY_OFF_TYPE_NAMES
+} from '../../constants.js';
 import { displayDate, displayDateRange, capitalizeFirstLetter } from '../../utils.js';
 
 import './requests.html';
@@ -44,7 +50,10 @@ Template.requestsList.helpers({
 		return DayOffRequests.findOne(Session.get('sickDayDetailsId'));
 	},
 	sickDayRequests(){
-		const requests = DayOffRequests.find({ dayOffType: 'sick' }, { sort: { createdAt: -1 } });
+		const requests = DayOffRequests.find(
+			{ [DAY_OFF_FIELDS.TYPE]: DAY_OFF_TYPES.SICK },
+			{ sort: { createdAt: -1 } }
+		);
 		if(requests.count() > 0)
 			return requests;
 		else
@@ -65,7 +74,10 @@ Template.requestsList.helpers({
 		return DayOffRequests.findOne(Session.get('iDayDetailsId'));
 	},
 	iDayRequests(){
-		const requests = DayOffRequests.find({ dayOffType: 'iDay' }, { sort: { createdAt: -1 } });
+		const requests = DayOffRequests.find(
+			{ [DAY_OFF_FIELDS.TYPE]: DAY_OFF_TYPES.I_DAY },
+			{ sort: { createdAt: -1 } }
+		);
 		if(requests.count() > 0)
 			return requests;
 		else
@@ -80,17 +92,55 @@ Template.requestsList.helpers({
 				{ key: 'requestTime', label: 'Requested', fn: displaySortableDate, sortOrder: 1, sortDirection: 'desc' },
 				{ key: 'requestReason', label: 'Reason' },
 				{ key: 'status', label: 'Status', fn: capitalizeFirstLetter },
-				{ key: 'confirmationRequests', label: '', fn: iDayNeedsResponse }
+				{ key: 'confirmationRequests', label: '', fn: requestNeedsResponse }
+			]
+		};
+	},
+	fellowRequestDetails(){
+		return DayOffRequests.findOne(Session.get('iDayDetailsId'));
+	},
+	fellowRequestRequests(){
+		const requests = DayOffRequests.find(
+			{
+				[DAY_OFF_FIELDS.TYPE]: {
+					$in: [
+						DAY_OFF_TYPES.MEETING,
+						DAY_OFF_TYPES.VACATION
+					]
+				}
+			},
+			{ sort: { createdAt: -1 } }
+		);
+		if(requests.count() > 0)
+			return requests;
+		else
+			return [{}];
+	},
+	fellowRequestSettings(){
+		return {
+			fields: [
+				{ key: DAY_OFF_FIELDS.TYPE, label: 'Request Type', fn: displayTypeName },
+				{ key: 'requestorName', label: 'Name', sortOrder: 2, sortDirection: 'asc' },
+				{ key: 'requestedLocation.name', label: 'Location' },
+				{ key: 'requestedDate', label: 'I-Days', fn: displaySortableDateRange, sortOrder: 0, sortDirection: 'desc' },
+				{ key: 'requestTime', label: 'Requested', fn: displaySortableDate, sortOrder: 1, sortDirection: 'desc' },
+				{ key: 'requestReason', label: 'Reason' },
+				{ key: 'status', label: 'Status', fn: capitalizeFirstLetter },
+				{ key: 'confirmationRequests', label: '', fn: requestNeedsResponse }
 			]
 		};
 	}
 });
 
-function iDayNeedsResponse(confirmationRequests, request){
+function displayTypeName(type){
+	return DAY_OFF_TYPE_NAMES[type];
+}
+
+function requestNeedsResponse(confirmationRequests, request){
 	try {
 		const confirmationRequest = find(confirmationRequests, { confirmer: Meteor.user().username });
 		if(confirmationRequest.status === 'pending' && request.status === 'pending'){
-			return Spacebars.SafeString('<span class="i-day-needs-response-icon"></span>');
+			return Spacebars.SafeString('<span class="request-needs-response-icon"></span>');
 		}
 	}
 	catch(e){
@@ -138,8 +188,8 @@ Template.requestDetails.onCreated(function(){
 // });
 
 Template.requestDetails.helpers({
-	isIDay(request){
-		return (request.dayOffType === 'iDay');
+	isRequest(request){
+		return (request[DAY_OFF_FIELDS.TYPE] !== DAY_OFF_TYPES.SICK);
 	},
 	// requestDates(request){
 	// 	let range = moment(request.requestedDate[0]).twix(request.requestedDate[1], true);

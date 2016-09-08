@@ -27,9 +27,9 @@
 		{{#unless routeIs "Users"}}
 			<a href="/users">User administration</a>
 		{{/unless}}
-		{{#unless routeIs "Locations"}}{{#unless isFellow}}
+		{{#unless routeIs "Locations"}}
 			<a href="/locations">Locations</a>
-		{{/unless}}{{/unless}}
+		{{/unless}}
 		{{#unless routeIs "Fellowships"}}{{#if isFellow}}
 			<a href="/fellowships">Fellowships</a>
 		{{/if}}{{/unless}}

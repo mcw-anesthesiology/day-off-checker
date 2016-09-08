@@ -47,13 +47,6 @@
 					<input type="tel" class="form-control" id="pager" name="pager" value="{{user.pager}}" placeholder="Pager" required />
 				</div>
 {{/if}}
-				<div class="form-group col-md-2 col-sm-3">
-					<label>
-						Always notify
-						<input type="hidden" name="notify" value="" />
-						<input type="checkbox" id="notify" name="notify" value="true" {{notifySelected user}} />
-					</label>
-				</div>
 			</div>
 			<div class="row button-row">
 				{{!-- TODO: Delete/disable user --}}

@@ -70,7 +70,6 @@ const accounts = [
 		username: "amatenaer",
 		password: "test",
 		email: "amatenaer@mcw.edu",
-		notify: true,
 		role: "admin"
 	},
 	{

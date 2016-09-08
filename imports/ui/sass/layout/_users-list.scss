@@ -23,6 +23,46 @@
 
 			tr {
 				cursor: pointer;
+
+				td.role::before {
+					content: '';
+					display: inline-block;
+					height: 0.7em;
+					width: 0.7em;
+					border-radius: 100%;
+					border: 1px solid;
+					margin-right: 1em;
+				}
+
+				&.admin td.role::before {
+					background-color: $admin-role-color;
+					border-color: $admin-border-color;
+				}
+
+				&.location_admin td.role::before {
+					background-color: $location-admin-role-color;
+					border-color: $location-admin-border-color;
+				}
+
+				&.residency_coordinator td.role::before {
+					background-color: $residency-coordinator-role-color;
+					border-color: $residency-coordinator-border-color;
+				}
+
+				&.chief td.role::before {
+					background-color: $chief-role-color;
+					border-color: $chief-border-color;
+				}
+
+				&.fellowship_coordinator td.role::before {
+					background-color: $fellowship-coordinator-role-color;
+					border-color: $fellowship-coordinator-border-color;
+				}
+
+				&.fellowship_admin td.role::before {
+					background-color: $fellowship-admin-role-color;
+					border-color: $fellowship-admin-border-color;
+				}
 			}
 		}
 	}

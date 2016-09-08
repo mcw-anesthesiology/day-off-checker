@@ -4,16 +4,12 @@ import { Template } from 'meteor/templating';
 import { throwError } from 'meteor/saucecode:rollbar';
 
 import '../../api/users.js';
-import { ADMIN_EMAIL_ADDRESS } from '../../constants.js';
+import {
+	ADMIN_EMAIL_ADDRESS,
+	USER_ROLE_NAMES
+} from '../../constants.js';
 
 import './usersList.html';
-
-const roleNames = {
-	admin: 'Administrator',
-	location_admin: 'Site Administrator',
-	chief: 'Chief',
-	fellowship_admin: 'Fellowship Administrator'
-};
 
 Template.usersList.onCreated(() => {
 	Meteor.subscribe('allUserData');
@@ -27,12 +23,13 @@ Template.usersList.helpers({
 	usersSettings(){
 		return {
 			fields: [
-				{ key: 'name', label: 'Name' },
+				{ key: 'name', label: 'Name', sortOrder: 1 },
 				{ key: 'username', label: 'Username' },
 				{ key: 'emails', label: 'Email', fn: getFirstEmail },
-				{ key: 'role', label: 'Role', fn: roleName },
+				{ key: 'role', label: 'Role', sortOrder: 0, fn: roleName },
 				{ key: 'pager', label: 'Pager' }
-			]
+			],
+			rowClass: user => user.role
 		};
 	},
 	userToEdit(){
@@ -57,7 +54,7 @@ function getFirstEmail(emails){
 }
 
 function roleName(role){
-	return roleNames[role];
+	return USER_ROLE_NAMES[role];
 }
 
 Template.editUser.helpers({
@@ -67,8 +64,8 @@ Template.editUser.helpers({
 	getFirstEmail: getFirstEmail,
 	roles(){
 		let roles = [];
-		for(let i in roleNames){
-			roles.push({ id: i, name: roleNames[i] });
+		for(let role in USER_ROLE_NAMES){
+			roles.push({ id: role, name: USER_ROLE_NAMES[role] });
 		}
 		return roles;
 	},
@@ -78,10 +75,6 @@ Template.editUser.helpers({
 	},
 	userIsChief(user){
 		return user.role === 'chief';
-	},
-	notifySelected(user){
-		if(user.notify)
-			return 'checked';
 	}
 });
 
@@ -115,7 +108,6 @@ Template.editUser.events({
 		for(let i of formArray){
 			user[i.name] = i.value;
 		}
-		user.notify = Boolean(user.notify);
 		if(userId)
 			Meteor.call('updateUser', userId, user, (err) => {
 				if(err){

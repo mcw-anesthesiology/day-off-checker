@@ -1,11 +1,15 @@
 import { Accounts } from 'meteor/accounts-base';
 
-import { APP_SITE_NAME, APP_ACCOUNTS_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS } from '../../constants.js';
+import {
+	APP_SITE_NAME,
+	APP_ACCOUNTS_EMAIL_ADDRESS,
+	ADMIN_EMAIL_ADDRESS,
+	USER_ROLES
+} from '../../constants.js';
 
 Accounts.onCreateUser((options, user) => {
 	user.name = options.name;
 	user.role = options.role;
-	user.notify = options.notify;
 	user.pager = options.pager;
 	user.fellow = options.fellow;
 	return user;
@@ -30,22 +34,28 @@ Accounts.emailTemplates.resetPassword.html = (user, url) => {
 Accounts.emailTemplates.enrollAccount.html = (user, url) => {
 	let roleDescription = '';
 	switch(user.role){
-		case 'admin':
+		case USER_ROLES.ADMIN:
 			roleDescription = 'As an administrator, you have full access to create and manage accounts and locations, and view all day off requests.';
-			if(user.notify)
-				roleDescription += ' Additionally, you will also be notified of all sick day submissions and I-Day request approvals and denials.';
 			break;
-		case 'chief':
+		case USER_ROLES.CHIEF:
 			roleDescription = 'As a chief, you have full access to view all day off requests, and must approve or deny all I-Day requests. '
 				+ 'You will be notified for all sick day submissions and I-Day requests.';
 			break;
-		case 'location_admin':
+		case USER_ROLES.LOCATION_ADMIN:
 			roleDescription = 'As a location administrator, you have full access to view all day off requests for the site under your administration. '
 				+ 'You will be notified for all sick day submissions and all I-Day requests for your location.';
 			break;
-		case 'fellowship_admin':
-			roleDescription = 'As a fellowship administrator, you have full access to view all requests for your fellowship. '
-				+ 'You will be notified for all sick day submissions and all day off requests for your fellowship.';
+		case USER_ROLES.FELLOWSHIP_ADMIN:
+			roleDescription = 'As a fellowship director, you have full access to view all requests for your fellowship, and must approve or deny all meeting or vacation requests. '
+				+ 'You will be notified for all sick day submissions and all day off requests for your fellows.';
+			break;
+		case USER_ROLES.RESIDENCY_COORDINATOR:
+			roleDescription = 'As residency coordinator, you have full access to view all resident requests. '
+				+ 'You will be notified for all sick day submissions and all day off reqeusts made by residents.';
+			break;
+		case USER_ROLES.FELLOWSHIP_COORDINATOR:
+			roleDescription = 'As fellowship coordinator, you have full access to view all fellow requests. '
+				+ 'You will be notified for all sick day submissions and all day off reqeusts made by fellows.';
 			break;
 	}
 	return `

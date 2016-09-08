@@ -7,11 +7,11 @@
 {{#if editable}}
 		<section class="completed-entries">
 			<table>
-	{{#each entry in entries}}
-		{{#if getEntry entry}}
-				<tr class="completed-entry {{editable}}" data-id="{{entry}}">
-					<th>{{entryName entry}}</th>
-					<td>{{getEntry entry}}</td>
+	{{#each field in fields}}
+		{{#if getField field}}
+				<tr class="completed-entry {{editable}}" data-id="{{field}}">
+					<th>{{fieldName field}}</th>
+					<td>{{getField field}}</td>
 				</tr>
 		{{/if}}
 	{{/each}}
@@ -31,7 +31,7 @@
 
 <template name="dayOffEntry">
 	<form class="entry-form">
-		{{> Template.dynamic template=nextEntry}}
+		{{> Template.dynamic template=nextField}}
 	</form>
 </template>
 
@@ -59,6 +59,16 @@
 
 <template name="requestedDate">
 	<input type="text" name="requestedDate" id="daterange" placeholder="MM/DD/YYYY - MM/DD/YYYY" value="{{oldValue}}" autocomplete="off" required />
+	<button type="submit" class="btn btn-lg btn-primary">Next</button>
+</template>
+
+<template name="requestedFellowship">
+	<select name="requestedFellowship" id="fellowship" required>
+		<option value="">Select fellowship</option>
+{{#each fellowship in fellowships}}
+		<option value="{{fellowship._id}}" {{oldValueSelected fellowship}}>{{fellowship.name}}</option>
+{{/each}}
+	</select>
 	<button type="submit" class="btn btn-lg btn-primary">Next</button>
 </template>
 

@@ -28,19 +28,19 @@ Meteor.methods({
 		new SimpleSchema({
 			_id: {
 				type: String,
-				label: 'Location ID'
+				label: 'Fellowship ID'
 			},
 			name: {
 				type: String,
-				label: 'Location name'
+				label: 'Fellowship name'
 			},
 			number: {
 				type: String,
-				label: 'Location number' // TODO: restrict this to actual numbers?
+				label: 'Fellowship number' // TODO: restrict this to actual numbers?
 			},
 			administrator: {
 				type: String,
-				label: 'Location administrator username',
+				label: 'Fellowship administrator username',
 				allowedValues: map(fellowshipAdmins, 'username')
 			}
 		}).validate(fellowship);
@@ -59,19 +59,19 @@ Meteor.methods({
 		new SimpleSchema({
 			_id: {
 				type: String,
-				label: 'Location ID'
+				label: 'Fellowship ID'
 			},
 			name: {
 				type: String,
-				label: 'Location name'
+				label: 'Fellowship name'
 			},
 			number: {
 				type: String,
-				label: 'Location number' // TODO: restrict this to actual numbers?
+				label: 'Fellowship number' // TODO: restrict this to actual numbers?
 			},
 			administrator: {
 				type: String,
-				label: 'Location administrator username',
+				label: 'Fellowship administrator username',
 				allowedValues: map(fellowshipAdmins, 'username')
 			}
 		}).validate(fellowship);
@@ -98,7 +98,7 @@ function notifyNewFellowshipAdmin(fellowship){
 						<h1>Hello ${user.name}</h1>
 						<p>
 							This email is notifying you that you have been added as a fellowship administrator in the Anesthesiology department's day off
-							management site for ${location.name}.
+							management site for ${fellowship.name}.
 						</p>
 						<p>
 							You will be notified when any fellow from your fellowship requests a day off or requires a sick day, and you will have to login

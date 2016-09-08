@@ -54,10 +54,6 @@ FlowRouter.route('/locations', {
 		(context, redirect) => {
 			if(Meteor.user() && Meteor.user().role !== 'admin')
 				redirect('/');
-		},
-		(context, redirect) => {
-			if(isFellow())
-				redirect("/fellowships");
 		}
 	],
 	action(){
@@ -75,7 +71,7 @@ FlowRouter.route('/fellowships', {
 		},
 		(context, redirect) => {
 			if(!isFellow())
-				redirect('/locations');
+				redirect('/');
 		}
 	],
 	action(){

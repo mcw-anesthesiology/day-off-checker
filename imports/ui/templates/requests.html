@@ -16,17 +16,32 @@
 		</section>
 {{/if}}
 
-{{#if iDayDetails}}
+{{#if isFellow}}
+	{{#if fellowRequestDetails}}
+		<h2 id="i-day-details">Request Details</h2>
+		{{>requestDetails request=fellowRequestDetails}}
+		<button type="button" class="close-details-button btn btn-default" id="close-i-day-details">Close details</button>
+	{{/if}}
+	{{#if fellowRequestRequests}}
+		<section class="i-day-requests">
+			<h2>Request Requests</h2>
+			{{>reactiveTable collection=fellowRequestRequests settings=fellowRequestSettings}}
+			<hr />
+		</section>
+	{{/if}}
+{{else}}
+	{{#if iDayDetails}}
 		<h2 id="i-day-details">I-Day Details</h2>
 		{{>requestDetails request=iDayDetails}}
 		<button type="button" class="close-details-button btn btn-default" id="close-i-day-details">Close details</button>
-{{/if}}
-{{#if iDayRequests}}
+	{{/if}}
+	{{#if iDayRequests}}
 		<section class="i-day-requests">
 			<h2>I-Day Requests</h2>
 			{{>reactiveTable collection=iDayRequests settings=iDaySettings}}
 			<hr />
 		</section>
+	{{/if}}
 {{/if}}
 	</section>
 </template>
@@ -45,7 +60,7 @@
 	<section class="request-details well well-lg">
 
 {{#if request}}
-		<h1>{{request.requestorName}}{{#if isIDay request}} <span class="label {{statusLabelType request.status}}">{{capitalizeFirstLetter request.status}}</span>{{/if}}</h1>
+		<h1>{{request.requestorName}}{{#if isRequest request}} <span class="label {{statusLabelType request.status}}">{{capitalizeFirstLetter request.status}}</span>{{/if}}</h1>
 	{{!-- TODO: Render calendar --}}
 		<div class="row">
 			<div class="col-md-9 request-details-main">
@@ -97,7 +112,7 @@
 					</div>
 					<div class="panel-body">
 						<span class="label label-success">Notified</span>
-		{{#if isIDay request}}
+		{{#if isRequest request}}
 			{{#let scheduledReminder=(userReminderScheduled userNotified request)}}
 			{{#let sentReminder=(userReminderSent userNotified request)}}
 			{{#if scheduledReminder}}
@@ -160,13 +175,13 @@
 		{{/let}}
 	{{/if}}{{/if}}{{/if}}
 
-	{{#if currentUserAdmin}}{{#if isIDay request}}
+	{{#if currentUserAdmin}}{{#if isRequest request}}
 		<button type="button" class="btn btn-warning" id="resend-confirmation-requests">Resend confirmation requests</button>
 	{{/if}}{{/if}}
 
 	{{! TODO: Add button to schedule reminders }}
 
-	{{#if currentUserAdmin}}{{#if resendConfirmationRequests}}{{#if isIDay request}}
+	{{#if currentUserAdmin}}{{#if resendConfirmationRequests}}{{#if isRequest request}}
 		<div class="panel panel-default resend-confirmation-requests-container">
 			<div class="panel-heading">
 				<h1 class="panel-title">Resend Confirmation Requests <button type="button" class="close" aria-label="Close" id="close-resend-confirmation-requests"><span aria-hidden="true">&times;</span></button></h1>
