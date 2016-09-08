@@ -21,9 +21,8 @@ import {
 	DAY_OFF_TYPE_NAMES,
 	USER_ROLES
 } from '../constants.js';
-import { displayDateRange, nl2br, isFellow, isFellowRequest } from '../utils.js';
+import { displayDateRange, nl2br, isFellow, isFellowRequest, article } from '../utils.js';
 
-import Noun from 'nlp_compromise/src/term/noun/noun.js';
 import map from 'lodash/map';
 import moment from 'moment';
 import 'twix';
@@ -484,7 +483,7 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 			</blockquote>`;
 	}
 	let typeName = DAY_OFF_TYPE_NAMES[request[DAY_OFF_FIELDS.TYPE]];
-	let typeArticle = new Noun(typeName).article();
+	let typeArticle = article(typeName);
 	let timeout = 0; // FIXME
 	for(let user of users){
 		try {

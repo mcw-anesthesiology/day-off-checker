@@ -66,3 +66,11 @@ export function isFellow(connection){
 export function isFellowRequest(request){
 	return request.hasOwnProperty(DAY_OFF_FIELDS.FELLOWSHIP);
 }
+
+export function article(noun){
+	const vowels = ['a', 'e', 'i', 'o', 'u'];
+	if(vowels.indexOf(noun.charAt(0).toLowerCase()) !== -1)
+		return 'an';
+	else
+		return 'a';
+}
