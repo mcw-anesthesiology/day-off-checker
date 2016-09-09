@@ -7,6 +7,8 @@ import { throwError } from 'meteor/saucecode:rollbar';
 import { Fellowships } from '../../api/fellowships.js';
 import { Locations } from '../../api/locations.js';
 
+import { displayNameByUsername } from '../../utils.js';
+
 import validator from 'email-validator';
 
 import moment from 'moment';
@@ -90,9 +92,6 @@ Template.home.helpers({
 	},
 	fieldName(field){
 		return DAY_OFF_FIELD_NAMES[field];
-	},
-	hint(){
-		return Session.get('hint');
 	}
 });
 
@@ -195,7 +194,6 @@ Template.dayOffEntry.events({
 
 		if(value){
 			Session.set(input.name, value);
-			Session.set('hint', undefined);
 		}
 	}
 });
@@ -218,6 +216,7 @@ Template.dayOffType.helpers({
 
 Template.requestorName.onRendered(function(){
 	this.$('#name').placeholder();
+	this.$('#name').focus();
 });
 
 Template.requestorName.helpers({
@@ -228,6 +227,7 @@ Template.requestorName.helpers({
 
 Template.requestorEmail.onRendered(function(){
 	this.$('#email').placeholder();
+	this.$('#email').focus();
 });
 
 Template.requestorEmail.helpers({
@@ -241,7 +241,6 @@ Template.requestedDate.onRendered(function(){
 	this.$('#daterange').daterangepicker({
 		minDate: moment().startOf('day')
 	});
-	Session.set('hint', 'Select a starting date and an ending date. If you are only missing one day, select the same day as both the starting and ending date.');
 });
 
 Template.requestedDate.helpers({
@@ -294,6 +293,7 @@ Template.requestedLocation.helpers({
 
 Template.requestReason.onRendered(function(){
 	this.$('#reason').placeholder();
+	this.$('#reason').focus();
 });
 
 Template.requestReason.helpers({
@@ -320,6 +320,10 @@ Template.submissionConfirmation.helpers({
 	},
 	chiefs(){
 		return Meteor.users.find({ role: 'chief' }, { pager: 1, name: 1 });
+	},
+	fellowshipAdminName(){
+		const username = Session.get(DAY_OFF_FIELDS.FELLOWSHIP).administrator;
+		return displayNameByUsername(username);
 	}
 });
 

@@ -27,6 +27,10 @@ Accounts.emailTemplates.resetPassword.html = (user, url) => {
 				<p>To reset your password please click the link below.</p>
 
 				<p><a href="${url}">${url}</a></p>
+
+				<p>If you have any questions or concerns please let me know at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
+
+				<p>Thank you!</p>
 			</body>
 		</html>`;
 };

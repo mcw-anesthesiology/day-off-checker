@@ -1,15 +1,23 @@
 <template name="main">
+	<header class="{{routeName}}">
+		<h1>
+{{#if isFellow}}
+			<span class="site-header-user-type">Fellow</span>
+{{else}}
+			<span class="site-header-user-type">Resident</span>
+{{/if}}
+			Day&nbsp;off reporter
+		</h1>
+	</header>
+	<main class="main {{routeName}}">
 {{#if errorAlert}}
-	<header>
 		<div class="container">
 			<div class="alert alert-danger alert-dismissable error-alert" role="alert">
 				<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 				<strong>Error:</strong> {{errorAlert}}
 			</div>
 		</div>
-	</header>
 {{/if}}
-	<main class="main">
 		{{> Template.dynamic template=main}}
 	</main>
 	<footer class="{{routeName}}">
