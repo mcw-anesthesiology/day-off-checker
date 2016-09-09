@@ -1,30 +1,22 @@
 .home {
-	padding-top: 0.5em;
-
-	@include mobile {
-		font-size: 4em;
-	}
-
-	position: relative;
-	min-height: 100vh;
-	font-size: 2em;
+	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+	font-size: 1.5em;
 	background-color: $background-color;
 
 	@include prefix(transition, "background-color 0.5s ease-in, background-image 0.5s ease-in");
 
-	&.sick,
-	&.iDay {
+	@media screen and (min-width: $on-desktop) {
+		font-size: 1.65em;
+	}
 
-		header {
+	@media screen and (min-width: $medium-desktop) {
+		font-size: 1.8em;
+	}
 
-			@media screen and (max-width: $on-desktop) {
-				display: none;
-			}
-
-			@include mobile {
-				display: none;
-			}
-		}
+	@media screen and (min-width: $large-desktop) {
+		font-size: 2em;
 	}
 
 	&.sick {
@@ -139,30 +131,13 @@
 		}
 	}
 
-	header {
-		margin-bottom: 1em;
-
-		h1 {
-			font-family: $site-header-font-family;
-			text-align: center;
-			font-size: 3em;
-
-			@media screen and (min-width: $on-desktop) {
-				font-size: 3em;
-			}
-		}
-	}
-
 	.completed-entries {
+		flex-grow: 1;
 		margin-top: 0.5em;
 		font-size: 1em;
 
 		@media screen and (min-width: $on-desktop) {
 			font-size: 1.5em;
-		}
-
-		@include mobile {
-			margin-top: 0.5em;
 		}
 
 		table {
@@ -178,16 +153,8 @@
 				animation-duration: 1s;
 				animation-name: slidein;
 
-				@include mobile {
-					display: none;
-				}
-
 				&.editable {
 					cursor: pointer;
-
-					@include mobile {
-						display: table-row;
-					}
 
 					&:hover {
 						text-decoration: underline;
@@ -204,15 +171,23 @@
 	}
 
 	.entry-form {
+		flex-grow: 3;
 		width: 100%;
-		margin-top: 2em;
-		text-align: center;
+		padding: 0 1em;
+		display: flex;
+		justify-content: center;
+		align-items: flex-start;
+		align-content: stretch;
+		flex-wrap: wrap;
 
-		@include mobile {
-			margin-top: 1em;
-		}
+		// @media screen and (min-width: $on-desktop) {
+		// 	flex-direction: row;
+		// }
 
 		.day-off-buttons {
+			display: flex;
+			justify-content: center;
+			flex-wrap: wrap;
 
 			.day-off-button {
 				margin: 0.5em;
@@ -259,11 +234,16 @@
 
 		input, select, textarea, button {
 			display: inline-block;
-			vertical-align: middle;
+			margin: 0.2em;
 		}
 
 		input, select, textarea {
-			width: 70%;
+			flex-shrink: 1;
+			max-width: 100%;
+
+			@media screen and (min-width: $small-mobile) {
+				width: 70%;
+			}
 
 			@media screen and (min-width: $medium-desktop) {
 				width: 50%;
@@ -271,10 +251,6 @@
 
 			@media screen and (min-width: $large-desktop) {
 				width: 40%;
-			}
-
-			@include mobile {
-
 			}
 		}
 
@@ -293,8 +269,11 @@
 		}
 
 		select {
-			font-size: 1em;
-			height: 2em;
+			font-size: 1.5em;
+
+			option {
+				font-size: 0.66em;
+			}
 		}
 
 		textarea {
@@ -306,81 +285,84 @@
 		}
 
 		p {
-			font-size: 1.5em;
-			margin-bottom: 1em;
-			margin-left: 1em;
-			margin-right: 1em;
+			margin: 1em;
+		}
+
+		.hint {
+			margin-top: 2em;
+		}
+
+		.request-confirmation {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
 		}
 	}
 
-	.hint {
-		margin: 4em;
-	}
+	.submission-confirmation-container {
+		flex-grow: 1;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 
-	.submission-confirmation {
-		padding-left: 1em;
-		padding-right: 1em;
+		.submission-confirmation {
+			padding-left: 1em;
+			padding-right: 1em;
 
-		@media screen and (min-width: $medium-desktop) {
-			padding-left: 2em;
-			padding-right: 2em;
-		}
+			@media screen and (min-width: $medium-desktop) {
+				padding-left: 2em;
+				padding-right: 2em;
+			}
 
-		@media screen and (min-width: $large-desktop) {
-			padding-right: 4em;
-			padding-left: 4em;
-		}
+			@media screen and (min-width: $large-desktop) {
+				padding-right: 4em;
+				padding-left: 4em;
+			}
 
-		p {
-			font-size: 1em;
-			margin-bottom: 1em;
-			margin-left: 1em;
-			margin-right: 1em;
-		}
+			p {
+				font-size: 1em;
+				margin-bottom: 1em;
+				margin-left: 1em;
+				margin-right: 1em;
+			}
 
-		.location-number {
-			text-align: center;
-			font-size: 1.25em;
-		}
+			.location-number {
+				text-align: center;
+				font-size: 1.25em;
+			}
 
-		.chief-pager-table {
-			margin-left: auto;
-			margin-right: auto;
-			margin-bottom: 1.75em;
-			font-size: 1em;
+			.chief-pager-table {
+				margin-left: auto;
+				margin-right: auto;
+				margin-bottom: 1.75em;
+				font-size: 1em;
 
-			tr {
+				tr {
 
-				th {
-					padding-right: 1em;
-				}
+					th {
+						padding-right: 1em;
+					}
 
-				td {
+					td {
 
+					}
 				}
 			}
-		}
 
-		.btn-primary {
-			font-size: 1em;
-			display: block;
-			margin-left: auto;
-			margin-right: auto;
-			margin-bottom: 1em;
+			.btn-primary {
+				font-size: 1em;
+				display: block;
+				margin-left: auto;
+				margin-right: auto;
+				margin-bottom: 1em;
+			}
 		}
 	}
 }
 
 footer.Home {
-	font-size: 2em;
-	position: absolute;
-	bottom: 20px;
-	right: 40px;
-	left: 40px;
-
-	@include mobile() {
-		font-size: 4em;
-	}
+	font-size: 1.25em;
 
 	// a {
 	//

@@ -1,13 +1,31 @@
 body {
 	background-color: $background-color;
-    // font: $base-font-weight #{$base-font-size}/#{$base-line-height} $base-font-family;
     color: $text-color;
     background-color: $background-color;
+	font-size: initial !important;
+	font-family: $base-font-family;
+	margin: 0;
+	padding: 0;
+}
+
+html {
+	font-size: initial !important;
+	margin: 0;
+	padding: 0;
+}
+
+main {
+	margin: 0;
+	padding: 0;
 }
 
 h1, h2, h3, h4, h5, h6 {
 	font-family: $heading-font-family;
 	color: $heading-text-color;
+}
+
+.btn {
+	font-family: $button-font-family;
 }
 
 .btn.btn-primary {

@@ -1,13 +1,10 @@
 @import "../imports/ui/sass/colors";
-@import url(https://fonts.googleapis.com/css?family=Roboto);
-@import url(https://fonts.googleapis.com/css?family=Raleway);
-@import url(https://fonts.googleapis.com/css?family=Nunito);
+@import url(//fonts.googleapis.com/css?family=Open+Sans|Oxygen|Nunito|Roboto);
 
-$base-font-family: Helvetica, Arial, sans-serif;
-$heading-font-family: "Roboto", Helvetica, Arial, sans-serif;
-$button-font-family: "Raleway", "Roboto", Helvetica, Arial, sans-serif;
-$site-header-font-family: "Nunito", "Roboto", "Raleway", Helvetica, Arial, sans-serif;
-$base-font-size: 16px;
+$base-font-family: "Open Sans", sans-serif;
+$heading-font-family: "Oxygen", sans-serif;
+$button-font-family: "Roboto", sans-serif;
+$site-header-font-family: "Nunito",  sans-serif;
 $base-font-weight: 400;
 $base-line-height: 1.5;
 
@@ -17,6 +14,7 @@ $text-color: #333;
 $heading-text-color: $md-grey-800;
 $background-color: #fff;
 $background-color-darker: $md-blue-grey-100;
+$heading-background-color: #fff;
 
 $input-border-color: $md-blue-grey-700;
 $button-background-color: $md-blue-grey-500;
@@ -61,6 +59,7 @@ $chief-border-color: $md-lime-900;
 $fellowship-coordinator-border-color: $md-deep-purple-900;
 $fellowship-admin-border-color: $md-purple-900;
 
+$small-mobile: 480px;
 $on-desktop: 768px;
 $medium-desktop: 992px;
 $large-desktop: 1200px;

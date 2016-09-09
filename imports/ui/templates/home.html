@@ -1,8 +1,5 @@
 <template name="home">
-	<section class="home {{dayOffType}}">
-		<header>
-			<h1>Day off reporter</h1>
-		</header>
+	<section class="home {{dayOffType}} {{#if isFellow}}fellow{{else}}resident{{/if}}">
 
 {{#if editable}}
 		<section class="completed-entries">
@@ -19,10 +16,6 @@
 		</section>
 
 		{{>dayOffEntry}}
-		{{!-- TODO: Display hints --}}
-	{{#if hint}}
-		<p class="hint">{{hint}}</p>
-	{{/if}}
 {{else}}
 		{{>submissionConfirmation}}
 {{/if}}
@@ -60,6 +53,12 @@
 <template name="requestedDate">
 	<input type="text" name="requestedDate" id="daterange" placeholder="MM/DD/YYYY - MM/DD/YYYY" value="{{oldValue}}" autocomplete="off" required />
 	<button type="submit" class="btn btn-lg btn-primary">Next</button>
+
+	<p class="hint">
+		Select a starting date and an ending date.
+		If you are only missing one day, select the same day as both the
+		starting and ending date.
+	</p>
 </template>
 
 <template name="requestedFellowship">
@@ -83,45 +82,55 @@
 </template>
 
 <template name="requestReason">
-	<textarea class="form-control" name="requestReason" id="reason" placeholder="Reason (optional)"  autocomplete="off">{{oldValue}}</textarea>
+	<textarea class="form-control" name="requestReason" id="reason" placeholder="Reason (optional)" autocomplete="off">{{oldValue}}</textarea>
 	<button type="submit" class="btn btn-lg btn-primary">Next</button>
 </template>
 
 <template name="requestConfirmation">
-	<input type="hidden" name="requestConfirmation" value="confirmed" />
-	<p>
-		Does everything look right? Click an entry to change it.
-	</p>
-	<button type="submit" class="btn btn-lg btn-primary">Submit request</button>
+	<div class="request-confirmation">
+		<input type="hidden" name="requestConfirmation" value="confirmed" />
+		<p>
+			Does everything look right? Click an entry to change it.
+		</p>
+		<button type="submit" class="btn btn-lg btn-primary">Submit request</button>
+	</div>
 </template>
 
 <template name="submissionConfirmation">
-	<div class="submission-confirmation">
+	<div class="submission-confirmation-container">
+		<div class="submission-confirmation">
 {{#if sickDay}}
-		<p>
-			Please notify your rotation site charge faculty
-			and the faculty you are assigned directly as soon as possible
-			using the following number.
-		</p>
-		<p class="location-number">
-			{{location}}: {{number}}
-		</p>
-		<p>
-			If you are on call, notify both chief residents via pager as soon as possible.
-		</p>
-		<table class="chief-pager-table">
-	{{#each chief in chiefs}}
-			<tr>
-				<th>{{chief.name}}</th>
-				<td>{{chief.pager}}</td>
-			</tr>
-	{{/each}}
-		</table>
+			<p>
+				Please notify your rotation site charge faculty
+				and the faculty you are assigned directly as soon as possible
+				using the following number.
+			</p>
+			<p class="location-number">
+				{{location}}: {{number}}
+			</p>
+	{{#if isFellow}}
+			<p>
+				If you are on call, please notify {{fellowshipAdminName}} via text message as soon as possible.
+			</p>
+	{{else}}
+			<p>
+				If you are on call, notify both chief residents via pager as soon as possible.
+			</p>
+			<table class="chief-pager-table">
+		{{#each chief in chiefs}}
+				<tr>
+					<th>{{chief.name}}</th>
+					<td>{{chief.pager}}</td>
+				</tr>
+		{{/each}}
+			</table>
+	{{/if}}
 {{else}}
-		<p>
-			Approval requests have been sent. You will be notified of their responses.
-		</p>
+			<p>
+				Approval requests have been sent. You will be notified of their responses.
+			</p>
 {{/if}}
-		<button type="button" class="btn btn-lg btn-primary" id="restart">Restart</button>
+			<button type="button" class="btn btn-lg btn-primary" id="restart">Restart</button>
+		</div>
 	</div>
 </template>
