@@ -11,7 +11,7 @@ import 'twix';
 
 import {
 	ADMIN_EMAIL_ADDRESS,
-	DAYS_BEFORE_I_DAY_TO_SEND_REMINDER,
+	DAYS_BEFORE_REQUEST_TO_SEND_REMINDER,
 	DAY_OFF_FIELDS,
 	DAY_OFF_TYPES,
 	DAY_OFF_TYPE_NAMES
@@ -227,7 +227,7 @@ Template.requestDetails.helpers({
 	},
 	reminderCanBeScheduled(request){
 		return (request.requestedDate[0] > moment()
-				.add(DAYS_BEFORE_I_DAY_TO_SEND_REMINDER, 'days')
+				.add(DAYS_BEFORE_REQUEST_TO_SEND_REMINDER, 'days')
 			&& request.status === 'approved');
 	},
 	statusLabelType(status){
@@ -348,7 +348,7 @@ Template.requestDetails.events({
 		const request = DayOffRequests.findOne({ _id: requestId });
 		const user = Meteor.users.findOne({ username: username });
 
-		let remindTime = moment(request.requestedDate[0]).subtract(DAYS_BEFORE_I_DAY_TO_SEND_REMINDER, 'days').startOf('day');
+		let remindTime = moment(request.requestedDate[0]).subtract(DAYS_BEFORE_REQUEST_TO_SEND_REMINDER, 'days').startOf('day');
 
 		Meteor.call('reminderEmails.scheduleReminder', request, user, remindTime.toDate(), (err) => {
 			if(err){

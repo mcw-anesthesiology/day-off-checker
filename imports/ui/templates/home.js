@@ -23,7 +23,8 @@ import {
 	RESIDENT_DAY_OFF_TYPES,
 	FELLOW_DAY_OFF_TYPES,
 	DAY_OFF_FIELDS,
-	DAY_OFF_FIELD_NAMES
+	DAY_OFF_FIELD_NAMES,
+	ISO_DATE_FORMAT
 } from '../../constants.js';
 import { isFellow } from '../../utils.js';
 
@@ -128,14 +129,14 @@ Template.dayOffEntry.events({
 		const allowedTypes = isFellow() ? FELLOW_DAY_OFF_TYPES : RESIDENT_DAY_OFF_TYPES;
 
 		if(allowedTypes.indexOf(button.value) !== -1){
-			Session.set('dayOffType', button.value);
+			Session.set(DAY_OFF_FIELDS.TYPE, button.value);
 		}
 	},
-	'submit .entry-form'(event) {
+	'submit .entry-form'(event, instance) {
 		event.preventDefault();
 
 		const form = event.target;
-		const input = $(form).find('input, select, textarea')[0];
+		const input = $(form).find('input[type="hidden"], input:visible, select, textarea')[0];
 
 		let value;
 		switch(input.name){
@@ -160,9 +161,30 @@ Template.dayOffEntry.events({
 					Session.set('errorAlert', 'Email address seems wrong. Please make sure to enter a valid email address.');
 				break;
 			case DAY_OFF_FIELDS.DATE: {
-				let dates = input.value.split(' - ');
-				let startDate = moment(dates[0], 'MM/DD/YYYY');
-				let endDate = moment(dates[1], 'MM/DD/YYYY');
+				let isRange = instance.$('#multiple-days').prop('checked');
+				let startDate, endDate;
+				if(instance.$(input).data('endDateElement')){
+					startDate = moment(input.value, 'YYYY-MM-DD');
+
+					if(isRange){
+						let endInput = instance.$(instance.$(input).data('endDateElement'))[0];
+						endDate = moment(endInput.value, 'YYYY-MM-DD');
+					}
+					else {
+						endDate = moment(startDate);
+					}
+				}
+				else {
+					if(isRange){
+						let dates = input.value.split(' - ');
+						startDate = moment(dates[0], 'MM/DD/YYYY');
+						endDate = moment(dates[1], 'MM/DD/YYYY');
+					}
+					else {
+						startDate = moment(input.value, 'MM/DD/YYYY');
+						endDate = moment(startDate);
+					}
+				}
 				let range = startDate.twix(endDate, true);
 				if(!range.isValid())
 					Session.set('errorAlert', 'Invalid date range. Please select first the beginning date and then the ending date.');
@@ -221,7 +243,7 @@ Template.requestorName.onRendered(function(){
 
 Template.requestorName.helpers({
 	oldValue(){
-		return Session.get('old_requestorName');
+		return Session.get(`old_${DAY_OFF_FIELDS.NAME}`);
 	}
 });
 
@@ -232,24 +254,85 @@ Template.requestorEmail.onRendered(function(){
 
 Template.requestorEmail.helpers({
 	oldValue(){
-		return Session.get('old_requestorEmail');
+		return Session.get(`old_${DAY_OFF_FIELDS.EMAIL}`);
 	}
 });
 
 Template.requestedDate.onRendered(function(){
 	this.$('#daterange').placeholder();
-	this.$('#daterange').daterangepicker({
-		minDate: moment().startOf('day')
-	});
+
+	if(Session.get('isRange'))
+		this.$('#daterange').daterangepicker({
+			minDate: moment().startOf('day')
+		});
+	else
+		this.$('#daterange').daterangepicker({
+			singleDatePicker: true,
+			minDate: moment().startOf('day')
+		});
 });
 
 Template.requestedDate.helpers({
+	isRange(){
+		return Session.get('isRange');
+	},
 	oldValue(){
-		if(Session.get('old_requestedDate')){
-			const dates = Session.get('old_requestedDate');
+		if(Session.get(`old_${DAY_OFF_FIELDS.DATE}`)){
+			const dates = Session.get(`old_${DAY_OFF_FIELDS.DATE}`);
 			let range = moment(dates[0]).twix(dates[1], true);
 			return range.simpleFormat('MM/DD/YYYY');
 		}
+	},
+	oldStartValue(){
+		if(Session.get(`old_${DAY_OFF_FIELDS.DATE}`)){
+			const dates = Session.get(`old_${DAY_OFF_FIELDS.DATE}`);
+			let startDate = moment(dates[0]);
+			return startDate.format(ISO_DATE_FORMAT);
+		}
+	},
+	oldEndValue(){
+		if(Session.get(`old_${DAY_OFF_FIELDS.DATE}`)){
+			const dates = Session.get(`old_${DAY_OFF_FIELDS.DATE}`);
+			let startDate = moment(dates[1]);
+			return startDate.format(ISO_DATE_FORMAT);
+		}
+	},
+	oldMultiple(){
+		if(Session.get('isRange'))
+			return 'checked';
+	},
+	today(){
+		return moment().format(ISO_DATE_FORMAT);
+	},
+	startDate(){
+		let startDate = Session.get('startDate');
+		if(!startDate)
+			return moment().format(ISO_DATE_FORMAT);
+
+		return startDate;
+	}
+});
+
+Template.requestedDate.events({
+	'change #multiple-days'(event, instance){
+		let checkbox = event.target;
+		Session.set('isRange', checkbox.checked);
+		if(checkbox.checked){
+			instance.$('#daterange').daterangepicker({
+				minDate: moment().startOf('day')
+			});
+			instance.$('label[for="start-date"]').text('Start date');
+		}
+		else {
+			instance.$('#daterange').daterangepicker({
+				singleDatePicker: true,
+				minDate: moment().startOf('day')
+			});
+			instance.$('label[for="start-date"]').text('Date');
+		}
+	},
+	'input #start-date'(event){
+		Session.set('startDate', event.target.value);
 	}
 });
 
@@ -262,13 +345,9 @@ Template.requestedFellowship.helpers({
 		return Fellowships.find({}, { sort: { name: 1 } });
 	},
 	oldValueSelected(fellowship){
-		try{
-			if(Session.get('old_requestedFellowship')._id === fellowship._id)
-				return 'selected';
-		}
-		catch(e){
-			console.log(e);
-		}
+		const oldFellowship = Session.get(`old_${DAY_OFF_FIELDS.FELLOWSHIP}`);
+		if(oldFellowship && oldFellowship._id === fellowship._id)
+			return 'selected';
 	}
 });
 
@@ -281,13 +360,9 @@ Template.requestedLocation.helpers({
 		return Locations.find({}, { sort: { name: 1 } });
 	},
 	oldValueSelected(location){
-		try{
-			if(Session.get('old_requestedLocation')._id === location._id)
-				return 'selected';
-		}
-		catch(e){
-			console.log(e);
-		}
+		const oldLocation = Session.get(`old_${DAY_OFF_FIELDS.LOCATION}`);
+		if(oldLocation && oldLocation._id === location._id)
+			return 'selected';
 	}
 });
 
@@ -298,7 +373,7 @@ Template.requestReason.onRendered(function(){
 
 Template.requestReason.helpers({
 	oldValue(){
-		let oldReason = Session.get('old_requestReason');
+		let oldReason = Session.get(`old_${DAY_OFF_FIELDS.REASON}`);
 		if(oldReason !== '(None)')
 			return oldReason;
 	}
@@ -310,13 +385,13 @@ Template.submissionConfirmation.onCreated(function(){
 
 Template.submissionConfirmation.helpers({
 	sickDay(){
-		return Session.get('dayOffType') === 'sick';
+		return Session.get(DAY_OFF_FIELDS.TYPE) === 'sick';
 	},
 	location(){
-		return Session.get('requestedLocation').name;
+		return Session.get(DAY_OFF_FIELDS.LOCATION).name;
 	},
 	number(){
-		return Session.get('requestedLocation').number;
+		return Session.get(DAY_OFF_FIELDS.LOCATION).number;
 	},
 	chiefs(){
 		return Meteor.users.find({ role: 'chief' }, { pager: 1, name: 1 });

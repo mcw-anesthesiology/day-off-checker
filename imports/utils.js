@@ -74,3 +74,7 @@ export function article(noun){
 	else
 		return 'a';
 }
+
+// export function userTypeUrl(type){
+// 	if(type.toLower)
+// }

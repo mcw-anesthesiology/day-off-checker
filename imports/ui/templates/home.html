@@ -51,14 +51,22 @@
 </template>
 
 <template name="requestedDate">
-	<input type="text" name="requestedDate" id="daterange" placeholder="MM/DD/YYYY - MM/DD/YYYY" value="{{oldValue}}" autocomplete="off" required />
+	<div class="on-desktop">
+		<input type="text" name="requestedDate" id="daterange" placeholder="MM/DD/YYYY - MM/DD/YYYY" value="{{oldValue}}" autocomplete="off" />
+	</div>
+	<div class="on-mobile">
+		<label for="start-date">Date</label>
+		<input type="date" name="requestedDate" id="start-date" data-end-date-element="#end-date" min="{{today}}" value="{{oldStartValue}}" placeholder="YYYY-MM-DD" autocomplete="off" />
+{{#if isRange}}
+		<label for="end-date">End date</label>
+		<input type="date" name="requestedEndDate" id="end-date" placeholder="YYYY-MM-DD" value="{{oldEndValue}}" min="{{startDate}}" autocomplete="off" />
+{{/if}}
+	</div>
+	<label id="multiple-days-label">
+		Multiple days?
+		<input type="checkbox" name="multiple-days" id="multiple-days" {{oldMultiple}} />
+	</label>
 	<button type="submit" class="btn btn-lg btn-primary">Next</button>
-
-	<p class="hint">
-		Select a starting date and an ending date.
-		If you are only missing one day, select the same day as both the
-		starting and ending date.
-	</p>
 </template>
 
 <template name="requestedFellowship">
