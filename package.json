@@ -12,7 +12,6 @@
     "mup-logs-production": "cd .mup/production/ && mup logs"
   },
   "dependencies": {
-    "bcrypt": "^0.8.7",
     "bootstrap-daterangepicker": "^2.1.19",
     "email-validator": "^1.0.4",
     "jquery": "<3.0.0",
