@@ -28,6 +28,10 @@ h1, h2, h3, h4, h5, h6 {
 	font-family: $button-font-family;
 }
 
+.btn-lg {
+	border-radius: 2px;
+}
+
 .btn.btn-primary {
 	background-color: $button-background-color;
 

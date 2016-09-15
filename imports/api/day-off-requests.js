@@ -13,7 +13,7 @@ import { scheduleReminder } from '../api/reminder-emails.js';
 import {
 	APP_NOTIFICATION_EMAIL_ADDRESS,
 	ADMIN_EMAIL_ADDRESS,
-	DAYS_BEFORE_I_DAY_TO_SEND_REMINDER,
+	DAYS_BEFORE_REQUEST_TO_SEND_REMINDER,
 	DAY_OFF_FIELDS,
 	DAY_OFF_TYPES,
 	RESIDENT_DAY_OFF_TYPES,
@@ -739,7 +739,7 @@ function sendRequestApprovalNotifications(request){
 			}, timeout);
 
 			if(user.role === 'location_admin'){
-				let remindTime = moment(request.requestedDate[0]).subtract(DAYS_BEFORE_I_DAY_TO_SEND_REMINDER, 'days').startOf('day');
+				let remindTime = moment(request.requestedDate[0]).subtract(DAYS_BEFORE_REQUEST_TO_SEND_REMINDER, 'days').startOf('day');
 				if(moment() < moment(remindTime).subtract(1, 'day'))
 					scheduleReminder(request, user, remindTime.toDate());
 			}

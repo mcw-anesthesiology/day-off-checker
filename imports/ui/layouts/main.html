@@ -1,11 +1,10 @@
 <template name="main">
-	<header class="{{routeName}}">
+	<header class="{{routeName}} {{#if fieldEntries}} field-entries {{/if}}">
 		<h1>
-{{#if isFellow}}
-			<span class="site-header-user-type">Fellow</span>
-{{else}}
-			<span class="site-header-user-type">Resident</span>
-{{/if}}
+			<select id="site-header-user-type">
+				<option value="resident">Resident</option>
+				<option value="fellow" {{isFellowSelected}}>Fellow</option>
+			</select>
 			Day&nbsp;off reporter
 		</h1>
 	</header>
