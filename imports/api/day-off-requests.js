@@ -78,8 +78,6 @@ Meteor.methods({
 		const locations = Locations.find({}).fetch();
 		const locationAdmins = Meteor.users.find({ role: 'location_admin' }).fetch();
 
-		console.log(this.connection.httpHeaders);
-
 		let schema = {
 			dayOffType: {
 				type: String,

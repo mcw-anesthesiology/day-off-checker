@@ -87,6 +87,16 @@ body {
 			@media screen and (min-width: $on-desktop) {
 				font-size: 3em;
 			}
+
+			a {
+
+				&,
+				&:hover,
+				&:active,
+				&:focus {
+					color: inherit;
+				}
+			}
 		}
 	}
 
