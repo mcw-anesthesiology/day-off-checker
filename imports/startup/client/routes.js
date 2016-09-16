@@ -20,11 +20,27 @@ FlowRouter.route('/', {
 	}
 });
 
+FlowRouter.route('/requests', {
+	name: 'Requests',
+	triggersEnter: [AccountsTemplates.ensureSignedIn],
+	action(){
+		BlazeLayout.render('main', { main: 'requests' });
+	}
+});
+
 FlowRouter.route('/list', {
 	name: 'List',
 	triggersEnter: [AccountsTemplates.ensureSignedIn],
 	action(){
 		BlazeLayout.render('main', { main: 'requestsList' });
+	}
+});
+
+FlowRouter.route('/calendar', {
+	name: 'Calendar',
+	triggersEnter: [AccountsTemplates.ensureSignedIn],
+	action(){
+		BlazeLayout.render('main', { main: 'calendar' });
 	}
 });
 

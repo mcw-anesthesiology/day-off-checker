@@ -51,6 +51,25 @@ export const DAY_OFF_TYPE_NAMES = {
 	[DAY_OFF_TYPES.VACATION]: 'Vacation'
 };
 
+export const DAY_OFF_TYPE_COLORS = {
+	[DAY_OFF_TYPES.SICK]: {
+		background: '#4fc3f7',
+		border: '#039be5'
+	},
+	[DAY_OFF_TYPES.I_DAY]: {
+		background: '#aed581',
+		border: '#7cb342'
+	},
+	[DAY_OFF_TYPES.MEETING]: {
+		background: '#9575cd',
+		border: '#5e35b1'
+	},
+	[DAY_OFF_TYPES.VACATION]: {
+		background: '#ffb74d',
+		border: '#fb8c00'
+	}
+};
+
 export const RESIDENT_DAY_OFF_TYPES = [
 	DAY_OFF_TYPES.SICK,
 	DAY_OFF_TYPES.I_DAY

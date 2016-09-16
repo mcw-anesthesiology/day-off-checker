@@ -1,0 +1,78 @@
+.event-details {
+
+	.close-details-button {
+		display: block;
+		margin: auto;
+	}
+}
+
+.calendar-utils {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+}
+
+#calendar {
+	margin: 2em 0;
+
+	.fc-event-container .fc-content,
+	.fc-list-item {
+		cursor: pointer;
+	}
+}
+
+#legend {
+	background-color: $md-blue-grey-400;
+	border: 1px solid $md-blue-grey-700;
+	padding: 0.5em;
+
+	tr {
+
+		&:first-child {
+
+			th,
+			td {
+				padding-top: 1em;
+			}
+		}
+
+		&:last-child {
+
+			th,
+			td {
+				padding-bottom: 1em;
+			}
+		}
+	}
+
+	th,
+	td {
+		padding: 0.15em 1em;
+	}
+
+	.legend-type {
+		display: inline-block;
+		width: 1em;
+		height: 1em;
+
+		&.sick {
+			background-color: $sick-day-button-color;
+			border: 1px solid $sick-day-button-border-color;
+		}
+
+		&.iDay {
+			background-color: $i-day-button-color;
+			border: 1px solid $i-day-button-border-color;
+		}
+
+		&.meeting {
+			background-color: $meeting-button-color;
+			border: 1px solid $meeting-button-border-color;
+		}
+
+		&.vacation {
+			background-color: $vacation-button-color;
+			border: 1px solid $vacation-button-border-color;
+		}
+	}
+}
