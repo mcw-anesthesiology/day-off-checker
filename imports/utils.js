@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Email } from 'meteor/email';
+import { FlowRouter } from 'meteor/kadira:flow-router';
 
 import moment from 'moment';
 import 'twix';
@@ -75,6 +76,12 @@ export function article(noun){
 		return 'a';
 }
 
-// export function userTypeUrl(type){
-// 	if(type.toLower)
-// }
+export function userTypeUrl(type){
+	FlowRouter.watchPathChange();
+	if(type.toLowerCase() === 'fellow')
+		return '//fellow.' + document.location.host
+			+ FlowRouter.current().path;
+
+	return '//' + document.location.host.substring(document.location.host.indexOf('.') + 1)
+		+ FlowRouter.current().path;
+}

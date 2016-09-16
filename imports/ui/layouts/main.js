@@ -1,9 +1,8 @@
 import { Meteor } from 'meteor/meteor';
-import { FlowRouter } from 'meteor/kadira:flow-router';
 import { AccountsTemplates } from 'meteor/useraccounts:core';
 
 import { DAY_OFF_FIELDS } from '../../constants.js';
-import { isFellow } from '../../utils.js';
+import { isFellow, userTypeUrl } from '../../utils.js';
 
 import './main.html';
 
@@ -20,13 +19,10 @@ Template.main.helpers({
 		return Session.get('errorAlert');
 	},
 	residentUrl(){
-		FlowRouter.watchPathChange();
-		return document.location.host.substring(document.location.host.indexOf('.') + 1)
-			+ FlowRouter.current().path;
+		return userTypeUrl('resident');
 	},
 	fellowUrl(){
-		FlowRouter.watchPathChange();
-		return 'fellow.' + document.location.host + FlowRouter.current().path;
+		return userTypeUrl('fellow');
 	},
 	fieldEntries(){
 		let fields = Object.values(DAY_OFF_FIELDS).filter(field => {
@@ -54,6 +50,6 @@ Template.main.events({
 		AccountsTemplates.logout();
 	},
 	'change #site-header-user-type'(event){
-		
+		window.location = userTypeUrl(event.target.value);
 	}
 });

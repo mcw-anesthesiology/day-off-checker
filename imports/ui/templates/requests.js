@@ -122,7 +122,7 @@ Template.requestsList.helpers({
 				{ key: DAY_OFF_FIELDS.TYPE, label: 'Request Type', fn: displayTypeName },
 				{ key: 'requestorName', label: 'Name', sortOrder: 2, sortDirection: 'asc' },
 				{ key: 'requestedLocation.name', label: 'Location' },
-				{ key: 'requestedDate', label: 'I-Days', fn: displaySortableDateRange, sortOrder: 0, sortDirection: 'desc' },
+				{ key: 'requestedDate', label: 'Dates', fn: displaySortableDateRange, sortOrder: 0, sortDirection: 'desc' },
 				{ key: 'requestTime', label: 'Requested', fn: displaySortableDate, sortOrder: 1, sortDirection: 'desc' },
 				{ key: 'requestReason', label: 'Reason' },
 				{ key: 'status', label: 'Status', fn: capitalizeFirstLetter },
