@@ -1,0 +1,23 @@
+<template name="calendar">
+{{#if eventDetails}}
+	<section class="event-details container">
+		{{>requestDetails request=eventDetails}}
+		<button type="button" class="close-details-button btn btn-default" id="close-event-details">Close details</button>
+	</section>
+{{/if}}
+
+	<div class="calendar-container container">
+		<section id="calendar"></section>
+	</div>
+
+	<section class="calendar-utils container">
+		<table id="legend">
+{{#each dayOffType in dayOffTypes}}
+			<tr>
+				<th>{{dayOffTypeNames dayOffType}}</th>
+				<td><span class="legend-type {{dayOffType}}"></span></td>
+			</tr>
+{{/each}}
+		</table>
+	</section>
+</template>
