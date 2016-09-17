@@ -1,0 +1,179 @@
+.requests-list {
+	position: relative;
+
+	header {
+
+		h1 {
+
+		}
+		margin-top: 2em;
+		margin-bottom: 2em;
+	}
+
+	h2 {
+		margin-bottom: 1em;
+	}
+
+	table {
+		width: 100%;
+		margin-bottom: 2em;
+
+		& + .reactive-table-navigation {
+			margin-bottom: 4em;
+		}
+	}
+
+	.reactive-table {
+
+		tbody {
+
+			tr {
+				cursor: pointer;
+
+				.request-needs-response-icon {
+					display: inline-block;
+					height: 0.7em;
+					width: 0.7em;
+					border-radius: 50%;
+					background-color: $md-blue-500;
+				}
+			}
+		}
+	}
+
+	.close-details-button {
+		display: block;
+		margin: 1em auto;
+	}
+
+	footer {
+		position: absolute;
+		bottom: 20px;
+		right: 40px;
+
+		a {
+
+			& + a {
+				margin-left: 1em;
+			}
+		}
+	}
+}
+
+.request-details {
+
+	h1 {
+
+		span.label {
+			display: inline-block;
+		}
+
+		span.request-type {
+
+			&.sick {
+				background-color: $sick-day-button-color;
+				border: 1px solid $sick-day-button-border-color;
+			}
+
+			&.iDay {
+				background-color: $i-day-button-color;
+				border: 1px solid $i-day-button-border-color;
+			}
+
+			&.meeting {
+				background-color: $meeting-button-color;
+				border: 1px solid $meeting-button-border-color;
+			}
+
+			&.vacation {
+				background-color: $vacation-button-color;
+				border: 1px solid $vacation-button-border-color;
+			}
+		}
+	}
+
+	.request-details-main {
+		position: relative;
+
+		.date-location-container {
+			font-size: 2em;
+			margin-top: 2em;
+			margin-bottom: 2em;
+		}
+
+		.request-reason {
+			font-size: 1.5em;
+			margin-top: 2em;
+			margin-bottom: 2em;
+		}
+
+		.id-time-container {
+			font-size: 1.1em;
+			margin-top: 2em;
+			margin-bottom: 2em;
+		}
+	}
+
+	.request-details-aside {
+
+		.request-status {
+			font-size: 2em;
+
+			.label {
+				display: block;
+				margin: 1em auto;
+			}
+		}
+
+		.panel {
+
+			.panel-body {
+
+				.label {
+					display: block;
+					margin-left: auto;
+					margin-right: auto;
+					white-space: normal;
+				}
+
+				p {
+					margin-top: 1em;
+					margin-bottom: 1em;
+				}
+			}
+		}
+	}
+
+	.request-response-container {
+		background-color: $md-grey-300;
+		border-color: $md-grey-400;
+
+		form {
+
+			&#confirmation-request-note-edit-form {
+				margin-top: 2em;
+			}
+
+			button {
+				display: block;
+				margin: 1em auto 0px;
+			}
+		}
+	}
+
+	.resend-confirmation-requests-container {
+		margin-top: 1em;
+	}
+}
+
+.single-request {
+
+	header {
+		margin-top: 2em;
+		margin-bottom: 2em;
+	}
+
+	.request-details {
+		margin-bottom: 2em;
+	}
+}

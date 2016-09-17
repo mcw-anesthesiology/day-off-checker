@@ -59,10 +59,13 @@ $chief-border-color: $md-lime-900;
 $fellowship-coordinator-border-color: $md-deep-purple-900;
 $fellowship-admin-border-color: $md-purple-900;
 
-$small-mobile: 480px;
+$medium-mobile: 480px;
 $on-desktop: 768px;
 $medium-desktop: 992px;
 $large-desktop: 1200px;
+
+$inactive-opacity: 0.54;
+$active-opacity: 1;
 
 @mixin flex {
 	display: -webkit-flex;
