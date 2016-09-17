@@ -1,179 +1,56 @@
-.requests-list {
-	position: relative;
+main.Requests {
 
-	header {
+	.nav-container {
 
-		h1 {
-
+		@media screen and (max-width: $on-desktop) {
+			margin: 0;
 		}
-		margin-top: 2em;
-		margin-bottom: 2em;
 	}
 
-	h2 {
-		margin-bottom: 1em;
-	}
-
-	table {
+	nav {
 		width: 100%;
-		margin-bottom: 2em;
+		margin: 0;
+		border-bottom: 2px solid $button-background-color;
 
-		& + .reactive-table-navigation {
-			margin-bottom: 4em;
-		}
-	}
+		a.view-link {
+			margin-bottom: -2px;
+			margin-right: 1em;
+			font-family: $button-font-family;
+			border: 2px solid $button-background-color;
+			border-radius: 4px 4px 0 0;
+			background: transparent;
+			color: $input-border-color;
+			opacity: $inactive-opacity;
 
-	.reactive-table {
-
-		tbody {
-
-			tr {
-				cursor: pointer;
-
-				.request-needs-response-icon {
-					display: inline-block;
-					height: 0.7em;
-					width: 0.7em;
-					border-radius: 50%;
-					background-color: $md-blue-500;
-				}
-			}
-		}
-	}
-
-	.close-details-button {
-		display: block;
-		margin: 1em auto;
-	}
-
-	footer {
-		position: absolute;
-		bottom: 20px;
-		right: 40px;
-
-		a {
-
-			& + a {
-				margin-left: 1em;
-			}
-		}
-	}
-}
-
-.request-details {
-
-	h1 {
-
-		span.label {
-			display: inline-block;
-		}
-
-		span.request-type {
-
-			&.sick {
-				background-color: $sick-day-button-color;
-				border: 1px solid $sick-day-button-border-color;
+			&:hover {
+				color: $button-text-color;
+				border-color: $input-border-color;
+				background-color: $button-background-hover-color;
+				opacity: $active-opacity;
 			}
 
-			&.iDay {
-				background-color: $i-day-button-color;
-				border: 1px solid $i-day-button-border-color;
+			&.active {
+				pointer-events: none;
+				color: $input-border-color;
+				border-color: $button-background-color;
+				background: transparent;
+				opacity: $active-opacity;
+				border-bottom: 2px solid $background-color;
 			}
 
-			&.meeting {
-				background-color: $meeting-button-color;
-				border: 1px solid $meeting-button-border-color;
+			font-size: 1em;
+
+			@media screen and (min-width: $medium-mobile) {
+				font-size: 1.25em;
 			}
 
-			&.vacation {
-				background-color: $vacation-button-color;
-				border: 1px solid $vacation-button-border-color;
-			}
-		}
-	}
-
-	.request-details-main {
-		position: relative;
-
-		.date-location-container {
-			font-size: 2em;
-			margin-top: 2em;
-			margin-bottom: 2em;
-		}
-
-		.request-reason {
-			font-size: 1.5em;
-			margin-top: 2em;
-			margin-bottom: 2em;
-		}
-
-		.id-time-container {
-			font-size: 1.1em;
-			margin-top: 2em;
-			margin-bottom: 2em;
-		}
-	}
-
-	.request-details-aside {
-
-		.request-status {
-			font-size: 2em;
-
-			.label {
-				display: block;
-				margin: 1em auto;
-			}
-		}
-
-		.panel {
-
-			.panel-body {
-
-				.label {
-					display: block;
-					margin-left: auto;
-					margin-right: auto;
-					white-space: normal;
-				}
-
-				p {
-					margin-top: 1em;
-					margin-bottom: 1em;
-				}
-			}
-		}
-	}
-
-	.request-response-container {
-		background-color: $md-grey-300;
-		border-color: $md-grey-400;
-
-		form {
-
-			&#confirmation-request-note-edit-form {
-				margin-top: 2em;
+			@media screen and (min-width: $medium-desktop) {
+				font-size: 1.5em;
 			}
 
-			button {
-				display: block;
-				margin: 1em auto 0px;
+			@media screen and (min-width: $large-desktop) {
+				font-size: 2em;
 			}
 		}
-	}
-
-	.resend-confirmation-requests-container {
-		margin-top: 1em;
-	}
-}
-
-.single-request {
-
-	header {
-		margin-top: 2em;
-		margin-bottom: 2em;
-	}
-
-	.request-details {
-		margin-bottom: 2em;
 	}
 }

@@ -23,12 +23,12 @@ body {
 			&.field-entries {
 				font-size: 0.75em;
 
-				@media screen and (min-width: $small-mobile) {
+				@media screen and (min-width: $medium-mobile) {
 					padding: 0.85em;
 				}
 			}
 
-			@media screen and (min-width: $small-mobile) {
+			@media screen and (min-width: $medium-mobile) {
 				padding: 1em;
 			}
 
