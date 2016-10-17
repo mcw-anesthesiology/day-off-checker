@@ -1,6 +1,8 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { Session } from 'meteor/session';
+import { ReactiveDict } from 'meteor/reactive-dict';
+import { Spacebars } from 'meteor/spacebars';
 
 import { throwError } from 'meteor/saucecode:rollbar';
 
@@ -24,14 +26,18 @@ import {
 	FELLOW_DAY_OFF_TYPES,
 	DAY_OFF_FIELDS,
 	DAY_OFF_FIELD_NAMES,
+	DAY_OFF_TYPES,
 	ISO_DATE_FORMAT
 } from '../../constants.js';
-import { isFellow } from '../../utils.js';
+import { isFellow, capitalizeFirstLetter, camelCaseToWords } from '../../utils.js';
 
 import './home.html';
 
 let fields = Object.values(DAY_OFF_FIELDS).filter(field => {
-	if(field === DAY_OFF_FIELDS.FELLOWSHIP){
+	if([
+		DAY_OFF_FIELDS.FELLOWSHIP,
+		DAY_OFF_FIELDS.ADDITIONAL_FELLOWSHIP_INFO
+	].includes(field)){
 		return isFellow();
 	}
 
@@ -86,6 +92,19 @@ Template.home.helpers({
 					return moment(field[0]).twix(field[1], true).format();
 				case DAY_OFF_FIELDS.REASON:
 					return field;
+				case DAY_OFF_FIELDS.ADDITIONAL_FELLOWSHIP_INFO: {
+					let fieldValue = '';
+					for(let name of Object.keys(field)){
+						let value = field[name];
+						if(typeof value === 'boolean')
+							value = value ? 'yes' : 'no';
+
+						fieldValue += `${camelCaseToWords(name)}:
+							${capitalizeFirstLetter(value)}<br />
+						`;
+					}
+					return Spacebars.SafeString(fieldValue);
+				}
 				default:
 					return field;
 			}
@@ -204,6 +223,9 @@ Template.dayOffEntry.events({
 				value = input.value.trim();
 				if(!value)
 					value = '(None)';
+				break;
+			case DAY_OFF_FIELDS.ADDITIONAL_FELLOWSHIP_INFO:
+				// Handled in template
 				break;
 			case 'requestConfirmation':
 				insertEntries();
@@ -409,5 +431,73 @@ Template.submissionConfirmation.events({
 		for(let field of fields){
 			Session.set(field, undefined);
 		}
+	}
+});
+
+Template.additionalFellowshipInfo.onCreated(function(){
+	this.state = new ReactiveDict();
+});
+
+Template.additionalFellowshipInfo.helpers({
+	DAY_OFF_TYPES: DAY_OFF_TYPES,
+	submissionType(type){
+		return Session.equals(DAY_OFF_FIELDS.TYPE, type);
+	},
+	alreadyNotified(){
+		return Template.instance().state.get('alreadyNotified');
+	}
+});
+
+Template.additionalFellowshipInfo.events({
+	'change .additional-fellowship-info, input .additional-fellowship-info'(event, instance){
+		let value;
+		switch(event.target.name){
+			case 'alreadyNotified':
+			case 'presenting':
+			case 'cancelRequest':
+				value = (event.target.value === 'yes');
+				break;
+			default:
+				value = event.target.value;
+				break;
+		}
+		instance.state.set(event.target.name, value);
+	},
+	'click #submit-additional-fellowship-info, keypress'(event, instance){
+		if(event.type === 'keypress'){ // Enter key
+			if(event.which === 13){
+				event.preventDefault();
+				event.stopImmediatePropagation();
+			}
+			else {
+				return;
+			}
+		}
+
+		switch(Session.get(DAY_OFF_FIELDS.TYPE)){
+			case DAY_OFF_TYPES.SICK:
+				instance.state.set('alreadyNotified', Boolean(instance.state.get('alreadyNotified')));
+				if(instance.state.get('alreadyNotified')){
+					if(!instance.state.get('notified')){
+						Session.set('errorAlert', 'Please say who you notified.');
+						return;
+					}
+				}
+				break;
+			case DAY_OFF_TYPES.MEETING:
+				instance.state.set('presenting', Boolean(instance.state.get('presenting')));
+				break;
+			case DAY_OFF_TYPES.VACATION:
+				if(!instance.state.get('newOrUpdated')){
+					Session.set('errorAlert', 'Please say whether this is a new or updated request');
+					return;
+				}
+				instance.state.set('cancelRequest', Boolean(instance.state.get('cancelRequest')));
+				break;
+			default:
+				Session.set('errorAlert', 'Unrecognized info');
+				break;
+		}
+		Session.set(DAY_OFF_FIELDS.ADDITIONAL_FELLOWSHIP_INFO, instance.state.all());
 	}
 });

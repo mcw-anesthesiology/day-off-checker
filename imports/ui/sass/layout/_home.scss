@@ -260,12 +260,32 @@
 			}
 		}
 
+		fieldset {
+
+			legend {
+				font-weight: bold;
+			}
+		}
+
+		.column {
+			width: 100%;
+			display: flex;
+			flex-direction: column;
+			justify-content: flex-start;
+			align-items: center;
+		}
+
 		.on-desktop,
-		.on-mobile {
+		.on-mobile,
+		.labelled-input {
 
 			input {
 				width: 100%;
 			}
+		}
+
+		.labelled-input + button {
+			margin-top: 1.5em;
 		}
 
 		.on-desktop {

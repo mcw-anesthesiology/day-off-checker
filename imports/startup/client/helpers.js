@@ -9,6 +9,7 @@ import {
 	displayNameByUsername,
 	nl2br,
 	capitalizeFirstLetter,
+	camelCaseToWords,
 	isFellow
 } from '../../utils.js';
 
@@ -33,5 +34,7 @@ Template.registerHelper('routeIs', (routeName) => {
 Template.registerHelper('nl2br', nl2br);
 
 Template.registerHelper('capitalizeFirstLetter', capitalizeFirstLetter);
+
+Template.registerHelper('camelCaseToWords', camelCaseToWords);
 
 Template.registerHelper('isFellow', isFellow);

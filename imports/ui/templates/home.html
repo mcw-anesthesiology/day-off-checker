@@ -41,17 +41,24 @@
 </template>
 
 <template name="requestorName">
-	<input type="text" name="requestorName" id="name" placeholder="Your name" value="{{oldValue}}" autocomplete="off" required />
+	<div class="labelled-input">
+		<label for="name">Your name</label>
+		<input type="text" name="requestorName" id="name" placeholder="Your name" value="{{oldValue}}" autocomplete="off" required />
+	</div>
 	<button type="submit" class="btn btn-lg btn-primary">Next</button>
 </template>
 
 <template name="requestorEmail">
-	<input type="email" name="requestorEmail" id="email" placeholder="Your email" value="{{oldValue}}" autocomplete="off" required />
+	<div class="labelled-input">
+		<label for="email">Your email</label>
+		<input type="email" name="requestorEmail" id="email" placeholder="Your email" value="{{oldValue}}" autocomplete="off" required />
+	</div>
 	<button type="submit" class="btn btn-lg btn-primary">Next</button>
 </template>
 
 <template name="requestedDate">
 	<div class="on-desktop">
+		<label for="daterange">Date</label>
 		<input type="text" name="requestedDate" id="daterange" placeholder="MM/DD/YYYY - MM/DD/YYYY" value="{{oldValue}}" autocomplete="off" />
 	</div>
 	<div class="on-mobile">
@@ -140,5 +147,65 @@
 {{/if}}
 			<button type="button" class="btn btn-lg btn-primary" id="restart">Restart</button>
 		</div>
+	</div>
+</template>
+
+<template name="additionalFellowshipInfo">
+	<div class="column">
+{{#if submissionType DAY_OFF_TYPES.SICK}}
+		<fieldset>
+			<legend>Have you already notified anyone?</legend>
+			<label>
+				<input type="radio" name="alreadyNotified" value="yes" class="additional-fellowship-info" />
+				Yes
+			</label>
+			<label>
+				<input type="radio" name="alreadyNotified" value="no" class="additional-fellowship-info" />
+				No
+			</label>
+		</fieldset>
+	{{#if alreadyNotified}}
+		<div class="labelled-input">
+			<label for="notifiee">Who did you notify?</label>
+			<input type="text" name="notified" id="notified" class="additional-fellowship-info" placeholder="Who did you notify?" />
+		</div>
+	{{/if}}
+{{else}}{{#if submissionType DAY_OFF_TYPES.MEETING}}
+		<fieldset>
+			<legend>Are you presenting?</legend>
+			<label>
+				<input type="radio" name="presenting" value="yes" class="additional-fellowship-info" required />
+				Yes
+			</label>
+			<label>
+				<input type="radio" name="presenting" value="no" class="additional-fellowship-info" required />
+				No
+			</label>
+		</fieldset>
+{{else}}{{#if submissionType DAY_OFF_TYPES.VACATION}}
+		<fieldset>
+			<legend>Is this a new or updated event?</legend>
+			<label>
+				<input type="radio" name="newOrUpdated" value="new" class="additional-fellowship-info" required />
+				New
+			</label>
+			<label>
+				<input type="radio" name="newOrUpdated" value="updated" class="additional-fellowship-info" required />
+				Updated
+			</label>
+		</fieldset>
+		<fieldset>
+			<legend>Is this a request to <b>cancel</b> these vacation dates?</legend>
+			<label>
+				<input type="radio" name="cancelRequest" value="yes" class="additional-fellowship-info" required />
+				Yes
+			</label>
+			<label>
+				<input type="radio" name="cancelRequest" value="no" class="additional-fellowship-info" required />
+				No
+			</label>
+		</fieldset>
+{{/if}}{{/if}}{{/if}}
+		<button type="button" id="submit-additional-fellowship-info" class="btn btn-lg btn-primary">Next</button>
 	</div>
 </template>

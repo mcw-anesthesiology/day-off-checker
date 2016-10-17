@@ -152,13 +152,13 @@ Template.requestsList.events({
 	'click #close-sick-day-details'(){
 		Session.set('sickDayDetailsId', undefined);
 	},
-	'click .sick-day-requests tr'(event, instance){
+	'click .sick-day-requests tr'(){
 		Session.set('sickDayDetailsId', this._id);
 	},
 	'click #close-i-day-details'(){
 		Session.set('iDayDetailsId', undefined);
 	},
-	'click .i-day-requests tr'(event, instance){
+	'click .i-day-requests tr'(){
 		Session.set('iDayDetailsId', this._id);
 	}
 });
@@ -269,6 +269,16 @@ Template.requestDetails.helpers({
 	},
 	resendConfirmationRequests(){
 		return Session.equals('requestDetailAdminAction', 'resend-confirmation-requests');
+	},
+	keys(obj){
+		return Object.keys(obj);
+	},
+	getAdditionalInfo(request, key){
+		let value = request.additionalFellowshipInfo[key];
+		if(typeof value === 'boolean')
+			value = value ? 'yes' : 'no';
+
+		return capitalizeFirstLetter(value);
 	}
 });
 
