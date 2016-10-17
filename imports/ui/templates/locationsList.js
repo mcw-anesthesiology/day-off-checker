@@ -1,24 +1,34 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
+import { ReactiveDict } from 'meteor/reactive-dict';
 
 import { throwError } from 'meteor/saucecode:rollbar';
 
 import { Locations } from '../../api/locations.js';
+import { Fellowships } from '../../api/fellowships.js';
 import '../../api/users.js';
 import { ADMIN_EMAIL_ADDRESS } from '../../constants.js';
-import { displayNameByUsername } from '../../utils.js';
+import { displayNameByUsername, isFellow } from '../../utils.js';
 
 import './locationsList.html';
 
-Template.locationsList.onCreated(() => {
+Template.locationsList.onCreated(function(){
 	Meteor.subscribe('locations');
 	Meteor.subscribe('locationAdminUserData');
 	Session.set('locationToEdit', undefined);
+	if(isFellow()){
+		Meteor.subscribe('fellowships');
+		this.fellowshipLocationsToEdit = new ReactiveDict();
+	}
 });
 
 Template.locationsList.helpers({
 	locations(){
-		return Locations.find();
+		return Locations.find({
+			fellowship: {
+				$exists: false
+			}
+		});
 	},
 	editing(){
 		return Session.get('locationToEdit')._id;
@@ -33,7 +43,32 @@ Template.locationsList.helpers({
 				{ key: 'name', label: 'Name' },
 				{ key: 'number', label: 'Number' },
 				{ key: 'administrator', label: 'Administrator', fn: displayNameByUsername }
-			]
+			],
+			class: 'resident-locations'
+		};
+	},
+
+	fellowships(){
+		return Fellowships.find();
+	},
+	fellowshipLocations(id){
+		return Locations.find({
+			fellowship: id
+		});
+	},
+	fellowshipLocationToEdit(id){
+		return Template.instance().fellowshipLocationsToEdit.get(id);
+	},
+	fellowshipLocationsSettings(id){
+		return {
+			fields: [
+				{ key: '_id', label: 'ID' },
+				{ key: 'name', label: 'Name' },
+				{ key: 'number', label: 'Number' },
+				{ key: 'administrator', label: 'Administrator', fn: displayNameByUsername }
+			],
+			class: 'fellowship-locations',
+			rowClass: id
 		};
 	}
 });
@@ -42,8 +77,17 @@ Template.locationsList.events({
 	'click #add-location'(){
 		Session.set('locationToEdit', {});
 	},
-	'click .reactive-table tr'(){
+	'click .resident-locations tr'(){
 		Session.set('locationToEdit', this);
+	},
+
+	'click #add-fellowship-location'(event, instance){
+		const fellowship = event.target.dataList.fellowship;
+		instance.fellowshipLocationsToEdit.set(fellowship, {});
+	},
+	'click .fellowship-locations tr'(event, instance){
+		const fellowship = event.target.className.trim();
+		instance.fellowshipLocationsToEdit.set(fellowship, this);
 	}
 });
 

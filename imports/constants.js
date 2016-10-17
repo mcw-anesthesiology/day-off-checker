@@ -20,7 +20,9 @@ export const DAY_OFF_FIELDS = {
 	DATE: 'requestedDate',
 	FELLOWSHIP: 'requestedFellowship',
 	LOCATION: 'requestedLocation',
-	REASON: 'requestReason'
+	REASON: 'requestReason',
+
+	ADDITIONAL_FELLOWSHIP_INFO: 'additionalFellowshipInfo'
 };
 
 export const DAY_OFF_FIELD_NAMES = {
@@ -30,7 +32,9 @@ export const DAY_OFF_FIELD_NAMES = {
 	[DAY_OFF_FIELDS.DATE]: 'Date',
 	[DAY_OFF_FIELDS.FELLOWSHIP]: 'Fellowship',
 	[DAY_OFF_FIELDS.LOCATION]: 'Location',
-	[DAY_OFF_FIELDS.REASON]: 'Reason'
+	[DAY_OFF_FIELDS.REASON]: 'Reason',
+
+	[DAY_OFF_FIELDS.ADDITIONAL_FELLOWSHIP_INFO]: 'Additional info'
 };
 
 export const DAY_OFF_TYPES = {

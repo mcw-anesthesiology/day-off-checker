@@ -191,6 +191,24 @@
 		<button type="button" class="btn btn-warning" id="resend-confirmation-requests">Resend confirmation requests</button>
 	{{/if}}{{/if}}
 
+	{{#if currentUserAdmin}}{{#if request.additionalFellowshipInfo}}
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				Additional info
+			</div>
+			<table class="table table-striped">
+				<tbody>
+		{{#each key in keys request.additionalFellowshipInfo}}
+				<tr>
+					<th>{{ camelCaseToWords key }}</th>
+					<td>{{ getAdditionalInfo request key }}</td>
+				</tr>
+		{{/each}}
+				</tbody>
+			</table>
+		</div>
+	{{/if}}{{/if}}
+
 	{{! TODO: Add button to schedule reminders }}
 
 	{{#if currentUserAdmin}}{{#if resendConfirmationRequests}}{{#if isRequest request}}

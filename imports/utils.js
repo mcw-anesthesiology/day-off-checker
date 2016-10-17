@@ -54,6 +54,22 @@ export function capitalizeFirstLetter(string){
 	return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+export function camelCaseToWords(string){
+	let result = '';
+	for(let char of string){
+		if(result === ''){
+			result += char.toUpperCase();
+		}
+		else if(char === char.toUpperCase()){
+			result += ' ' + char.toLowerCase();
+		}
+		else {
+			result += char;
+		}
+	}
+	return result;
+}
+
 export function isFellow(connection){
 	let hostname;
 	if(Meteor.isClient)

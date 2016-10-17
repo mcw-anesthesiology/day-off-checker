@@ -21,7 +21,15 @@ import {
 	DAY_OFF_TYPE_NAMES,
 	USER_ROLES
 } from '../constants.js';
-import { displayDateRange, nl2br, isFellow, isFellowRequest, article } from '../utils.js';
+import {
+	displayDateRange,
+	nl2br,
+	isFellow,
+	isFellowRequest,
+	article,
+	capitalizeFirstLetter,
+	camelCaseToWords
+} from '../utils.js';
 
 import map from 'lodash/map';
 import moment from 'moment';
@@ -160,6 +168,40 @@ Meteor.methods({
 					type: String,
 					label: 'Fellowship administrator',
 					allowedValues: map(fellowshipAdmins, 'username')
+				},
+				additionalFellowshipInfo: {
+					type: Object,
+					label: 'Additional fellowship info',
+					optional: true
+				},
+				'additionalFellowshipInfo.alreadyNotified': {
+					type: Boolean,
+					label: 'Has already notified',
+					optional: true
+				},
+				'additionalFellowshipInfo.notified': {
+					type: String,
+					label: 'Person notified',
+					optional: true
+				},
+				'additionalFellowshipInfo.presenting': {
+					type: Boolean,
+					label: 'Presenting in meeting',
+					optional: true
+				},
+				'additionalFellowshipInfo.newOrUpdated': {
+					type: String,
+					label: 'New or updated vacation request',
+					allowedValues: [
+						'new',
+						'updated'
+					],
+					optional: true
+				},
+				'additionalFellowshipInfo.cancelRequest': {
+					type: Boolean,
+					label: 'Cancel vacation request?',
+					optional: true
 				}
 			};
 
@@ -482,6 +524,27 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 				<p>${nl2br(request.requestReason)}</p>
 			</blockquote>`;
 	}
+	let additionalInfoHtml = '';
+	if(request.additionalFellowshipInfo){
+		additionalInfoHtml = `
+			<table class="table">
+				<tbody>`;
+		for(let key of Object.keys(request.additionalFellowshipInfo)){
+			let value = request.additionalFellowshipInfo[key];
+			if(typeof value === 'boolean')
+				value = value ? 'yes' : 'no';
+			additionalInfoHtml += `
+					<tr>
+						<th>${camelCaseToWords(key)}</th>
+						<td>${capitalizeFirstLetter(value)}</td>
+					</tr>`;
+		}
+
+		additionalInfoHtml +=
+				`</tbody>
+			</table>`;
+	}
+
 	let typeName = DAY_OFF_TYPE_NAMES[request[DAY_OFF_FIELDS.TYPE]];
 	let typeArticle = article(typeName);
 	let timeout = 0; // FIXME
@@ -538,6 +601,8 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 								</table>
 
 								${reasonHtml}
+
+								${additionalInfoHtml}
 
 								<p>You will be notified when the request is approved or denied.</p>
 

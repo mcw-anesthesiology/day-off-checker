@@ -6,9 +6,11 @@ import { Accounts } from 'meteor/accounts-base';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 import { handleError } from 'meteor/saucecode:rollbar';
 
-import map from 'lodash/map';
+import { Fellowships } from './fellowships.js';
 
 import { APP_ACCOUNTS_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS } from '../constants.js';
+
+import map from 'lodash/map';
 
 export const Locations = new Mongo.Collection('locations');
 
@@ -18,12 +20,17 @@ if(Meteor.isServer){
 	});
 }
 
+if(Meteor.isClient){
+	Meteor.subscribe('fellowships');
+}
+
 Meteor.methods({
 	'addLocation'(location){
 		if(Meteor.user().role !== 'admin')
 			throw new Meteor.Error('addLocation.unauthorized');
 
 		const locationAdmins = Meteor.users.find({ role: 'location_admin' }).fetch();
+		const fellowships = Fellowships.find({}).fetch();
 
 		new SimpleSchema({
 			_id: {
@@ -42,6 +49,12 @@ Meteor.methods({
 				type: String,
 				label: 'Location administrator username',
 				allowedValues: map(locationAdmins, 'username')
+			},
+			fellowship: {
+				type: String,
+				label: 'Fellowship ID',
+				allowedValues: map(fellowships, 'id'),
+				optional: true
 			}
 		}).validate(location);
 
