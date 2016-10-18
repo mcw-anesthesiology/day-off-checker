@@ -225,6 +225,12 @@ Template.dayOffEntry.events({
 						name: otherName
 					};
 				}
+				else if(isFellow() && input.value === 'not-assigned-yet'){
+					value = {
+						_id: 'not-assigned-yet',
+						name: 'Not assigned yet'
+					};
+				}
 				else {
 					value = Locations.findOne(input.value);
 				}
@@ -408,6 +414,9 @@ Template.requestedLocation.helpers({
 			}
 		}
 		return Locations.find(queryObject, { sort: { name: 1 } });
+	},
+	isRequest(){
+		return !Session.equals(DAY_OFF_FIELDS.TYPE, DAY_OFF_TYPES.SICK);
 	},
 	oldValueSelected(location){
 		const oldLocation = Session.get(`old_${DAY_OFF_FIELDS.LOCATION}`);
