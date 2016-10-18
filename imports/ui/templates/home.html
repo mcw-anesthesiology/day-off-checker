@@ -92,7 +92,18 @@
 {{#each location in locations}}
 		<option value="{{location._id}}" {{oldValueSelected location}}>{{location.name}}</option>
 {{/each}}
+{{#if isFellow}}
+		<option value="other">Other</option>
+{{/if}}
 	</select>
+{{#if isFellow}}
+	{{#if otherSelected}}
+	<div class="labelled-input">
+		<label for="other-location">Please specify location</label>
+		<input type="text" name="otherLocation" id="other-location" placeholder="Other location" />
+	</div>
+	{{/if}}
+{{/if}}
 	<button type="submit" class="btn btn-lg btn-primary">Next</button>
 </template>
 
@@ -117,12 +128,13 @@
 {{#if sickDay}}
 			<p>
 				Please notify your rotation site charge faculty
-				and the faculty you are assigned directly as soon as possible
-				using the following number.
+				and the faculty you are assigned directly as soon as possible.
 			</p>
+	{{#if number}}
 			<p class="location-number">
 				{{location}}: {{number}}
 			</p>
+	{{/if}}
 	{{#if isFellow}}
 			<p>
 				If you are on call, please notify {{fellowshipAdminName}} via text message as soon as possible.
