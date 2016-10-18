@@ -1,7 +1,10 @@
 {
 	"parserOptions": {
 		"ecmaVersion": 6,
-		"sourceType": "module"
+		"sourceType": "module",
+		"ecmaFeatures": {
+			"jsx": true
+		}
 	},
 	"env": {
 		"meteor": true,
@@ -17,5 +20,6 @@
 		"comma-style": "warn",
 		"comma-spacing": "warn",
 		"key-spacing": "warn"
-	}
+	},
+	"plugins": ["react"]
 }

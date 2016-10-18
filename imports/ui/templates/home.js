@@ -379,7 +379,21 @@ Template.requestedLocation.onCreated(function(){
 
 Template.requestedLocation.helpers({
 	locations(){
-		return Locations.find({}, { sort: { name: 1 } });
+		let queryObject = {
+			fellowship: { $exists: false }
+		};
+		if(isFellow()){
+			if(Session.get(DAY_OFF_FIELDS.FELLOWSHIP)){
+				queryObject = {
+					fellowship: Session.get(DAY_OFF_FIELDS.FELLOWSHIP)._id
+				};
+			}
+			else {
+				Session.set('errorAlert', 'No fellowship found, please select a fellowship');
+				return;
+			}
+		}
+		return Locations.find(queryObject, { sort: { name: 1 } });
 	},
 	oldValueSelected(location){
 		const oldLocation = Session.get(`old_${DAY_OFF_FIELDS.LOCATION}`);
