@@ -145,6 +145,11 @@ Meteor.methods({
 					label: 'Day off type',
 					allowedValues: FELLOW_DAY_OFF_TYPES
 				},
+				'requestedLocation.fellowship': {
+					type: String,
+					label: 'Location fellowship ID',
+					'allowedValues': map(fellowships, '_id')
+				},
 				requestedFellowship: {
 					type: Object,
 					label: 'Fellowship'
@@ -205,8 +210,7 @@ Meteor.methods({
 				}
 			};
 
-			for(let i in fellowSchema)
-				schema[i] = fellowSchema[i];
+			Object.assign(schema, fellowSchema);
 		}
 
 		new SimpleSchema(schema).validate(request);

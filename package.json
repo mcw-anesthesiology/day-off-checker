@@ -25,6 +25,9 @@
   },
   "devDependencies": {
     "eslint": "^3.4.0",
-    "mup": "github:jacobmischka/meteor-up"
+    "eslint-plugin-react": "^6.4.1",
+    "mup": "github:jacobmischka/meteor-up",
+    "react": "^15.3.2",
+    "react-dom": "^15.3.2"
   }
 }

@@ -5,9 +5,14 @@
 	{{#each fellowship in fellowships}}
 			<h2>{{fellowship.name}}</h2>
 		{{#if fellowshipLocationToEdit fellowship._id}}
-			{{>editLocation location=(fellowshipLocationToEdit fellowship._id)}}
+			<div>
+				{{>React component=EditLocation location=(fellowshipLocationToEdit fellowship._id)
+					siteAdmins=siteAdmins fellowshipId=fellowship._id
+					handleSubmit=(handleLocationSubmit fellowship._id) handleCancel=(handleCancel fellowship._id)
+				}}
+			</div>
 		{{else}}
-			<button type="button" class="btn btn-lg btn-primary" id="add-fellowship-location" data-fellowship="{{fellowship.id}}">Add location</button>
+			<button type="button" class="btn btn-lg btn-primary" id="add-fellowship-location" data-fellowship="{{fellowship._id}}">Add location</button>
 		{{/if}}
 
 		{{>reactiveTable collection=(fellowshipLocations fellowship._id) settings=(fellowshipLocationsSettings fellowship._id)}}

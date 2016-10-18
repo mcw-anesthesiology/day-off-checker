@@ -10,6 +10,8 @@ import '../../api/users.js';
 import { ADMIN_EMAIL_ADDRESS } from '../../constants.js';
 import { displayNameByUsername, isFellow } from '../../utils.js';
 
+import EditLocation from '../components/edit-location.js';
+
 import './locationsList.html';
 
 Template.locationsList.onCreated(function(){
@@ -44,7 +46,7 @@ Template.locationsList.helpers({
 				{ key: 'number', label: 'Number' },
 				{ key: 'administrator', label: 'Administrator', fn: displayNameByUsername }
 			],
-			class: 'resident-locations'
+			class: 'resident-locations table table-striped'
 		};
 	},
 
@@ -67,10 +69,53 @@ Template.locationsList.helpers({
 				{ key: 'number', label: 'Number' },
 				{ key: 'administrator', label: 'Administrator', fn: displayNameByUsername }
 			],
-			class: 'fellowship-locations',
+			class: 'fellowship-locations table table-striped',
 			rowClass: id
 		};
-	}
+	},
+
+	EditLocation(){
+		return EditLocation;
+	},
+	siteAdmins(){
+		return Meteor.users.find({ role: 'location_admin' }).fetch();
+	},
+	handleLocationSubmit(fellowshipId){
+		const instance = Template.instance();
+		return () => { // Okay blaze sucks
+			return location => {
+				const locationId = instance.fellowshipLocationsToEdit.get(fellowshipId)._id;
+				if(locationId)
+					Meteor.call('updateLocation', locationId, location, (err) => {
+						if(err){
+							console.log(err.name + ': ' + err.message);
+							Session.set('errorAlert', 'There was a problem updating the location. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
+							throwError(err.message);
+						}
+						else
+							instance.fellowshipLocationsToEdit.set(fellowshipId, undefined);
+					});
+				else
+					Meteor.call('addLocation', location, (err) => {
+						if(err){
+							console.log(err.name + ': ' + err.message);
+							Session.set('errorAlert', 'There was a problem adding the location. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
+							throwError(err.message);
+						}
+						else
+							instance.fellowshipLocationsToEdit.set(fellowshipId, undefined);
+					});
+			};
+		};
+	},
+	handleCancel(id){
+		const instance = Template.instance();
+		return () => { // Okay blaze sucks
+			return () => {
+				instance.fellowshipLocationsToEdit.set(id, undefined);
+			};
+		};
+	},
 });
 
 Template.locationsList.events({
@@ -82,11 +127,16 @@ Template.locationsList.events({
 	},
 
 	'click #add-fellowship-location'(event, instance){
-		const fellowship = event.target.dataList.fellowship;
-		instance.fellowshipLocationsToEdit.set(fellowship, {});
+		const fellowship = event.target.dataset.fellowship;
+		instance.fellowshipLocationsToEdit.set(fellowship, {
+			_id: '',
+			name: '',
+			number: '',
+			administrator: ''
+		});
 	},
 	'click .fellowship-locations tr'(event, instance){
-		const fellowship = event.target.className.trim();
+		const fellowship = event.target.parentElement.className.trim();
 		instance.fellowshipLocationsToEdit.set(fellowship, this);
 	}
 });
