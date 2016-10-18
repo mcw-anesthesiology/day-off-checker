@@ -139,16 +139,42 @@ Meteor.methods({
 		if(isFellow(this.connection)){
 			const fellowships = Fellowships.find().fetch();
 			const fellowshipAdmins = Meteor.users.find({ role: 'fellowship_admin' }).fetch();
+			let allowedLocationIds = map(locations, '_id');
+			allowedLocationIds.push('other');
+
 			let fellowSchema = {
 				dayOffType: {
 					type: String,
 					label: 'Day off type',
 					allowedValues: FELLOW_DAY_OFF_TYPES
 				},
+				'requestedLocation._id': {
+					type: String,
+					label: 'Location ID',
+					allowedValues: allowedLocationIds
+				},
+				'requestedLocation.name': {
+					type: String,
+					label: 'Location name',
+					// allowedValues: map(locations, 'name')
+				},
+				'requestedLocation.number': {
+					type: String,
+					label: 'Location number',
+					allowedValues: map(locations, 'number'),
+					optional: true
+				},
+				'requestedLocation.administrator': {
+					type: String,
+					label: 'Location administrator',
+					allowedValues: map(locationAdmins, 'username'),
+					optional: true
+				},
 				'requestedLocation.fellowship': {
 					type: String,
 					label: 'Location fellowship ID',
-					'allowedValues': map(fellowships, '_id')
+					'allowedValues': map(fellowships, '_id'),
+					optional: true
 				},
 				requestedFellowship: {
 					type: Object,
@@ -370,7 +396,13 @@ function getUsersToNotify(request){
 
 function sendNotifications(request, users = getUsersToNotify(request), sendRequestorNotification = true){
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
-	const locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
+	let locationAdmin;
+	if(isFellowRequest(request) && !request.requestedLocation.administrator)
+		locationAdmin = {
+			name: ''
+		};
+	else
+		locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
 
 	let reasonHtml = '';
 	if(request.requestReason){
@@ -519,7 +551,16 @@ function getUsersForConfirmation(request){
 
 function sendConfirmationRequests(request, users = getUsersForConfirmation(request), sendRequestorNotification = true, sendLocationAdminNotification = true){
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
-	const locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
+	let locationAdmin;
+	if(isFellowRequest(request) && !request.requestedLocation.administrator){
+		locationAdmin = {
+			name: ''
+		};
+		sendLocationAdminNotification = false;
+	}
+	else {
+		locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
+	}
 
 	let reasonHtml = '';
 	if(request.requestReason){

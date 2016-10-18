@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { Session } from 'meteor/session';
 import { ReactiveDict } from 'meteor/reactive-dict';
+import { ReactiveVar } from 'meteor/reactive-var';
 import { Spacebars } from 'meteor/spacebars';
 
 import { throwError } from 'meteor/saucecode:rollbar';
@@ -217,7 +218,16 @@ Template.dayOffEntry.events({
 				value = Fellowships.findOne(input.value);
 				break;
 			case DAY_OFF_FIELDS.LOCATION:
-				value = Locations.findOne(input.value);
+				if(isFellow() && input.value === 'other'){
+					let otherName = $(form).find('#other-location').val();
+					value = {
+						_id: 'other',
+						name: otherName
+					};
+				}
+				else {
+					value = Locations.findOne(input.value);
+				}
 				break;
 			case DAY_OFF_FIELDS.REASON:
 				value = input.value.trim();
@@ -375,6 +385,10 @@ Template.requestedFellowship.helpers({
 
 Template.requestedLocation.onCreated(function(){
 	Meteor.subscribe('locations');
+	if(isFellow()){
+		this.otherSelected = new ReactiveVar();
+		this.otherSelected.set(false);
+	}
 });
 
 Template.requestedLocation.helpers({
@@ -389,7 +403,7 @@ Template.requestedLocation.helpers({
 				};
 			}
 			else {
-				Session.set('errorAlert', 'No fellowship found, please select a fellowship');
+				Session.set('errorAlert', 'Please select a fellowship');
 				return;
 			}
 		}
@@ -399,6 +413,17 @@ Template.requestedLocation.helpers({
 		const oldLocation = Session.get(`old_${DAY_OFF_FIELDS.LOCATION}`);
 		if(oldLocation && oldLocation._id === location._id)
 			return 'selected';
+	},
+	otherSelected(){
+		return Template.instance().otherSelected.get();
+	}
+});
+
+Template.requestedLocation.events({
+	'change #location'(event, instance){
+		if(isFellow()){
+			instance.otherSelected.set(event.target.value === 'other');
+		}
 	}
 });
 
