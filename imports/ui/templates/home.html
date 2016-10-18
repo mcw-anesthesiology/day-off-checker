@@ -93,6 +93,9 @@
 		<option value="{{location._id}}" {{oldValueSelected location}}>{{location.name}}</option>
 {{/each}}
 {{#if isFellow}}
+	{{#if isRequest}}
+		<option value="not-assigned-yet">Not assigned yet</option>
+	{{/if}}
 		<option value="other">Other</option>
 {{/if}}
 	</select>
@@ -167,14 +170,16 @@
 {{#if submissionType DAY_OFF_TYPES.SICK}}
 		<fieldset>
 			<legend>Have you already notified anyone?</legend>
-			<label>
-				<input type="radio" name="alreadyNotified" value="yes" class="additional-fellowship-info" />
-				Yes
-			</label>
-			<label>
-				<input type="radio" name="alreadyNotified" value="no" class="additional-fellowship-info" />
-				No
-			</label>
+			<div class="options">				
+				<label>
+					<input type="radio" name="alreadyNotified" value="yes" class="additional-fellowship-info" />
+					Yes
+				</label>
+				<label>
+					<input type="radio" name="alreadyNotified" value="no" class="additional-fellowship-info" />
+					No
+				</label>
+			</div>
 		</fieldset>
 	{{#if alreadyNotified}}
 		<div class="labelled-input">
@@ -185,37 +190,43 @@
 {{else}}{{#if submissionType DAY_OFF_TYPES.MEETING}}
 		<fieldset>
 			<legend>Are you presenting?</legend>
-			<label>
-				<input type="radio" name="presenting" value="yes" class="additional-fellowship-info" required />
-				Yes
-			</label>
-			<label>
-				<input type="radio" name="presenting" value="no" class="additional-fellowship-info" required />
-				No
-			</label>
+			<div class="options">
+				<label>
+					<input type="radio" name="presenting" value="yes" class="additional-fellowship-info" required />
+					Yes
+				</label>
+				<label>
+					<input type="radio" name="presenting" value="no" class="additional-fellowship-info" required />
+					No
+				</label>
+			</div>
 		</fieldset>
 {{else}}{{#if submissionType DAY_OFF_TYPES.VACATION}}
 		<fieldset>
 			<legend>Is this a new or updated event?</legend>
-			<label>
-				<input type="radio" name="newOrUpdated" value="new" class="additional-fellowship-info" required />
-				New
-			</label>
-			<label>
-				<input type="radio" name="newOrUpdated" value="updated" class="additional-fellowship-info" required />
-				Updated
-			</label>
+			<div class="options">
+				<label>
+					<input type="radio" name="newOrUpdated" value="new" class="additional-fellowship-info" required />
+					New
+				</label>
+				<label>
+					<input type="radio" name="newOrUpdated" value="updated" class="additional-fellowship-info" required />
+					Updated
+				</label>
+			</div>
 		</fieldset>
 		<fieldset>
 			<legend>Is this a request to <b>cancel</b> these vacation dates?</legend>
-			<label>
-				<input type="radio" name="cancelRequest" value="yes" class="additional-fellowship-info" required />
-				Yes
-			</label>
-			<label>
-				<input type="radio" name="cancelRequest" value="no" class="additional-fellowship-info" required />
-				No
-			</label>
+			<div class="options">
+				<label>
+					<input type="radio" name="cancelRequest" value="yes" class="additional-fellowship-info" required />
+					Yes
+				</label>
+				<label>
+					<input type="radio" name="cancelRequest" value="no" class="additional-fellowship-info" required />
+					No
+				</label>
+			</div>
 		</fieldset>
 {{/if}}{{/if}}{{/if}}
 		<button type="button" id="submit-additional-fellowship-info" class="btn btn-lg btn-primary">Next</button>

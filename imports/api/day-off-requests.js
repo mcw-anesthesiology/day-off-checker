@@ -141,6 +141,7 @@ Meteor.methods({
 			const fellowshipAdmins = Meteor.users.find({ role: 'fellowship_admin' }).fetch();
 			let allowedLocationIds = map(locations, '_id');
 			allowedLocationIds.push('other');
+			allowedLocationIds.push('not-assigned-yet');
 
 			let fellowSchema = {
 				dayOffType: {
