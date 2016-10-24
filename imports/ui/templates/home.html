@@ -34,6 +34,7 @@
 		{{> dayOffTypeButton}}
 {{/each}}
 	</section>
+	<a href="/manage-request">Manage an existing request</a>
 </template>
 
 <template name="dayOffTypeButton">
@@ -170,7 +171,7 @@
 {{#if submissionType DAY_OFF_TYPES.SICK}}
 		<fieldset>
 			<legend>Have you already notified anyone?</legend>
-			<div class="options">				
+			<div class="options">
 				<label>
 					<input type="radio" name="alreadyNotified" value="yes" class="additional-fellowship-info" />
 					Yes

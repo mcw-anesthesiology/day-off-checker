@@ -46,7 +46,6 @@ FlowRouter.route('/calendar', {
 
 FlowRouter.route('/request/:_id', {
 	name: 'Request',
-	triggersEnter: [AccountsTemplates.ensureSignedIn],
 	action(){
 		BlazeLayout.render('main', { main: 'singleRequestPage' });
 	}
@@ -92,5 +91,12 @@ FlowRouter.route('/fellowships', {
 	],
 	action(){
 		BlazeLayout.render('main', { main: 'fellowshipsList' });
+	}
+});
+
+FlowRouter.route('/manage-request', {
+	name: 'Manage request',
+	action(){
+		BlazeLayout.render('main', { main: 'manageRequest' });
 	}
 });

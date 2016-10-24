@@ -10,7 +10,7 @@ import '../../api/users.js';
 import { ADMIN_EMAIL_ADDRESS } from '../../constants.js';
 import { displayNameByUsername, isFellow } from '../../utils.js';
 
-import EditLocation from '../components/edit-location.js';
+import EditLocation from '../components/EditLocation.js';
 
 import './locationsList.html';
 

@@ -10,7 +10,8 @@
 		"meteor": true,
 		"browser": true
 	},
-	"extends": "eslint:recommended",
+	"plugins": ["react"],
+	"extends": ["eslint:recommended", "plugin:react/recommended"],
 	"rules": {
 		"no-console": "off",
 		"no-var": "warn",
@@ -20,6 +21,5 @@
 		"comma-style": "warn",
 		"comma-spacing": "warn",
 		"key-spacing": "warn"
-	},
-	"plugins": ["react"]
+	}
 }

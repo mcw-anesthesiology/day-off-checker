@@ -9,6 +9,7 @@ import find from 'lodash/find';
 import moment from 'moment';
 import 'twix';
 
+import RequestDetails from '../components/RequestDetails.js';
 import {
 	ADMIN_EMAIL_ADDRESS,
 	DAYS_BEFORE_REQUEST_TO_SEND_REMINDER,
@@ -129,6 +130,9 @@ Template.requestsList.helpers({
 				{ key: 'confirmationRequests', label: '', fn: requestNeedsResponse }
 			]
 		};
+	},
+	RequestDetails(){
+		return RequestDetails;
 	}
 });
 
@@ -163,6 +167,10 @@ Template.requestsList.events({
 	}
 });
 
+Template.singleRequestPage.onCreated(function(){
+	Meteor.subscribe('dayOffRequests_byId', FlowRouter.getParam('_id'));
+});
+
 Template.singleRequestPage.helpers({
 	request(){
 		try {
@@ -172,6 +180,9 @@ Template.singleRequestPage.helpers({
 			console.log(e);
 			return false;
 		}
+	},
+	RequestDetails(){
+		return RequestDetails;
 	}
 });
 
