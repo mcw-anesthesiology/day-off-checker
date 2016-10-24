@@ -2,14 +2,15 @@ import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import { Email } from 'meteor/email';
 import { Accounts } from 'meteor/accounts-base';
+import { check } from 'meteor/check';
 
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 import { handleError } from 'meteor/saucecode:rollbar';
 
 import { Locations } from './locations.js';
 import { Fellowships } from './fellowships.js';
+import { ReminderEmails, scheduleReminder } from './reminder-emails.js';
 
-import { scheduleReminder } from '../api/reminder-emails.js';
 import {
 	APP_NOTIFICATION_EMAIL_ADDRESS,
 	ADMIN_EMAIL_ADDRESS,
@@ -70,6 +71,14 @@ if(Meteor.isServer){
 			});
 		}
 
+	});
+
+	Meteor.publish('dayOffRequests_byId', function(requestId){
+		check(requestId, String);
+		return [
+			DayOffRequests.find({_id: requestId}),
+			ReminderEmails.find({requestId: requestId})
+		];
 	});
 }
 

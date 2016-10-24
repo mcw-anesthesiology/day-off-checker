@@ -101,3 +101,7 @@ export function userTypeUrl(type){
 	return '//' + document.location.host.substring(document.location.host.indexOf('.') + 1)
 		+ FlowRouter.current().path;
 }
+
+export function escapeNewlines(str){
+	return str.replace(/\s+/g, ' ');
+}

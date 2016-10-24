@@ -140,6 +140,8 @@
 			display: flex;
 			justify-content: center;
 			flex-wrap: wrap;
+			width: 100%;
+			flex-shrink: 0;
 
 			.day-off-button {
 				margin: 0.35em;
