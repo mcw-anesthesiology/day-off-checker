@@ -20,6 +20,7 @@ let dayOffEvents = [];
 const calendarMobileHeight = 500;
 
 Template.calendar.onCreated(function(){
+	console.log($.fn.fullCalendar);
 	requestSubscription = this.subscribe('dayOffRequests');
 	this.subscribe('allUserData');
 });
