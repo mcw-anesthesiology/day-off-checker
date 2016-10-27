@@ -34,7 +34,9 @@
 		{{> dayOffTypeButton}}
 {{/each}}
 	</section>
-	<a href="/manage-request">Manage an existing request</a>
+	<div>
+		{{>React component=ManageRequest }}
+	</div>
 </template>
 
 <template name="dayOffTypeButton">
@@ -202,34 +204,7 @@
 				</label>
 			</div>
 		</fieldset>
-{{else}}{{#if submissionType DAY_OFF_TYPES.VACATION}}
-		<fieldset>
-			<legend>Is this a new or updated event?</legend>
-			<div class="options">
-				<label>
-					<input type="radio" name="newOrUpdated" value="new" class="additional-fellowship-info" required />
-					New
-				</label>
-				<label>
-					<input type="radio" name="newOrUpdated" value="updated" class="additional-fellowship-info" required />
-					Updated
-				</label>
-			</div>
-		</fieldset>
-		<fieldset>
-			<legend>Is this a request to <b>cancel</b> these vacation dates?</legend>
-			<div class="options">
-				<label>
-					<input type="radio" name="cancelRequest" value="yes" class="additional-fellowship-info" required />
-					Yes
-				</label>
-				<label>
-					<input type="radio" name="cancelRequest" value="no" class="additional-fellowship-info" required />
-					No
-				</label>
-			</div>
-		</fieldset>
-{{/if}}{{/if}}{{/if}}
+{{/if}}{{/if}}
 		<button type="button" id="submit-additional-fellowship-info" class="btn btn-lg btn-primary">Next</button>
 	</div>
 </template>

@@ -128,18 +128,17 @@ function isRequest(request){
 }
 
 function statusLabelType(status){
-	const labelTypes = {
-		pending: 'warning',
-		approved: 'success',
-		denied: 'danger'
-	};
-
-	try {
-		return `label-${labelTypes[status]}`;
-	}
-	catch(e){
-		console.log(e);
-		return 'label-default';
+	switch(status){
+		case 'pending':
+			return 'label-warning';
+		case 'approved':
+			return 'label-success';
+		case 'denied':
+			return 'label-danger';
+		case 'cancelled':
+			return 'label-default';
+		default:
+			return 'label-info';
 	}
 }
 

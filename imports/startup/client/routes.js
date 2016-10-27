@@ -93,10 +93,3 @@ FlowRouter.route('/fellowships', {
 		BlazeLayout.render('main', { main: 'fellowshipsList' });
 	}
 });
-
-FlowRouter.route('/manage-request', {
-	name: 'Manage request',
-	action(){
-		BlazeLayout.render('main', { main: 'manageRequest' });
-	}
-});
