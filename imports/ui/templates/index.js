@@ -4,5 +4,4 @@ import './requests.js';
 import './requestsList.js';
 import './usersList.js';
 import './locationsList.js';
-import './manageRequest.js';
 import './fellowshipsList.js';

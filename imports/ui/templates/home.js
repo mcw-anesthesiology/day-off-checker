@@ -20,6 +20,8 @@ import 'twix';
 import 'bootstrap-daterangepicker';
 import 'bootstrap-daterangepicker/daterangepicker.css';
 
+import ManageRequest from '../components/ManageRequest.js';
+
 import {
 	ADMIN_EMAIL_ADDRESS,
 	DAY_OFF_TYPE_NAMES,
@@ -49,7 +51,7 @@ function insertEntries(){
 	let request = {};
 	for(let field of fields){
 		let value = Session.get(field);
-		if(!value){
+		if(!value && fieldShouldBeCompleted(field)){
 			Session.set('errorAlert', 'Please complete all fields');
 			return;
 		}
@@ -130,7 +132,7 @@ Template.home.events({
 Template.dayOffEntry.helpers({
 	nextField(){
 		for(let field of fields){
-			if(!Session.get(field)){
+			if(!Session.get(field) && fieldShouldBeCompleted(field)){
 				return field;
 			}
 		}
@@ -138,6 +140,42 @@ Template.dayOffEntry.helpers({
 			return 'requestConfirmation';
 	}
 });
+
+function fieldShouldBeCompleted(field){
+	if(isFellow()){
+		if([
+			DAY_OFF_FIELDS.TYPE,
+			DAY_OFF_FIELDS.NAME,
+			DAY_OFF_FIELDS.EMAIL,
+			DAY_OFF_FIELDS.DATE,
+			DAY_OFF_FIELDS.FELLOWSHIP,
+			DAY_OFF_FIELDS.LOCATION,
+			DAY_OFF_FIELDS.REASON
+		].includes(field))
+			return true;
+
+		if(field === DAY_OFF_FIELDS.ADDITIONAL_FELLOWSHIP_INFO){
+			if([
+				DAY_OFF_TYPES.SICK,
+				DAY_OFF_TYPES.MEETING
+			].includes(Session.get(DAY_OFF_FIELDS.TYPE)))
+				return true;
+		}
+	}
+	else {
+		if([
+			DAY_OFF_FIELDS.TYPE,
+			DAY_OFF_FIELDS.NAME,
+			DAY_OFF_FIELDS.EMAIL,
+			DAY_OFF_FIELDS.DATE,
+			DAY_OFF_FIELDS.LOCATION,
+			DAY_OFF_FIELDS.REASON
+		].includes(field))
+			return true;
+	}
+
+	return false;
+}
 
 Template.dayOffEntry.events({
 	'click .day-off-button'(event) {
@@ -271,6 +309,9 @@ Template.dayOffType.helpers({
 		}
 
 		return buttons;
+	},
+	ManageRequest(){
+		return ManageRequest;
 	}
 });
 
@@ -512,8 +553,8 @@ Template.additionalFellowshipInfo.events({
 		instance.state.set(event.target.name, value);
 	},
 	'click #submit-additional-fellowship-info, keypress'(event, instance){
-		if(event.type === 'keypress'){ // Enter key
-			if(event.which === 13){
+		if(event.type === 'keypress'){
+			if(event.which === 13){ // Enter key
 				event.preventDefault();
 				event.stopImmediatePropagation();
 			}
@@ -536,11 +577,6 @@ Template.additionalFellowshipInfo.events({
 				instance.state.set('presenting', Boolean(instance.state.get('presenting')));
 				break;
 			case DAY_OFF_TYPES.VACATION:
-				if(!instance.state.get('newOrUpdated')){
-					Session.set('errorAlert', 'Please say whether this is a new or updated request');
-					return;
-				}
-				instance.state.set('cancelRequest', Boolean(instance.state.get('cancelRequest')));
 				break;
 			default:
 				Session.set('errorAlert', 'Unrecognized info');

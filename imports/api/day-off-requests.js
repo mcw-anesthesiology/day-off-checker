@@ -328,6 +328,29 @@ Meteor.methods({
 			sendRequestDenialNotifications(request, reason);
 		}
 	},
+	'dayOffRequests.cancelRequest'(requestId, cancelReason){
+		new SimpleSchema({
+			cancelReason: {
+				type: String,
+				label: 'Cancel reason'
+			}
+		}).validate({ cancelReason: cancelReason });
+
+		DayOffRequests.update({
+			_id: requestId,
+			status: 'pending'
+		}, {
+			$set: {
+				status: 'cancelled',
+				cancelReason: cancelReason
+			}
+		});
+
+		if(Meteor.isServer){
+			const request = DayOffRequests.findOne(requestId);
+			sendRequestCancellationNotifications(request, cancelReason);
+		}
+	},
 	'dayOffRequests.resendConfirmationRequests'(requestId, resendUsernames){
 		if(Meteor.user().role !== 'admin')
 			throw new Meteor.Error('dayOffRequests.resendConfirmationRequests.unauthorized');
@@ -520,6 +543,7 @@ function sendNotifications(request, users = getUsersToNotify(request), sendReque
 								<table>
 									<thead>
 										<tr>
+											<th>ID</th>
 											<th>Date</th>
 											<th>Location</th>
 											<th>Location administrator</th>
@@ -527,6 +551,7 @@ function sendNotifications(request, users = getUsersToNotify(request), sendReque
 									</thead>
 									<tbody>
 										<tr>
+											<td><a href="${requestUrl}">${request._id}</a></td>
 											<td>${displayDateRange(request.requestedDate)}</td>
 											<td>${request.requestedLocation.name}</td>
 											<td>${locationAdmin.name}</td>
@@ -584,6 +609,7 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 		additionalInfoHtml = `
 			<table class="table">
 				<tbody>`;
+
 		for(let key of Object.keys(request.additionalFellowshipInfo)){
 			let value = request.additionalFellowshipInfo[key];
 			if(typeof value === 'boolean')
@@ -632,7 +658,10 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 
 								<p>${request.requestorName} made ${typeArticle} ${typeName} request for ${displayDateRange(request.requestedDate)}.</p>
 
-								<p>Please navigate to <a href="${requestUrl}">${requestUrl}</a> or the <a href="${Meteor.absoluteUrl('list')}">requests list page</a> to approve or deny this request.</p>
+								<p>
+									Please navigate to <a href="${requestUrl}">${requestUrl}</a> or the
+									<a href="${Meteor.absoluteUrl('list')}">requests list page</a> to approve or deny this request.
+								</p>
 
 								<table>
 									<thead>
@@ -738,11 +767,12 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 								${reasonHtml}
 
 								<p>
-									If you have a problem with this request, please let one of the chief residents know:
+									If you have a problem with this request, please let one of the approvers know:
 								</p>
+
 								${confirmerList}
 
-								<p>You will be notified when the request is approved or denied by the chiefs.</p>
+								<p>You will be notified when the request is approved or denied.</p>
 
 								<p>If you have any questions or concerns about the system please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 
@@ -763,6 +793,14 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 	}
 
 	if(sendRequestorNotification){
+		let approvers = 'the chiefs';
+		if(isFellowRequest(request)){
+			if(users && users[0] && users[0].name)
+				approvers = users[0].name;
+			else
+				approvers = 'the fellowship director';
+		}
+
 		try{
 			timeout += 1000; // FIXME
 			Meteor.setTimeout(() => {
@@ -791,6 +829,7 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 								<table>
 									<thead>
 										<tr>
+											<th>ID</th>
 											<th>Name</th>
 											<th>Date</th>
 											<th>Location</th>
@@ -799,6 +838,7 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 									</thead>
 									<tbody>
 										<tr>
+											<td><a href="${requestUrl}">${request._id}</a></td>
 											<td>${request.requestorName}</td>
 											<td>${displayDateRange(request.requestedDate)}</td>
 											<td>${request.requestedLocation.name}</td>
@@ -809,7 +849,9 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 
 								${reasonHtml}
 
-								<p>Confirmation has been requested by the chiefs. You will be notified of their response.</p>
+								<p>Confirmation has been requested by ${approvers}. You will be notified of their response.</p>
+
+								<p>To view or cancel this request, please visit <a href="${requestUrl}">${requestUrl}</a>.</p>
 
 								<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 
@@ -882,7 +924,7 @@ function sendRequestApprovalNotifications(request){
 						<body>
 							<h1>Hello ${request.requestorName}</h1>
 
-							<p>Your ${typeName} request for ${displayDateRange(request.requestedDate)} has been approved!</p>
+							<p>Your <a href="${requestUrl}">${typeName} request</a> for ${displayDateRange(request.requestedDate)} has been approved!</p>
 
 							<p>Be sure to remind your site location administrator 1-2 days prior to your absence.</p>
 
@@ -957,12 +999,91 @@ function sendRequestDenialNotifications(request, reason){
 							<h1>Hello ${request.requestorName}</h1>
 
 							<p>
-								This email is notifying you that your ${typeName} request for ${displayDateRange(request.requestedDate)}
+								This email is notifying you that your <a href="${requestUrl}">${typeName}</a>
+								request for ${displayDateRange(request.requestedDate)}
 								has been denied by ${Meteor.user.name} for the following reason.
 							</p>
 
 							<blockquote>
 								<p>${nl2br(reason)}</p>
+							</blockquote>
+
+							<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
+
+							<p>Thank you!</p>
+						</body>
+					</html>`
+			});
+		}, timeout);
+	}
+	catch(e){
+		console.log('Error sending denial notification: ' + e);
+		handleError(e);
+	}
+}
+
+function sendRequestCancellationNotifications(request, cancelReason){
+	const users = getUsersToNotify(request);
+	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
+	let typeName = DAY_OFF_TYPE_NAMES[request[DAY_OFF_FIELDS.TYPE]];
+	let timeout = 0; // FIXME
+	for(let user of users){
+		try{
+			timeout += 1000; // FIXME
+			Meteor.setTimeout(() => {
+				Email.send({
+					to: user.emails[0].address,
+					from: APP_NOTIFICATION_EMAIL_ADDRESS,
+					subject: `${typeName} Request Cancelled`,
+					html: `
+						<html>
+							<body>
+								<h1>Hello ${user.name}</h1>
+
+								<p>
+									This email is notifying you that <a href="${requestUrl}">
+									${request.requestorName}'s ${typeName} request for ${displayDateRange(request.requestedDate)}</a>
+									has been cancelled for the following reason.
+								</p>
+
+								<blockquote>
+									<p>${nl2br(cancelReason)}</p>
+								</blockquote>
+
+								<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
+
+								<p>Thank you!</p>
+							</body>
+						</html>`
+				});
+			}, timeout);
+		}
+		catch(e){
+			console.log('Error sending cancellation notification: ' + e);
+			handleError(e);
+		}
+	}
+
+	try{
+		timeout += 1000; // FIXME
+		Meteor.setTimeout(() => {
+			Email.send({
+				to: request.requestorEmail,
+				from: APP_NOTIFICATION_EMAIL_ADDRESS,
+				subject: `${typeName} Request Cancelled`,
+				html: `
+					<html>
+						<body>
+							<h1>Hello ${request.requestorName}</h1>
+
+							<p>
+								This email is notifying you that your <a href="${requestUrl}"${typeName} request</a>
+								for ${displayDateRange(request.requestedDate)}
+								has been cancelled for the following reason.
+							</p>
+
+							<blockquote>
+								<p>${nl2br(cancelReason)}</p>
 							</blockquote>
 
 							<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>

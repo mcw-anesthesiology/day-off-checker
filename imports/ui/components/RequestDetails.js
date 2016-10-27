@@ -53,6 +53,8 @@ export default class RequestDetails extends React.Component {
 		this.handleEditApprovalNoteSubmit = this.handleEditApprovalNoteSubmit.bind(this);
 		this.handleChangeResendUsernames = this.handleChangeResendUsernames.bind(this);
 		this.handleSubmitResendConfirmationRequests = this.handleSubmitResendConfirmationRequests.bind(this);
+		this.handleCancelReasonInput = this.handleCancelReasonInput.bind(this);
+		this.handleCancelRequestClick = this.handleCancelRequestClick.bind(this);
 		this.setError = this.setError.bind(this);
 		this.handleErrorClose = this.handleErrorClose.bind(this);
 	}
@@ -87,7 +89,8 @@ export default class RequestDetails extends React.Component {
 
 		let requestResponseNode;
 		let adminControls = [];
-		if(this.props.currentUser && this.props.currentUser.role === 'admin'){
+		if(this.props.currentUser && this.props.currentUser.role === 'admin'
+				&& this.props.request.status === 'pending'){
 			if(this.isRequest()){
 				adminControls.push(
 					<button type="button" className="btn btn-warning"
@@ -231,6 +234,29 @@ export default class RequestDetails extends React.Component {
 			);
 		}
 
+		let requestorControls;
+		if(window.location.pathname.startsWith(`/request/${this.props.request._id}`)
+				&& !Meteor.user() && this.props.request.status === 'pending'){
+			requestorControls = (
+				<div className="well">
+					<div className="row">
+						<div className="col-md-12">
+							<div className="form-group">
+								<label htmlFor="cancel-reason">Cancel request</label>
+								<textarea className="form-control" id="cancel-reason"
+										value={this.state.cancelReason}
+										onInput={this.handleCancelReasonInput}></textarea>
+							</div>
+							<button type="button" className="btn btn-danger"
+									onClick={this.handleCancelRequestClick}>
+								Cancel request
+							</button>
+						</div>
+					</div>
+				</div>
+			);
+		}
+
 		return (
 			<div>
 
@@ -238,7 +264,7 @@ export default class RequestDetails extends React.Component {
 		this.state.error
 			? (
 				<ErrorAlert onClose={this.handleErrorClose}>
-					this.state.error
+					{this.state.error}
 				</ErrorAlert>
 			)
 			: null
@@ -269,8 +295,8 @@ export default class RequestDetails extends React.Component {
 			)
 			: null
 	}
-
 				{additionalFellowshipInfoPanel}
+				{requestorControls}
 				{adminControls}
 			</div>
 		);
@@ -392,6 +418,24 @@ export default class RequestDetails extends React.Component {
 				}
 				else {
 					this.handleCloseResendConfirmationRequestsPanel();
+				}
+			});
+		}
+	}
+
+	handleCancelReasonInput(event){
+		this.setState({cancelReason: event.target.value});
+	}
+
+	handleCancelRequestClick(){
+		const requestId = this.props.request._id;
+		const cancelReason = this.state.cancelReason;
+		if(cancelReason){
+			Meteor.call('dayOffRequests.cancelRequest', requestId, cancelReason, err => {
+				if(err){
+					console.log(`${err.name}: ${err.message}`);
+					this.setError('There was a problem cancelling the request');
+					throwError(err);
 				}
 			});
 		}

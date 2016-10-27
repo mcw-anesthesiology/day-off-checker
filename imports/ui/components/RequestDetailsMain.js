@@ -35,12 +35,13 @@ export default function RequestDetailsMain(props){
 			<div className="row id-time-container">
 				<div className="col-md-5">
 					<span className="request-id">
-						ID: {props.request._id}
+						<b>ID: </b>
+						{props.request._id}
 					</span>
 				</div>
 				<div className="col-md-5 col-md-offset-2">
 					<span className="request-time">
-						Requested:
+						<b>Requested: </b>
 						<time dateTime={props.request.requestTime.toISOString()}>
 							{displayDate(props.request.requestTime)}
 						</time>
