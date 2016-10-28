@@ -28,7 +28,6 @@ useraccounts:flow-routing
 email@1.1.18
 random@1.0.10
 reactive-dict@1.1.8
-twbs:bootstrap
 aslagle:reactive-table
 tmeasday:html5-history-api
 zenniz:jquery-placeholder

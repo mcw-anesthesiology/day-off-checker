@@ -95,7 +95,6 @@ tmeasday:check-npm-versions@0.3.1
 tmeasday:html5-history-api@4.1.2
 tomwasd:history-polyfill@0.0.1
 tracker@1.1.1
-twbs:bootstrap@3.3.6
 ui@1.0.12
 underscore@1.0.10
 url@1.0.11
