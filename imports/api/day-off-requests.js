@@ -1077,7 +1077,7 @@ function sendRequestCancellationNotifications(request, cancelReason){
 							<h1>Hello ${request.requestorName}</h1>
 
 							<p>
-								This email is notifying you that your <a href="${requestUrl}"${typeName} request</a>
+								This email is notifying you that your <a href="${requestUrl}">${typeName} request</a>
 								for ${displayDateRange(request.requestedDate)}
 								has been cancelled for the following reason.
 							</p>
