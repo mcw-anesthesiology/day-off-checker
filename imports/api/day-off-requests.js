@@ -37,31 +37,46 @@ if(Meteor.isServer){
 		const user = Meteor.users.findOne(this.userId);
 		const fellow = isFellow(this.connection);
 
-		if(user.role === 'admin'){
-			return DayOffRequests.find({
-				[DAY_OFF_FIELDS.FELLOWSHIP]: {
-					$exists: fellow
-				}
-			});
-		}
-		else{
-			return DayOffRequests.find({
-				$and: [
-					{
-						[DAY_OFF_FIELDS.FELLOWSHIP]: {
-							$exists: fellow
-						}
-					},
-					{
-						$or: [
-							{ usersNotified: user.username },
-							{ 'confirmationRequests.confirmer': user.username }
-						]
+		switch(user.role){
+			case USER_ROLES.ADMIN:
+				return DayOffRequests.find({
+					[DAY_OFF_FIELDS.FELLOWSHIP]: {
+						$exists: fellow
 					}
-				]
-			});
+				});
+			case USER_ROLES.RESIDENCY_COORDINATOR:
+				if(!fellow)
+					return DayOffRequests.find({
+						[DAY_OFF_FIELDS.FELLOWSHIP]: {
+							$exists: false
+						}
+					});
+				break;
+			case USER_ROLES.FELLOWSHIP_COORDINATOR:
+				if(fellow)
+					return DayOffRequests.find({
+						[DAY_OFF_FIELDS.FELLOWSHIP]: {
+							$exists: true
+						}
+					});
+				break;
+			default:
+				return DayOffRequests.find({
+					$and: [
+						{
+							[DAY_OFF_FIELDS.FELLOWSHIP]: {
+								$exists: fellow
+							}
+						},
+						{
+							$or: [
+								{ usersNotified: user.username },
+								{ 'confirmationRequests.confirmer': user.username }
+							]
+						}
+					]
+				});
 		}
-
 	});
 }
 
