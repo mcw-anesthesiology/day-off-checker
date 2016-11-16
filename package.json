@@ -25,6 +25,6 @@
   },
   "devDependencies": {
     "eslint": "^3.4.0",
-    "mup": "github:jacobmischka/meteor-up"
+    "mup": "git+https://github.com/jacobmischka/meteor-up"
   }
 }
