@@ -73,7 +73,7 @@ export function camelCaseToWords(string){
 export function isFellow(connection){
 	let hostname;
 	if(Meteor.isClient)
-		hostname = document.location.host;
+		hostname = window.location.host;
 	else
 		hostname = connection.httpHeaders.host;
 
@@ -95,10 +95,10 @@ export function article(noun){
 export function userTypeUrl(type){
 	FlowRouter.watchPathChange();
 	if(type.toLowerCase() === 'fellow')
-		return '//fellow.' + document.location.host
+		return '//fellow.' + window.location.host
 			+ FlowRouter.current().path;
 
-	return '//' + document.location.host.substring(document.location.host.indexOf('.') + 1)
+	return '//' + window.location.host.substring(window.location.host.indexOf('.') + 1)
 		+ FlowRouter.current().path;
 }
 
