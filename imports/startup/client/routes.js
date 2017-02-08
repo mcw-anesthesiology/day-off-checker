@@ -46,7 +46,6 @@ FlowRouter.route('/calendar', {
 
 FlowRouter.route('/request/:_id', {
 	name: 'Request',
-	triggersEnter: [AccountsTemplates.ensureSignedIn],
 	action(){
 		BlazeLayout.render('main', { main: 'singleRequestPage' });
 	}

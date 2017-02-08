@@ -6,9 +6,11 @@ import { Accounts } from 'meteor/accounts-base';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 import { handleError } from 'meteor/saucecode:rollbar';
 
-import map from 'lodash/map';
+import { Fellowships } from './fellowships.js';
 
 import { APP_ACCOUNTS_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS } from '../constants.js';
+
+import map from 'lodash/map';
 
 export const Locations = new Mongo.Collection('locations');
 
@@ -18,12 +20,17 @@ if(Meteor.isServer){
 	});
 }
 
+if(Meteor.isClient){
+	Meteor.subscribe('fellowships');
+}
+
 Meteor.methods({
 	'addLocation'(location){
 		if(Meteor.user().role !== 'admin')
 			throw new Meteor.Error('addLocation.unauthorized');
 
 		const locationAdmins = Meteor.users.find({ role: 'location_admin' }).fetch();
+		const fellowships = Fellowships.find({}).fetch();
 
 		new SimpleSchema({
 			_id: {
@@ -42,6 +49,12 @@ Meteor.methods({
 				type: String,
 				label: 'Location administrator username',
 				allowedValues: map(locationAdmins, 'username')
+			},
+			fellowship: {
+				type: String,
+				label: 'Fellowship ID',
+				allowedValues: map(fellowships, '_id'),
+				optional: true
 			}
 		}).validate(location);
 
@@ -56,6 +69,7 @@ Meteor.methods({
 			throw new Meteor.Error('updateLocation.unauthorized');
 
 		const locationAdmins = Meteor.users.find({ role: 'location_admin' }).fetch();
+		const fellowships = Fellowships.find({}).fetch();
 
 		new SimpleSchema({
 			_id: {
@@ -74,6 +88,12 @@ Meteor.methods({
 				type: String,
 				label: 'Location administrator username',
 				allowedValues: map(locationAdmins, 'username')
+			},
+			fellowship: {
+				type: String,
+				label: 'Fellowship ID',
+				allowedValues: map(fellowships, '_id'),
+				optional: true
 			}
 		}).validate(location);
 
@@ -88,6 +108,10 @@ Meteor.methods({
 });
 
 function notifyNewLocationAdmin(location){
+	let fellowshipStr;
+	if(location.fellowship){
+		fellowshipStr = ` for the <b>${location.fellowship} fellowship</b>`;
+	}
 	try {
 		const user = Accounts.findUserByUsername(location.administrator);
 		Email.send({
@@ -100,7 +124,7 @@ function notifyNewLocationAdmin(location){
 						<h1>Hello ${user.name}</h1>
 						<p>
 							This email is notifying you that you have been added as an administrator in the Anesthesiology department's day off
-							management site for ${location.name}.
+							management site for ${location.name}${fellowshipStr}.
 						</p>
 						<p>
 							You will be notified when anyone from this location requests a day off, and you will have to login

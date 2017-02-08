@@ -1,13 +1,31 @@
 <template name="locationsList">
 	<section class="locations-list container">
 		<h1>Locations</h1>
-{{#if locationToEdit}}
-		{{>editLocation location=locationToEdit}}
+{{#if isFellow}}
+	{{#each fellowship in fellowships}}
+			<h2>{{fellowship.name}}</h2>
+		{{#if fellowshipLocationToEdit fellowship._id}}
+			<div>
+				{{>React component=EditLocation location=(fellowshipLocationToEdit fellowship._id)
+					siteAdmins=siteAdmins fellowshipId=fellowship._id
+					handleSubmit=(handleLocationSubmit fellowship._id) handleCancel=(handleCancel fellowship._id)
+				}}
+			</div>
+		{{else}}
+			<button type="button" class="btn btn-lg btn-primary" id="add-fellowship-location" data-fellowship="{{fellowship._id}}">Add location</button>
+		{{/if}}
+
+		{{>reactiveTable collection=(fellowshipLocations fellowship._id) settings=(fellowshipLocationsSettings fellowship._id)}}
+	{{/each}}
 {{else}}
+	{{#if locationToEdit}}
+		{{>editLocation location=locationToEdit}}
+	{{else}}
 		<button type="button" class="btn btn-lg btn-primary" id="add-location">Add location</button>
-{{/if}}
+	{{/if}}
 
 		{{>reactiveTable collection=locations settings=locationsSettings}}
+{{/if}}
 	</section>
 </template>
 
