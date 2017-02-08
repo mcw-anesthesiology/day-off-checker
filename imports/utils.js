@@ -94,13 +94,19 @@ export function article(noun){
 
 export function userTypeUrl(type){
 	FlowRouter.watchPathChange();
-	let basename = window.location.host.substring(window.location.host.indexOf('.') + 1);
-	if(type.toLowerCase() === 'fellow')
-		return '//fellow.' + basename
-			+ FlowRouter.current().path;
+	let basename = window.location.host
+		.substring(window.location.host.indexOf('.') + 1);
+	let subdomain;
+	switch(type.toLowerCase()){
+		case 'fellow':
+			subdomain = 'fellow.';
+			break;
+		default:
+			subdomain = Meteor.isDevelopment ? '' : 'www.';
+			break;
+	}
 
-	return '//' + basename
-		+ FlowRouter.current().path;
+	return `//${subdomain}${basename}${FlowRouter.current().path}`;
 }
 
 export function escapeNewlines(str){
