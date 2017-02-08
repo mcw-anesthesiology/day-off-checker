@@ -94,11 +94,12 @@ export function article(noun){
 
 export function userTypeUrl(type){
 	FlowRouter.watchPathChange();
+	let basename = window.location.host.substring(window.location.host.indexOf('.') + 1);
 	if(type.toLowerCase() === 'fellow')
-		return '//fellow.' + window.location.host
+		return '//fellow.' + basename
 			+ FlowRouter.current().path;
 
-	return '//' + window.location.host.substring(window.location.host.indexOf('.') + 1)
+	return '//' + basename
 		+ FlowRouter.current().path;
 }
 
