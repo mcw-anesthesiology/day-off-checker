@@ -2,14 +2,15 @@ import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import { Email } from 'meteor/email';
 import { Accounts } from 'meteor/accounts-base';
+import { check } from 'meteor/check';
 
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 import { handleError } from 'meteor/saucecode:rollbar';
 
 import { Locations } from './locations.js';
 import { Fellowships } from './fellowships.js';
+import { ReminderEmails, scheduleReminder } from './reminder-emails.js';
 
-import { scheduleReminder } from '../api/reminder-emails.js';
 import {
 	APP_NOTIFICATION_EMAIL_ADDRESS,
 	ADMIN_EMAIL_ADDRESS,
@@ -21,7 +22,15 @@ import {
 	DAY_OFF_TYPE_NAMES,
 	USER_ROLES
 } from '../constants.js';
-import { displayDateRange, nl2br, isFellow, isFellowRequest, article } from '../utils.js';
+import {
+	displayDateRange,
+	nl2br,
+	isFellow,
+	isFellowRequest,
+	article,
+	capitalizeFirstLetter,
+	camelCaseToWords
+} from '../utils.js';
 
 import map from 'lodash/map';
 import moment from 'moment';
@@ -77,6 +86,14 @@ if(Meteor.isServer){
 					]
 				});
 		}
+	});
+
+	Meteor.publish('dayOffRequests_byId', function(requestId){
+		check(requestId, String);
+		return [
+			DayOffRequests.find({_id: requestId}),
+			ReminderEmails.find({requestId: requestId})
+		];
 	});
 }
 
@@ -146,11 +163,43 @@ Meteor.methods({
 		if(isFellow(this.connection)){
 			const fellowships = Fellowships.find().fetch();
 			const fellowshipAdmins = Meteor.users.find({ role: 'fellowship_admin' }).fetch();
+			let allowedLocationIds = map(locations, '_id');
+			allowedLocationIds.push('other');
+			allowedLocationIds.push('not-assigned-yet');
+
 			let fellowSchema = {
 				dayOffType: {
 					type: String,
 					label: 'Day off type',
 					allowedValues: FELLOW_DAY_OFF_TYPES
+				},
+				'requestedLocation._id': {
+					type: String,
+					label: 'Location ID',
+					allowedValues: allowedLocationIds
+				},
+				'requestedLocation.name': {
+					type: String,
+					label: 'Location name',
+					// allowedValues: map(locations, 'name')
+				},
+				'requestedLocation.number': {
+					type: String,
+					label: 'Location number',
+					allowedValues: map(locations, 'number'),
+					optional: true
+				},
+				'requestedLocation.administrator': {
+					type: String,
+					label: 'Location administrator',
+					allowedValues: map(locationAdmins, 'username'),
+					optional: true
+				},
+				'requestedLocation.fellowship': {
+					type: String,
+					label: 'Location fellowship ID',
+					'allowedValues': map(fellowships, '_id'),
+					optional: true
 				},
 				requestedFellowship: {
 					type: Object,
@@ -175,11 +224,44 @@ Meteor.methods({
 					type: String,
 					label: 'Fellowship administrator',
 					allowedValues: map(fellowshipAdmins, 'username')
+				},
+				additionalFellowshipInfo: {
+					type: Object,
+					label: 'Additional fellowship info',
+					optional: true
+				},
+				'additionalFellowshipInfo.alreadyNotified': {
+					type: Boolean,
+					label: 'Has already notified',
+					optional: true
+				},
+				'additionalFellowshipInfo.notified': {
+					type: String,
+					label: 'Person notified',
+					optional: true
+				},
+				'additionalFellowshipInfo.presenting': {
+					type: Boolean,
+					label: 'Presenting in meeting',
+					optional: true
+				},
+				'additionalFellowshipInfo.newOrUpdated': {
+					type: String,
+					label: 'New or updated vacation request',
+					allowedValues: [
+						'new',
+						'updated'
+					],
+					optional: true
+				},
+				'additionalFellowshipInfo.cancelRequest': {
+					type: Boolean,
+					label: 'Cancel vacation request?',
+					optional: true
 				}
 			};
 
-			for(let i in fellowSchema)
-				schema[i] = fellowSchema[i];
+			Object.assign(schema, fellowSchema);
 		}
 
 		new SimpleSchema(schema).validate(request);
@@ -261,6 +343,29 @@ Meteor.methods({
 			sendRequestDenialNotifications(request, reason);
 		}
 	},
+	'dayOffRequests.cancelRequest'(requestId, cancelReason){
+		new SimpleSchema({
+			cancelReason: {
+				type: String,
+				label: 'Cancel reason'
+			}
+		}).validate({ cancelReason: cancelReason });
+
+		DayOffRequests.update({
+			_id: requestId,
+			status: 'pending'
+		}, {
+			$set: {
+				status: 'cancelled',
+				cancelReason: cancelReason
+			}
+		});
+
+		if(Meteor.isServer){
+			const request = DayOffRequests.findOne(requestId);
+			sendRequestCancellationNotifications(request, cancelReason);
+		}
+	},
 	'dayOffRequests.resendConfirmationRequests'(requestId, resendUsernames){
 		if(Meteor.user().role !== 'admin')
 			throw new Meteor.Error('dayOffRequests.resendConfirmationRequests.unauthorized');
@@ -339,7 +444,13 @@ function getUsersToNotify(request){
 
 function sendNotifications(request, users = getUsersToNotify(request), sendRequestorNotification = true){
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
-	const locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
+	let locationAdmin;
+	if(isFellowRequest(request) && !request.requestedLocation.administrator)
+		locationAdmin = {
+			name: ''
+		};
+	else
+		locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
 
 	let reasonHtml = '';
 	if(request.requestReason){
@@ -447,6 +558,7 @@ function sendNotifications(request, users = getUsersToNotify(request), sendReque
 								<table>
 									<thead>
 										<tr>
+											<th>ID</th>
 											<th>Date</th>
 											<th>Location</th>
 											<th>Location administrator</th>
@@ -454,6 +566,7 @@ function sendNotifications(request, users = getUsersToNotify(request), sendReque
 									</thead>
 									<tbody>
 										<tr>
+											<td><a href="${requestUrl}">${request._id}</a></td>
 											<td>${displayDateRange(request.requestedDate)}</td>
 											<td>${request.requestedLocation.name}</td>
 											<td>${locationAdmin.name}</td>
@@ -488,7 +601,16 @@ function getUsersForConfirmation(request){
 
 function sendConfirmationRequests(request, users = getUsersForConfirmation(request), sendRequestorNotification = true, sendLocationAdminNotification = true){
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
-	const locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
+	let locationAdmin;
+	if(isFellowRequest(request) && !request.requestedLocation.administrator){
+		locationAdmin = {
+			name: ''
+		};
+		sendLocationAdminNotification = false;
+	}
+	else {
+		locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
+	}
 
 	let reasonHtml = '';
 	if(request.requestReason){
@@ -497,6 +619,28 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 				<p>${nl2br(request.requestReason)}</p>
 			</blockquote>`;
 	}
+	let additionalInfoHtml = '';
+	if(request.additionalFellowshipInfo){
+		additionalInfoHtml = `
+			<table class="table">
+				<tbody>`;
+
+		for(let key of Object.keys(request.additionalFellowshipInfo)){
+			let value = request.additionalFellowshipInfo[key];
+			if(typeof value === 'boolean')
+				value = value ? 'yes' : 'no';
+			additionalInfoHtml += `
+					<tr>
+						<th>${camelCaseToWords(key)}</th>
+						<td>${capitalizeFirstLetter(value)}</td>
+					</tr>`;
+		}
+
+		additionalInfoHtml +=
+				`</tbody>
+			</table>`;
+	}
+
 	let typeName = DAY_OFF_TYPE_NAMES[request[DAY_OFF_FIELDS.TYPE]];
 	let typeArticle = article(typeName);
 	let timeout = 0; // FIXME
@@ -529,7 +673,10 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 
 								<p>${request.requestorName} made ${typeArticle} ${typeName} request for ${displayDateRange(request.requestedDate)}.</p>
 
-								<p>Please navigate to <a href="${requestUrl}">${requestUrl}</a> or the <a href="${Meteor.absoluteUrl('list')}">requests list page</a> to approve or deny this request.</p>
+								<p>
+									Please navigate to <a href="${requestUrl}">${requestUrl}</a> or the
+									<a href="${Meteor.absoluteUrl('list')}">requests list page</a> to approve or deny this request.
+								</p>
 
 								<table>
 									<thead>
@@ -553,6 +700,8 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 								</table>
 
 								${reasonHtml}
+
+								${additionalInfoHtml}
 
 								<p>You will be notified when the request is approved or denied.</p>
 
@@ -633,11 +782,12 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 								${reasonHtml}
 
 								<p>
-									If you have a problem with this request, please let one of the chief residents know:
+									If you have a problem with this request, please let one of the approvers know:
 								</p>
+
 								${confirmerList}
 
-								<p>You will be notified when the request is approved or denied by the chiefs.</p>
+								<p>You will be notified when the request is approved or denied.</p>
 
 								<p>If you have any questions or concerns about the system please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 
@@ -658,6 +808,14 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 	}
 
 	if(sendRequestorNotification){
+		let approvers = 'the chiefs';
+		if(isFellowRequest(request)){
+			if(users && users[0] && users[0].name)
+				approvers = users[0].name;
+			else
+				approvers = 'the fellowship director';
+		}
+
 		try{
 			timeout += 1000; // FIXME
 			Meteor.setTimeout(() => {
@@ -686,6 +844,7 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 								<table>
 									<thead>
 										<tr>
+											<th>ID</th>
 											<th>Name</th>
 											<th>Date</th>
 											<th>Location</th>
@@ -694,6 +853,7 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 									</thead>
 									<tbody>
 										<tr>
+											<td><a href="${requestUrl}">${request._id}</a></td>
 											<td>${request.requestorName}</td>
 											<td>${displayDateRange(request.requestedDate)}</td>
 											<td>${request.requestedLocation.name}</td>
@@ -704,7 +864,9 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 
 								${reasonHtml}
 
-								<p>Confirmation has been requested by the chiefs. You will be notified of their response.</p>
+								<p>Confirmation has been requested by ${approvers}. You will be notified of their response.</p>
+
+								<p>To view or cancel this request, please visit <a href="${requestUrl}">${requestUrl}</a>.</p>
 
 								<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 
@@ -777,7 +939,7 @@ function sendRequestApprovalNotifications(request){
 						<body>
 							<h1>Hello ${request.requestorName}</h1>
 
-							<p>Your ${typeName} request for ${displayDateRange(request.requestedDate)} has been approved!</p>
+							<p>Your <a href="${requestUrl}">${typeName} request</a> for ${displayDateRange(request.requestedDate)} has been approved!</p>
 
 							<p>Be sure to remind your site location administrator 1-2 days prior to your absence.</p>
 
@@ -852,12 +1014,91 @@ function sendRequestDenialNotifications(request, reason){
 							<h1>Hello ${request.requestorName}</h1>
 
 							<p>
-								This email is notifying you that your ${typeName} request for ${displayDateRange(request.requestedDate)}
+								This email is notifying you that your <a href="${requestUrl}">${typeName}</a>
+								request for ${displayDateRange(request.requestedDate)}
 								has been denied by ${Meteor.user.name} for the following reason.
 							</p>
 
 							<blockquote>
 								<p>${nl2br(reason)}</p>
+							</blockquote>
+
+							<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
+
+							<p>Thank you!</p>
+						</body>
+					</html>`
+			});
+		}, timeout);
+	}
+	catch(e){
+		console.log('Error sending denial notification: ' + e);
+		handleError(e);
+	}
+}
+
+function sendRequestCancellationNotifications(request, cancelReason){
+	const users = getUsersToNotify(request);
+	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
+	let typeName = DAY_OFF_TYPE_NAMES[request[DAY_OFF_FIELDS.TYPE]];
+	let timeout = 0; // FIXME
+	for(let user of users){
+		try{
+			timeout += 1000; // FIXME
+			Meteor.setTimeout(() => {
+				Email.send({
+					to: user.emails[0].address,
+					from: APP_NOTIFICATION_EMAIL_ADDRESS,
+					subject: `${typeName} Request Cancelled`,
+					html: `
+						<html>
+							<body>
+								<h1>Hello ${user.name}</h1>
+
+								<p>
+									This email is notifying you that <a href="${requestUrl}">
+									${request.requestorName}'s ${typeName} request for ${displayDateRange(request.requestedDate)}</a>
+									has been cancelled for the following reason.
+								</p>
+
+								<blockquote>
+									<p>${nl2br(cancelReason)}</p>
+								</blockquote>
+
+								<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
+
+								<p>Thank you!</p>
+							</body>
+						</html>`
+				});
+			}, timeout);
+		}
+		catch(e){
+			console.log('Error sending cancellation notification: ' + e);
+			handleError(e);
+		}
+	}
+
+	try{
+		timeout += 1000; // FIXME
+		Meteor.setTimeout(() => {
+			Email.send({
+				to: request.requestorEmail,
+				from: APP_NOTIFICATION_EMAIL_ADDRESS,
+				subject: `${typeName} Request Cancelled`,
+				html: `
+					<html>
+						<body>
+							<h1>Hello ${request.requestorName}</h1>
+
+							<p>
+								This email is notifying you that your <a href="${requestUrl}">${typeName} request</a>
+								for ${displayDateRange(request.requestedDate)}
+								has been cancelled for the following reason.
+							</p>
+
+							<blockquote>
+								<p>${nl2br(cancelReason)}</p>
 							</blockquote>
 
 							<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>

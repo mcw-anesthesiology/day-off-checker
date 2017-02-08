@@ -15,11 +15,17 @@ import debounce from 'lodash/debounce';
 
 import './calendar.html';
 
+console.log($);
+console.log($.fn.fullCalendar);
+
+
 let requestSubscription;
 let dayOffEvents = [];
 const calendarMobileHeight = 500;
 
 Template.calendar.onCreated(function(){
+	console.log($);
+	console.log($.fn.fullCalendar);
 	requestSubscription = this.subscribe('dayOffRequests');
 	this.subscribe('allUserData');
 });

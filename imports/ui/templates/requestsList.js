@@ -4,11 +4,13 @@ import { throwError } from 'meteor/saucecode:rollbar';
 
 import { DayOffRequests } from '../../api/day-off-requests.js';
 import { ReminderEmails } from '../../api/reminder-emails.js';
+import { isFellow } from '../../../imports/utils.js';
 
 import find from 'lodash/find';
 import moment from 'moment';
 import 'twix';
 
+import RequestDetails from '../components/RequestDetails.js';
 import {
 	ADMIN_EMAIL_ADDRESS,
 	DAYS_BEFORE_REQUEST_TO_SEND_REMINDER,
@@ -60,7 +62,7 @@ Template.requestsList.helpers({
 			return [{}];
 	},
 	sickDaySettings(){
-		return {
+		const settings = {
 			fields: [
 				{ key: 'requestorName', label: 'Name', sortOrder: 2, sortDirection: 'asc' },
 				{ key: 'requestedLocation.name', label: 'Location' },
@@ -69,6 +71,11 @@ Template.requestsList.helpers({
 				{ key: 'requestReason', label: 'Reason' }
 			]
 		};
+		
+		if(isFellow())
+			settings.fields.splice(1, 0, { key: 'requestedFellowship.name', label: 'Fellowship' });
+		
+		return settings;
 	},
 	iDayDetails(){
 		return DayOffRequests.findOne(Session.get('iDayDetailsId'));
@@ -119,8 +126,9 @@ Template.requestsList.helpers({
 	fellowRequestSettings(){
 		return {
 			fields: [
-				{ key: DAY_OFF_FIELDS.TYPE, label: 'Request Type', fn: displayTypeName },
 				{ key: 'requestorName', label: 'Name', sortOrder: 2, sortDirection: 'asc' },
+				{ key: 'requestedFellowship.name', label: 'Fellowship' },
+				{ key: DAY_OFF_FIELDS.TYPE, label: 'Request Type', fn: displayTypeName },
 				{ key: 'requestedLocation.name', label: 'Location' },
 				{ key: 'requestedDate', label: 'Dates', fn: displaySortableDateRange, sortOrder: 0, sortDirection: 'desc' },
 				{ key: 'requestTime', label: 'Requested', fn: displaySortableDate, sortOrder: 1, sortDirection: 'desc' },
@@ -129,6 +137,9 @@ Template.requestsList.helpers({
 				{ key: 'confirmationRequests', label: '', fn: requestNeedsResponse }
 			]
 		};
+	},
+	RequestDetails(){
+		return RequestDetails;
 	}
 });
 
@@ -152,15 +163,19 @@ Template.requestsList.events({
 	'click #close-sick-day-details'(){
 		Session.set('sickDayDetailsId', undefined);
 	},
-	'click .sick-day-requests tr'(event, instance){
+	'click .sick-day-requests tr'(){
 		Session.set('sickDayDetailsId', this._id);
 	},
 	'click #close-i-day-details'(){
 		Session.set('iDayDetailsId', undefined);
 	},
-	'click .i-day-requests tr'(event, instance){
+	'click .i-day-requests tr'(){
 		Session.set('iDayDetailsId', this._id);
 	}
+});
+
+Template.singleRequestPage.onCreated(function(){
+	Meteor.subscribe('dayOffRequests_byId', FlowRouter.getParam('_id'));
 });
 
 Template.singleRequestPage.helpers({
@@ -172,6 +187,9 @@ Template.singleRequestPage.helpers({
 			console.log(e);
 			return false;
 		}
+	},
+	RequestDetails(){
+		return RequestDetails;
 	}
 });
 
@@ -269,6 +287,16 @@ Template.requestDetails.helpers({
 	},
 	resendConfirmationRequests(){
 		return Session.equals('requestDetailAdminAction', 'resend-confirmation-requests');
+	},
+	keys(obj){
+		return Object.keys(obj);
+	},
+	getAdditionalInfo(request, key){
+		let value = request.additionalFellowshipInfo[key];
+		if(typeof value === 'boolean')
+			value = value ? 'yes' : 'no';
+
+		return capitalizeFirstLetter(value);
 	}
 });
 

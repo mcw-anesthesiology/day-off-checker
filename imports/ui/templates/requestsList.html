@@ -5,7 +5,9 @@
 		</header>
 {{#if sickDayDetails}}
 		<h2 id="sick-day-details">Sick Day Details</h2>
-		{{>requestDetails request=sickDayDetails}}
+		<section class="request-details well well-lg">
+			{{>React component=RequestDetails request=sickDayDetails currentUser=currentUser}}
+		</section>
 		<button type="button" class="close-details-button btn btn-default" id="close-sick-day-details">Close details</button>
 {{/if}}
 {{#if sickDayRequests}}
@@ -19,7 +21,9 @@
 {{#if isFellow}}
 	{{#if fellowRequestDetails}}
 		<h2 id="i-day-details">Request Details</h2>
-		{{>requestDetails request=fellowRequestDetails}}
+		<section class="request-details well well-lg">
+			{{>React component=RequestDetails request=fellowRequestDetails currentUser=currentUser}}
+		</section>
 		<button type="button" class="close-details-button btn btn-default" id="close-i-day-details">Close details</button>
 	{{/if}}
 	{{#if fellowRequestRequests}}
@@ -32,7 +36,9 @@
 {{else}}
 	{{#if iDayDetails}}
 		<h2 id="i-day-details">I-Day Details</h2>
-		{{>requestDetails request=iDayDetails}}
+		<section class="request-details well well-lg">
+			{{>React component=RequestDetails request=iDayDetails currentUser=currentUser}}
+		</section>
 		<button type="button" class="close-details-button btn btn-default" id="close-i-day-details">Close details</button>
 	{{/if}}
 	{{#if iDayRequests}}
@@ -52,7 +58,9 @@
 			<h1>Request</h1>
 		</header>
 
-		{{>requestDetails request=request}}
+		<section class="request-details well well-lg">
+			{{>React component=RequestDetails request=request currentUser=currentUser}}
+		</section>
 	</section>
 </template>
 
@@ -189,6 +197,24 @@
 
 	{{#if currentUserAdmin}}{{#if isRequest request}}
 		<button type="button" class="btn btn-warning" id="resend-confirmation-requests">Resend confirmation requests</button>
+	{{/if}}{{/if}}
+
+	{{#if currentUserAdmin}}{{#if request.additionalFellowshipInfo}}
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				Additional info
+			</div>
+			<table class="table table-striped">
+				<tbody>
+		{{#each key in keys request.additionalFellowshipInfo}}
+				<tr>
+					<th>{{ camelCaseToWords key }}</th>
+					<td>{{ getAdditionalInfo request key }}</td>
+				</tr>
+		{{/each}}
+				</tbody>
+			</table>
+		</div>
 	{{/if}}{{/if}}
 
 	{{! TODO: Add button to schedule reminders }}
