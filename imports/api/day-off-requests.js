@@ -352,8 +352,7 @@ Meteor.methods({
 		}).validate({ cancelReason: cancelReason });
 
 		DayOffRequests.update({
-			_id: requestId,
-			status: 'pending'
+			_id: requestId
 		}, {
 			$set: {
 				status: 'cancelled',
@@ -1110,7 +1109,7 @@ function sendRequestCancellationNotifications(request, cancelReason){
 		}, timeout);
 	}
 	catch(e){
-		console.log('Error sending denial notification: ' + e);
+		console.log('Error sending cancellation confirmation: ' + e);
 		handleError(e);
 	}
 }
