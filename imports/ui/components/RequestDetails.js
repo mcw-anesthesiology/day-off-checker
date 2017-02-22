@@ -236,7 +236,7 @@ export default class RequestDetails extends React.Component {
 
 		let requestorControls;
 		if(window.location.pathname.startsWith(`/request/${this.props.request._id}`)
-				&& !Meteor.user() && this.props.request.status === 'pending'){
+				&& !Meteor.user() && ['pending', 'approved'].includes(this.props.request.status)){
 			requestorControls = (
 				<div className="well">
 					<div className="row">
