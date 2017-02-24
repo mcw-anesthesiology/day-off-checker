@@ -942,6 +942,8 @@ function sendRequestApprovalNotifications(request){
 
 							<p>Be sure to remind your site location administrator 1-2 days prior to your absence.</p>
 
+							<p>If you would like to cancel this ${typeName}, you can do so by visiting the <a href="${requestUrl}">request page</a>.</p>
+
 							<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 
 							<p>Thank you!</p>
