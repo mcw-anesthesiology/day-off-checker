@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import find from 'lodash/find';
 import moment from 'moment';
 import { throwError } from 'meteor/saucecode:rollbar';
@@ -21,7 +21,7 @@ import {
 	escapeNewlines
 } from '../../utils.js';
 
-export default class RequestDetails extends React.Component {
+export default class RequestDetails extends Component {
 	constructor(props){
 		super(props);
 
@@ -454,6 +454,6 @@ export default class RequestDetails extends React.Component {
 }
 
 RequestDetails.propTypes = {
-	request: React.PropTypes.object,
-	currentUser: React.PropTypes.object
+	request: PropTypes.object,
+	currentUser: PropTypes.object
 };

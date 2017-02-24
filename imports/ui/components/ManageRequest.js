@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { Meteor } from 'meteor/meteor';
 
 import { DayOffRequests } from '../../api/day-off-requests.js';
 
 import ErrorAlert from './ErrorAlert.js';
 
-export default class ManageRequest extends React.Component {
+export default class ManageRequest extends Component {
 	constructor(){
 		super();
 		this.state = {

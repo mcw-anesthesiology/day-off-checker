@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 import moment from 'moment';
 
 import { ReminderEmails } from '../../api/reminder-emails.js';
@@ -118,9 +118,9 @@ export default function RequestDetailsAside(props){
 }
 
 RequestDetailsAside.propTypes = {
-	request: React.PropTypes.object.isRequired,
-	currentUser: React.PropTypes.object,
-	scheduleReminder: React.PropTypes.func.isRequired
+	request: PropTypes.object.isRequired,
+	currentUser: PropTypes.object,
+	scheduleReminder: PropTypes.func.isRequired
 };
 
 function isRequest(request){
