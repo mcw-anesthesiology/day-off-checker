@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 
-export default class EditLocation extends React.Component {
+export default class EditLocation extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
@@ -103,9 +103,9 @@ export default class EditLocation extends React.Component {
 }
 
 EditLocation.propTypes = {
-	fellowshipId: React.PropTypes.string,
-	location: React.PropTypes.object,
-	siteAdmins: React.PropTypes.array,
-	handleSubmit: React.PropTypes.func,
-	handleCancel: React.PropTypes.func
+	fellowshipId: PropTypes.string,
+	location: PropTypes.object,
+	siteAdmins: PropTypes.array,
+	handleSubmit: PropTypes.func,
+	handleCancel: PropTypes.func
 };
