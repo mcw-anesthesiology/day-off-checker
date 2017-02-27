@@ -112,3 +112,31 @@ export function userTypeUrl(type){
 export function escapeNewlines(str){
 	return str.replace(/\s+/g, ' ');
 }
+
+export function sortNumbers(a, b){
+	return Number(a) - Number(b);
+}
+
+export function sortPropNumbers(prop){
+	return (a, b) => sortNumbers(a[prop], b[prop]);
+}
+
+export function sortPropLength(prop){
+	return (a, b) => sortNumbers(a[prop].length, b[prop].length);
+}
+
+export function sortIgnoreCase(a, b){
+	a = a.toLowerCase();
+	b = b.toLowerCase();
+
+	if(a < b)
+		return -1;
+	if(a > b)
+		return 1;
+
+	return 0;
+}
+
+export function sortPropIgnoreCase(prop){
+	return (a, b) => sortIgnoreCase(a[prop], b[prop]);
+}
