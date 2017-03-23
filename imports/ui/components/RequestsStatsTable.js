@@ -3,6 +3,8 @@ import ReactTable from 'react-table';
 
 import 'react-table/react-table.css';
 
+import RequestDetails from './RequestDetails.js';
+
 import {
 	displayDate,
 	displayDateRange,
@@ -13,7 +15,7 @@ import {
 
 export default class RequestsStatsTable extends Component {
 	render(){
-		const {search, dayOffRequests} = this.props;
+		const {search, dayOffRequests, currentUser} = this.props;
 		const requestors = new Map();
 
 		dayOffRequests.map(request => {
@@ -74,6 +76,7 @@ export default class RequestsStatsTable extends Component {
 				defaultPageSize={10}
 				data={rows}
 				columns={columns}
+				collapseOnDataChange={false}
 				SubComponent={({row}) => (
 					<div className="stats-requests-sub-component">
 						<div className="panel panel-default">
@@ -121,6 +124,14 @@ export default class RequestsStatsTable extends Component {
 												</span>
 										}
 									]}
+									SubComponent={({row}) =>
+										<section className="request-details well well-lg">
+											<RequestDetails
+												request={row}
+												currentUser={currentUser} />
+										</section>
+									}
+									collapseOnDataChange={false}
 									pageSize={row.requests.length}
 									showPagination={false} />
 							</div>
@@ -134,5 +145,6 @@ export default class RequestsStatsTable extends Component {
 RequestsStatsTable.propTypes = {
 	search: PropTypes.string,
 	dates: PropTypes.array,
-	dayOffRequests: PropTypes.array
+	currentUser: PropTypes.object,
+	dayOffRequests: PropTypes.array.isRequired
 };

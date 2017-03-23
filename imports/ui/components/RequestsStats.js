@@ -35,9 +35,9 @@ export default class RequestsStats extends Component {
 		const {search, dates, requestDates} = this.state;
 
 		return (
-			<div className="requests-stats">
+			<div className="container requests-stats">
 				<div className="row">
-					<div className="col-sm-3">
+					<div className="col-sm-4 col-md-3">
 						<div className="form-group">
 							<label className="containing-label">
 								Day off range
@@ -59,7 +59,7 @@ export default class RequestsStats extends Component {
 							</label>
 						</div>
 					</div>
-					<div className="col-sm-3">
+					<div className="col-sm-4 col-md-3">
 						<div className="form-group">
 							<label className="containing-label">
 								Request range
@@ -81,7 +81,7 @@ export default class RequestsStats extends Component {
 							</label>
 						</div>
 					</div>
-					<div className="col-sm-4 col-sm-offset-2">
+					<div className="col-sm-3 col-sm-offset-1 col-md-offset-3">
 						<div className="form-group">
 							<label className="containing-label">
 								Search
