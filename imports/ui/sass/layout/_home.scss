@@ -85,8 +85,10 @@
 
 	.completed-entries {
 		flex-grow: 1;
+		max-width: 100%;
 		margin-top: 0.5em;
 		font-size: 1em;
+		overflow-x: auto;
 
 		@media screen and (min-width: $on-desktop) {
 			font-size: 1.5em;
