@@ -9,11 +9,12 @@ import { isValidDateRange } from '../../utils.js';
 const RequestsStatsTableContainer = createContainer(props => {
 	const requestsHandle = Meteor.subscribe('dayOffRequests');
 
-	// TODO: Only get requests, not sick days
-
 	const {dates, requestDates} = props;
 	const query = isValidDateRange(dates)
 		? {
+			'dayOffType': {
+				$ne: 'sick'
+			},
 			'requestedDate.0': {
 				$lte: dates[1]
 			},
