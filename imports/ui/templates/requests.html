@@ -1,14 +1,26 @@
 <template name="requests">
 
-	<div class="container nav-container">		
+	<div class="container nav-container">
 		<nav>
-			<a href="#table-view" class="view-link btn btn-lg {{isActiveView "#table-view"}}">Table view</a>
-			<a href="#calendar-view" class="view-link btn btn-lg {{isActiveView "#calendar-view"}}">Calendar view</a>
+			<a href="#table-view"
+					class="view-link btn btn-lg {{isActiveView "#table-view"}}">
+				Table view
+			</a>
+			<a href="#calendar-view"
+				class="view-link btn btn-lg {{isActiveView "#calendar-view"}}">
+				Calendar view
+			</a>
+			<a href="#stats-view"
+					class="view-link btn btn-lg {{isActiveView "#stats-view"}}">
+				Breakdown
+			</a>
 		</nav>
 	</div>
 
 {{#if showCalendar}}
 	{{>calendar}}
+{{else if showStats}}
+	{{>stats}}
 {{else}}
 	{{>requestsList}}
 {{/if}}

@@ -1,0 +1,70 @@
+.requests-stats {
+	padding: 0.5em;
+
+	@media (min-width: $small-desktop) {
+		padding: 1em 2em;
+	}
+
+	.stats-table {
+
+		.stats-requests-sub-component {
+			padding: 0.5em;
+
+			@media (min-width: $small-desktop) {
+				padding: 1em;
+			}
+
+			.panel {
+				margin: 0;
+
+				.panel-body {
+					padding: 0;
+
+					.requests-table {
+						border: none;
+
+						.rt-tr-group:last-child {
+							border-bottom: none;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	.ReactTable {
+		$bs-table-border-color: #ddd;
+
+		.rt-thead.-header,
+		.-pagination {
+			box-shadow: none;
+		}
+
+		.rt-table {
+
+			.rt-thead {
+				border-bottom: 2px solid $bs-table-border-color;
+			}
+
+			.rt-tbody {
+
+				.rt-tr-group {
+					border-bottom: 1px solid $bs-table-border-color;
+				}
+			}
+
+			.rt-tr {
+
+				.rt-th, .rt-td {
+					padding: 0.75em;
+				}
+
+				.rt-th {
+					text-align: left;
+					border: none;
+					font-weight: bold;
+				}
+			}
+		}
+	}
+}

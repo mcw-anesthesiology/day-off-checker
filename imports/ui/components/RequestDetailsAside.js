@@ -11,7 +11,8 @@ import {
 import {
 	capitalizeFirstLetter,
 	displayDate,
-	displayNameByUsername
+	displayNameByUsername,
+	statusLabelType
 } from '../../utils.js';
 
 export default function RequestDetailsAside(props){
@@ -125,21 +126,6 @@ RequestDetailsAside.propTypes = {
 
 function isRequest(request){
 	return (request[DAY_OFF_FIELDS.TYPE] !== DAY_OFF_TYPES.SICK);
-}
-
-function statusLabelType(status){
-	switch(status){
-		case 'pending':
-			return 'label-warning';
-		case 'approved':
-			return 'label-success';
-		case 'denied':
-			return 'label-danger';
-		case 'cancelled':
-			return 'label-default';
-		default:
-			return 'label-info';
-	}
 }
 
 function reminderCanBeScheduled(request){
