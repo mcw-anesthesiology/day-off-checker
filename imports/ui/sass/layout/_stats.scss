@@ -1,9 +1,5 @@
 .requests-stats {
-	padding: 0.5em;
-
-	@media (min-width: $small-desktop) {
-		padding: 1em 2em;
-	}
+	padding-top: 2em;
 
 	.stats-table {
 
@@ -25,6 +21,10 @@
 
 						.rt-tr-group:last-child {
 							border-bottom: none;
+						}
+
+						.request-details {
+							margin: 1em;
 						}
 					}
 				}

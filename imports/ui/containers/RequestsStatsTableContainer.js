@@ -33,6 +33,7 @@ const RequestsStatsTableContainer = createContainer(props => {
 
 	return {
 		...props,
+		currentUser: Meteor.user(),
 		dayOffRequests
 	};
 }, RequestsStatsTable);
