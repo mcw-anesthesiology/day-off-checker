@@ -51,3 +51,21 @@ select:invalid {
 		color: #555; // default bootstrap color
 	}
 }
+
+.form-control.appear-not-readonly[readonly] {
+	background-color: #fff;
+}
+
+.containing-label {
+	width: 100%;
+	margin-bottom: 0;
+}
+
+.containing-label > input,
+.containing-label > textarea,
+.containing-label > select,
+.containing-label > .select2,
+.containing-label > .input-group {
+	margin-top: 5px;
+	font-weight: normal;
+}

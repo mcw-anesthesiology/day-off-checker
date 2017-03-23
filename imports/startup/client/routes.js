@@ -93,13 +93,3 @@ FlowRouter.route('/fellowships', {
 		BlazeLayout.render('main', { main: 'fellowshipsList' });
 	}
 });
-
-FlowRouter.route('/stats', {
-	name: 'Stats',
-	triggersEnter: [
-		AccountsTemplates.ensureSignedIn
-	],
-	action(){
-		BlazeLayout.render('main', { main: 'stats' });
-	}
-});

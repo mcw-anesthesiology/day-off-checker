@@ -1,9 +1,9 @@
 import { Template } from 'meteor/templating';
 
-import RequestsStatsContainer from '../containers/RequestsStatsContainer.js';
+import RequestsStats from '../components/RequestsStats.js';
 
 import './stats.html';
 
 Template.stats.helpers({
-	RequestsStatsContainer: () => RequestsStatsContainer,
+	RequestsStats: () => RequestsStats,
 });

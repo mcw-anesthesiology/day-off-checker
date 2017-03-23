@@ -2,7 +2,8 @@ import './requests.html';
 
 let views = [
 	'#table-view',
-	'#calendar-view'
+	'#calendar-view',
+	'#stats-view'
 ];
 
 Template.requests.onRendered(function(){
@@ -20,6 +21,9 @@ Template.requests.helpers({
 	},
 	showCalendar(){
 		return Session.equals('requestsView', '#calendar-view');
+	},
+	showStats(){
+		return Session.equals('requestsView', '#stats-view');
 	}
 });
 

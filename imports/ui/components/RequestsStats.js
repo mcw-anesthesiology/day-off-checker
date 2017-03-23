@@ -1,124 +1,100 @@
-import React, { Component, PropTypes } from 'react';
-import { Table, Column, Cell } from 'fixed-data-table';
-import Flatpickr from '@jacobmischka/react-flatpickr';
+import React, { Component } from 'react';
+import Flatpickr from 'react-flatpickr';
+
 import 'flatpickr/dist/flatpickr.css';
-import 'fixed-data-table/dist/fixed-data-table.css';
 
-import debounce from 'lodash/debounce';
-import fuzzysearch from 'fuzzysearch';
+import moment from 'moment';
 
-import { sortPropLength, sortPropIgnoreCase } from '../../utils.js';
+import RequestsStatsTableContainer from '../containers/RequestsStatsTableContainer.js';
+
+import { isValidDateRange } from '../../utils.js';
 
 export default class RequestsStats extends Component {
 	constructor(){
 		super();
 		this.state = {
-			width: window.innerWidth,
-			dates: null,
-			search: '',
-			sortKey: null,
-			sortDirection: null
+			dates: [
+				moment().startOf('month').subtract(2, 'months').toDate(),
+				moment().endOf('month').startOf('day').toDate()
+			],
+			requestDates: [
+				moment().startOf('month').subtract(2, 'months').toDate(),
+				moment().endOf('month').startOf('day').toDate()
+			],
+			search: ''
 		};
-
-		this.resizeListener = debounce(() => {
-			this.setState({
-				width: window.innerWidth
-			});
-		}, 100);
 
 		this.onSearchInput = this.onSearchInput.bind(this);
 		this.onDatesChange = this.onDatesChange.bind(this);
-		this.onSortChange = this.onSortChange.bind(this);
-	}
-
-	componentDidMount(){
-		window.addEventListener('resize', this.resizeListener);
+		this.clearDates = this.clearDates.bind(this);
+		this.onRequestDatesChange = this.onRequestDatesChange.bind(this);
+		this.clearRequestDates = this.clearRequestDates.bind(this);
 	}
 
 	render(){
-		const requestors = new Map();
-		this.props.dayOffRequests.map(request => {
-			let row = requestors.get(request.requestorEmail) || {};
-			if(!row.name)
-				row.name = request.requestorName;
-			if(!row.email)
-				row.email = request.requestorEmail;
-			if(!row.requests)
-				row.requests = [];
-			row.requests.push(request);
-			requestors.set(request.requestorEmail, row);
-		});
-		let rows = Array.from(requestors.values());
-		const {search, sortKey, sortDirection} = this.state;
-		if(search){
-			rows = rows.filter(row =>
-				fuzzysearch(search, row.name) || fuzzysearch(search, row.email));
-		}
-
-		if(sortKey && sortDirection){
-			rows.sort(sortKey === 'requests'
-				? sortPropLength(sortKey)
-				: sortPropIgnoreCase(sortKey));
-			if(sortDirection !== 'asc')
-				rows.reverse();
-		}
+		const {search, dates, requestDates} = this.state;
 
 		return (
-			<div>
-				<input type="search" value={this.state.search}
-					onInput={this.onSearchInput}/>
-				<Flatpickr value={this.state.dates}
-					options={{
-						mode: 'range',
-						onValueUpdate: this.onDatesChange
-					}}
-					onChange={this.onDatesChange} />
-				<Table rowHeight={50}
-						headerHeight={75}
-						rowsCount={rows.length}
-						width={this.state.width}
-						maxHeight={5000}>
-						<Column columnKey="name"
-						width={200}
-						fixed={true}
-						header={
-							<Header sortDirection={sortKey === 'name' ? sortDirection : null}
-									onSortChange={this.onSortChange}>
-								Name
-							</Header>
-						}
-						cell={({rowIndex, columnKey, ...props}) => (
-							<Cell {...props}>
-								{rows[rowIndex][columnKey]}
-							</Cell>
-						)} />
-					<Column columnKey="email"
-						width={200}
-						header={
-							<Header sortDirection={sortKey === 'email' ? sortDirection : null}
-									onSortChange={this.onSortChange}>
-								Email
-							</Header>
-						}
-						cell={({rowIndex, columnKey, ...props}) => (
-							<Cell {...props}>
-								{rows[rowIndex][columnKey]}
-							</Cell>
-						)} />
-					<Column columnKey="requests"
-						width={100}
-						header={
-							<Header sortDirection={sortKey === 'requests' ? sortDirection : null}
-									onSortChange={this.onSortChange}>
-								Requests
-							</Header>
-						}
-						cell={({rowIndex, columnKey, ...props}) => (
-							<Cell {...props}>
-								{rows[rowIndex][columnKey].length}
-							</Cell>
-						)} />
-				</Table>
+			<div className="requests-stats">
+				<div className="row">
+					<div className="col-sm-3">
+						<div className="form-group">
+							<label className="containing-label">
+								Day off range
+								<div className="input-group">
+									<Flatpickr className="form-control appear-not-readonly"
+										placeholder="Date range"
+										value={dates}
+										options={{
+											mode: 'range'
+										}}
+										onChange={this.onDatesChange} />
+									<span className="input-group-btn">
+										<button className="btn btn-default"
+												onClick={this.clearDates}>
+											Clear
+										</button>
+									</span>
+								</div>
+							</label>
+						</div>
+					</div>
+					<div className="col-sm-3">
+						<div className="form-group">
+							<label className="containing-label">
+								Request range
+								<div className="input-group">
+									<Flatpickr className="form-control appear-not-readonly"
+										placeholder="Date range"
+										value={requestDates}
+										options={{
+											mode: 'range'
+										}}
+										onChange={this.onRequestDatesChange} />
+									<span className="input-group-btn">
+										<button className="btn btn-default"
+												onClick={this.clearRequestDates}>
+											Clear
+										</button>
+									</span>
+								</div>
+							</label>
+						</div>
+					</div>
+					<div className="col-sm-4 col-sm-offset-2">
+						<div className="form-group">
+							<label className="containing-label">
+								Search
+								<input type="search" className="form-control"
+									placeholder="Search"
+									value={search}
+									onInput={this.onSearchInput} />
+							</label>
+						</div>
+					</div>
+				</div>
+				<RequestsStatsTableContainer search={search}
+					dates={dates} requestDates={requestDates} />
 			</div>
 		);
 	}
@@ -131,69 +107,24 @@ export default class RequestsStats extends Component {
 	}
 
 	onDatesChange(dates){
-		console.log(dates);
-		this.setState({dates});
+		if(isValidDateRange(dates))
+			this.setState({dates});
 	}
 
-	onSortChange(sortKey, sortDirection){
-		this.setState({
-			sortKey,
-			sortDirection
-		});
+	clearDates(){
+		this.setState({dates: null});
+	}
+
+	onRequestDatesChange(requestDates){
+		if(isValidDateRange(requestDates))
+			this.setState({requestDates});
+	}
+
+	clearRequestDates(){
+		this.setState({requestDates: null});
 	}
 
 	componentWillUnmount(){
 		window.removeEventListener('resize', this.resizeListener);
 	}
 }
-
-class Header extends Component {
-	constructor(props){
-		super(props);
-
-		this.onSortChange = this.onSortChange.bind(this);
-	}
-
-	render(){
-		const {children, sortDirection} = this.props;
-		return (
-			<Cell className="header-cell">
-				<style jsx global>
-				{`
-					.header-cell {
-						color: red;
-					}
-				`}
-				</style>
-				<a href="#" onClick={this.onSortChange}>
-					{children} {
-						sortDirection
-							? sortDirection === 'asc'
-								? '↓'
-								: '↑'
-							: ''
-					}
-				</a>
-			</Cell>
-		);
-	}
-
-	onSortChange(event){
-		event.preventDefault();
-		const {columnKey, sortDirection, onSortChange} = this.props;
-
-		if(onSortChange)
-			onSortChange(columnKey, sortDirection === 'asc' ? 'desc' : 'asc');
-	}
-}
-
-Header.propTypes = {
-	children: PropTypes.node,
-	columnKey: PropTypes.string,
-	sortDirection: PropTypes.string,
-	onSortChange: PropTypes.func
-};
-
-RequestsStats.propTypes = {
-	dayOffRequests: PropTypes.array
-};

@@ -12,11 +12,9 @@
     "mup-logs-production": "cd .mup/production/ && mup logs"
   },
   "dependencies": {
-    "@jacobmischka/react-flatpickr": "^3.1.0",
     "bootstrap": "^3.3.7",
     "bootstrap-daterangepicker": "^2.1.19",
     "email-validator": "^1.0.4",
-    "fixed-data-table": "^0.6.3",
     "fullcalendar": "^3.0.0",
     "fuzzysearch": "^1.0.3",
     "lodash": "^4.7.0",
@@ -27,6 +25,8 @@
     "react": "^15.3.2",
     "react-addons-pure-render-mixin": "^15.4.2",
     "react-dom": "^15.3.2",
+    "react-flatpickr": "^3.1.1",
+    "react-table": "^5.3.4",
     "twix": "^1.0.0"
   },
   "devDependencies": {

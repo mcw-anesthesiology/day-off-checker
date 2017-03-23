@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { Email } from 'meteor/email';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 
+import fuzzysearch from 'fuzzysearch';
 import moment from 'moment';
 import 'twix';
 
@@ -51,7 +52,15 @@ export function nl2br(text){
 }
 
 export function capitalizeFirstLetter(string){
-	return string.charAt(0).toUpperCase() + string.slice(1);
+	try {
+		return string.charAt(0).toUpperCase() + string.slice(1);
+	} catch(e) {
+		return '';
+	}
+}
+
+export function ucfirst(string){
+	return capitalizeFirstLetter(string);
 }
 
 export function camelCaseToWords(string){
@@ -139,4 +148,28 @@ export function sortIgnoreCase(a, b){
 
 export function sortPropIgnoreCase(prop){
 	return (a, b) => sortIgnoreCase(a[prop], b[prop]);
+}
+
+export function statusLabelType(status){
+	switch(status){
+		case 'pending':
+			return 'label-warning';
+		case 'approved':
+			return 'label-success';
+		case 'denied':
+			return 'label-danger';
+		case 'cancelled':
+			return 'label-default';
+		default:
+			return 'label-info';
+	}
+}
+
+export function isValidDateRange(dates){
+	return Boolean(dates) && Array.isArray(dates) && dates.length === 2;
+}
+
+export function matchesSearch(request, search){
+	return fuzzysearch(search, request.requestorName)
+		|| fuzzysearch(search, request.requestorEmail);
 }
