@@ -17,8 +17,8 @@ import validator from 'email-validator';
 import moment from 'moment';
 import 'twix';
 
-import 'bootstrap-daterangepicker';
-import 'bootstrap-daterangepicker/daterangepicker.css';
+import 'flatpickr';
+import 'flatpickr/dist/flatpickr.css';
 
 import ManageRequest from '../components/ManageRequest.js';
 
@@ -222,11 +222,11 @@ Template.dayOffEntry.events({
 				let isRange = instance.$('#multiple-days').prop('checked');
 				let startDate, endDate;
 				if(instance.$(input).data('endDateElement')){
-					startDate = moment(input.value, 'YYYY-MM-DD');
+					startDate = moment(input.value, ISO_DATE_FORMAT);
 
 					if(isRange){
 						let endInput = instance.$(instance.$(input).data('endDateElement'))[0];
-						endDate = moment(endInput.value, 'YYYY-MM-DD');
+						endDate = moment(endInput.value, ISO_DATE_FORMAT);
 					}
 					else {
 						endDate = moment(startDate);
@@ -234,12 +234,12 @@ Template.dayOffEntry.events({
 				}
 				else {
 					if(isRange){
-						let dates = input.value.split(' - ');
-						startDate = moment(dates[0], 'MM/DD/YYYY');
-						endDate = moment(dates[1], 'MM/DD/YYYY');
+						[startDate, endDate] = instance.$(input).val().split('to').map(date =>
+							moment(date, ISO_DATE_FORMAT)
+						);
 					}
 					else {
-						startDate = moment(input.value, 'MM/DD/YYYY');
+						startDate = moment(instance.$(input).val(), ISO_DATE_FORMAT);
 						endDate = moment(startDate);
 					}
 				}
@@ -341,13 +341,13 @@ Template.requestedDate.onRendered(function(){
 	this.$('#daterange').placeholder();
 
 	if(Session.get('isRange'))
-		this.$('#daterange').daterangepicker({
-			minDate: moment().startOf('day')
+		this.$('#daterange').flatpickr({
+			minDate: moment().startOf('day').toDate(),
+			mode: 'range'
 		});
 	else
-		this.$('#daterange').daterangepicker({
-			singleDatePicker: true,
-			minDate: moment().startOf('day')
+		this.$('#daterange').flatpickr({
+			minDate: moment().startOf('day').toDate()
 		});
 });
 
@@ -358,8 +358,8 @@ Template.requestedDate.helpers({
 	oldValue(){
 		if(Session.get(`old_${DAY_OFF_FIELDS.DATE}`)){
 			const dates = Session.get(`old_${DAY_OFF_FIELDS.DATE}`);
-			let range = moment(dates[0]).twix(dates[1], true);
-			return range.simpleFormat('MM/DD/YYYY');
+			return dates.map(date => moment(date).format(ISO_DATE_FORMAT))
+				.join(' to ');
 		}
 	},
 	oldStartValue(){
@@ -397,15 +397,15 @@ Template.requestedDate.events({
 		let checkbox = event.target;
 		Session.set('isRange', checkbox.checked);
 		if(checkbox.checked){
-			instance.$('#daterange').daterangepicker({
-				minDate: moment().startOf('day')
+			instance.$('#daterange').flatpickr({
+				mode: 'range',
+				minDate: moment().startOf('day').toDate()
 			});
 			instance.$('label[for="start-date"]').text('Start date');
 		}
 		else {
-			instance.$('#daterange').daterangepicker({
-				singleDatePicker: true,
-				minDate: moment().startOf('day')
+			instance.$('#daterange').flatpickr({
+				minDate: moment().startOf('day').toDate()
 			});
 			instance.$('label[for="start-date"]').text('Date');
 		}
