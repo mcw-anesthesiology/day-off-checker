@@ -74,5 +74,20 @@
 			background-color: $vacation-button-color;
 			border: 1px solid $vacation-button-border-color;
 		}
+
+		&.pending {
+			background-color: $pending-background-color;
+			border: 1px solid $pending-border-color;
+		}
+
+		&.approved {
+			background-color: $approved-background-color;
+			border: 1px solid $approved-border-color;
+		}
+
+		&.denied {
+			background-color: $denied-background-color;
+			border: 1px solid $denied-border-color;
+		}
 	}
 }

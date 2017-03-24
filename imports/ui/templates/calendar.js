@@ -71,10 +71,11 @@ Template.calendar.helpers({
 	eventDetails(){
 		return DayOffRequests.findOne(Session.get('eventDetails'));
 	},
-	dayOffTypes: Object.values(DAY_OFF_TYPES),
-	dayOffTypeNames(type){
-		return DAY_OFF_TYPE_NAMES[type];
-	}
+	eventTypes: [
+		'sick',
+		'pending',
+		'approved'
+	]
 });
 
 Template.calendar.events({
@@ -84,19 +85,32 @@ Template.calendar.events({
 });
 
 function fetchDayOffEvents(){
-	const requests = DayOffRequests.find();
+	const requests = DayOffRequests.find({
+		status: {
+			$ne: 'denied'
+		}
+	});
 
-	let events = [];
-	requests.forEach((request) => {
-		let event = {
+	let events = requests.map(request => {
+		let backgroundColor, borderColor;
+
+		if(request.dayOffType === DAY_OFF_TYPES.SICK){
+			backgroundColor = DAY_OFF_TYPE_COLORS[request[DAY_OFF_FIELDS.TYPE]].background;
+			borderColor = DAY_OFF_TYPE_COLORS[request[DAY_OFF_FIELDS.TYPE]].border;
+		}
+		else {
+			backgroundColor = DAY_OFF_TYPE_COLORS[request.status].background;
+			borderColor = DAY_OFF_TYPE_COLORS[request.status].border;
+		}
+
+		return {
 			id: request._id,
 			title: `${request[DAY_OFF_FIELDS.NAME]} – ${DAY_OFF_TYPE_NAMES[request[DAY_OFF_FIELDS.TYPE]]}`,
 			start: request[DAY_OFF_FIELDS.DATE][0],
 			end: request[DAY_OFF_FIELDS.DATE][1],
-			backgroundColor: DAY_OFF_TYPE_COLORS[request[DAY_OFF_FIELDS.TYPE]].background,
-			borderColor: DAY_OFF_TYPE_COLORS[request[DAY_OFF_FIELDS.TYPE]].border
+			backgroundColor,
+			borderColor
 		};
-		events.push(event);
 	});
 
 	return events;

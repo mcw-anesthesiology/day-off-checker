@@ -12,10 +12,10 @@
 
 	<section class="calendar-utils container">
 		<table id="legend">
-{{#each dayOffType in dayOffTypes}}
+{{#each eventType in eventTypes}}
 			<tr>
-				<th>{{dayOffTypeNames dayOffType}}</th>
-				<td><span class="legend-type {{dayOffType}}"></span></td>
+				<th>{{capitalizeFirstLetter eventType}}</th>
+				<td><span class="legend-type {{eventType}}"></span></td>
 			</tr>
 {{/each}}
 		</table>

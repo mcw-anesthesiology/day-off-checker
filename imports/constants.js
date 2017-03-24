@@ -71,6 +71,18 @@ export const DAY_OFF_TYPE_COLORS = {
 	[DAY_OFF_TYPES.VACATION]: {
 		background: '#ffb74d',
 		border: '#fb8c00'
+	},
+	'pending': {
+		background: '#f0ad4e',
+		border: '#eea236'
+	},
+	'approved': {
+		background: '#5cb85c',
+		border: '#4cae4c'
+	},
+	'denied': {
+		background: '#d9534f',
+		border: '#d43f3a'
 	}
 };
 
