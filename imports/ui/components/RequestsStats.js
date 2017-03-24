@@ -13,14 +13,8 @@ export default class RequestsStats extends Component {
 	constructor(){
 		super();
 		this.state = {
-			dates: [
-				moment().startOf('month').subtract(2, 'months').toDate(),
-				moment().endOf('month').startOf('day').toDate()
-			],
-			requestDates: [
-				moment().startOf('month').subtract(2, 'months').toDate(),
-				moment().endOf('month').startOf('day').toDate()
-			],
+			dates: dateRangeForCurrentAcademicYear(),
+			requestDates: dateRangeForCurrentAcademicYear(),
 			search: ''
 		};
 
@@ -127,4 +121,16 @@ export default class RequestsStats extends Component {
 	componentWillUnmount(){
 		window.removeEventListener('resize', this.resizeListener);
 	}
+}
+
+function dateRangeForCurrentAcademicYear(){
+	let startDate = moment().startOf('month');
+	while(startDate.month() !== 6)
+		startDate.subtract(1, 'month');
+	let endDate = moment(startDate).add(11, 'months').endOf('month');
+
+	return [
+		startDate.toDate(),
+		endDate.toDate()
+	];
 }
