@@ -73,10 +73,8 @@ export default class RequestsStatsTable extends Component {
 
 		return (
 			<ReactTable className="stats-table"
-				defaultPageSize={10}
 				data={rows}
 				columns={columns}
-				collapseOnDataChange={false}
 				SubComponent={({row}) => (
 					<div className="stats-requests-sub-component">
 						<div className="panel panel-default">
@@ -137,7 +135,10 @@ export default class RequestsStatsTable extends Component {
 							</div>
 						</div>
 					</div>
-				)} />
+				)}
+				collapseOnDataChange={false}
+				pageSize={rows.length}
+				showPagination={false} />
 		);
 	}
 }
