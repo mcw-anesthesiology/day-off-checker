@@ -246,8 +246,6 @@ Template.dayOffEntry.events({
 				let range = startDate.twix(endDate, true);
 				if(!range.isValid())
 					Session.set('errorAlert', 'Invalid date range. Please select first the beginning date and then the ending date.');
-				else if(range.isPast() || startDate.isBefore(moment().startOf('day')))
-					Session.set('errorAlert', 'You cannot request a day off for a date in the past.');
 				else
 					value = [ startDate.toDate(), endDate.toDate() ];
 				break;
@@ -342,13 +340,10 @@ Template.requestedDate.onRendered(function(){
 
 	if(Session.get('isRange'))
 		this.$('#daterange').flatpickr({
-			minDate: moment().startOf('day').toDate(),
 			mode: 'range'
 		});
 	else
-		this.$('#daterange').flatpickr({
-			minDate: moment().startOf('day').toDate()
-		});
+		this.$('#daterange').flatpickr();
 });
 
 Template.requestedDate.helpers({
@@ -398,15 +393,12 @@ Template.requestedDate.events({
 		Session.set('isRange', checkbox.checked);
 		if(checkbox.checked){
 			instance.$('#daterange').flatpickr({
-				mode: 'range',
-				minDate: moment().startOf('day').toDate()
+				mode: 'range'
 			});
 			instance.$('label[for="start-date"]').text('Start date');
 		}
 		else {
-			instance.$('#daterange').flatpickr({
-				minDate: moment().startOf('day').toDate()
-			});
+			instance.$('#daterange').flatpickr();
 			instance.$('label[for="start-date"]').text('Date');
 		}
 	},
