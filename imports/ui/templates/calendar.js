@@ -12,6 +12,7 @@ import {
 } from '../../constants.js';
 
 import debounce from 'lodash/debounce';
+import moment from 'moment';
 
 import './calendar.html';
 
@@ -106,8 +107,8 @@ function fetchDayOffEvents(){
 		return {
 			id: request._id,
 			title: `${request[DAY_OFF_FIELDS.NAME]} – ${DAY_OFF_TYPE_NAMES[request[DAY_OFF_FIELDS.TYPE]]}`,
-			start: request[DAY_OFF_FIELDS.DATE][0],
-			end: request[DAY_OFF_FIELDS.DATE][1],
+			start: moment(request[DAY_OFF_FIELDS.DATE][0]).startOf('day'),
+			end: moment(request[DAY_OFF_FIELDS.DATE][1]).add(1, 'day').startOf('day'),
 			backgroundColor,
 			borderColor
 		};
