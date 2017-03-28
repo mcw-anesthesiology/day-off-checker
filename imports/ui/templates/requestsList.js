@@ -67,14 +67,14 @@ Template.requestsList.helpers({
 				{ key: 'requestorName', label: 'Name', sortOrder: 2, sortDirection: 'asc' },
 				{ key: 'requestedLocation.name', label: 'Location' },
 				{ key: 'requestedDate', label: 'Sick days', fn: displaySortableDateRange, sortOrder: 0, sortDirection: 'desc' },
-				{ key: 'requestTime', label: 'Requested', fn: displaySortableDate, sortOrder: 1, sortDirection: 'desc' },
+				{ key: 'requestTime', label: 'Submitted', fn: displaySortableDate, sortOrder: 1, sortDirection: 'desc' },
 				{ key: 'requestReason', label: 'Reason' }
 			]
 		};
-		
+
 		if(isFellow())
 			settings.fields.splice(1, 0, { key: 'requestedFellowship.name', label: 'Fellowship' });
-		
+
 		return settings;
 	},
 	iDayDetails(){

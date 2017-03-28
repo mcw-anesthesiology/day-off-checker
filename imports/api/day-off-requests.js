@@ -127,8 +127,7 @@ Meteor.methods({
 			},
 			requestedDate: {
 				type: [Date],
-				label: 'Requested date range',
-				min: moment().startOf('day').toDate()
+				label: 'Requested date range'
 			},
 			requestedLocation: {
 				type: Object,
