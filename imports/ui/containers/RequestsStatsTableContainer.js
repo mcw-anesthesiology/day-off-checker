@@ -12,9 +12,6 @@ const RequestsStatsTableContainer = createContainer(props => {
 	const {dates, requestDates} = props;
 	const query = isValidDateRange(dates)
 		? {
-			'dayOffType': {
-				$ne: 'sick'
-			},
 			'requestedDate.0': {
 				$lte: dates[1]
 			},
