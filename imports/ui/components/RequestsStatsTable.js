@@ -1,5 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import ReactTable from 'react-table';
+import moment from 'moment';
+import 'twix';
 
 import 'react-table/react-table.css';
 
@@ -14,7 +16,7 @@ import {
 } from '../../utils.js';
 
 export default class RequestsStatsTable extends Component {
-	render(){
+	render() {
 		const {search, dayOffRequests, currentUser} = this.props;
 		const requestors = new Map();
 
@@ -23,13 +25,34 @@ export default class RequestsStatsTable extends Component {
 				return;
 
 			let row = requestors.get(request.requestorEmail) || {};
-			if(!row.name)
+			if (!row.name)
 				row.name = request.requestorName;
-			if(!row.email)
+			if (!row.email)
 				row.email = request.requestorEmail;
-			if(!row.requests)
+			if (!row.requests)
 				row.requests = [];
+
 			row.requests.push(request);
+
+			if (request.dayOffType === 'sick' || request.status === 'approved') {
+				let daysOff = moment(request.requestedDate[0])
+					.twix(request.requestedDate[1], true).length('days', true);
+
+				if (!('totalDays' in row))
+					row.totalDays = 0;
+
+				row.totalDays += daysOff;
+
+				let dayOffType = (request.dayOffType === 'sick')
+					? 'sickDays'
+					: 'approvedDays';
+
+				if (!(dayOffType in row))
+					row[dayOffType] = 0;
+
+				row[dayOffType] += daysOff;
+			}
+
 			requestors.set(request.requestorEmail, row);
 		});
 		let rows = Array.from(requestors.values());
@@ -44,30 +67,25 @@ export default class RequestsStatsTable extends Component {
 				accessor: 'email'
 			},
 			{
-				header: 'Approved',
-				id: 'approvedRequests',
-				accessor: row =>
-					row.requests.filter(request =>
-						request.status === 'approved').length
+				header: 'Total days off',
+				accessor: 'totalDays'
 			},
 			{
-				header: 'Denied',
-				id: 'deniedRequests',
-				accessor: row =>
-					row.requests.filter(request =>
-						request.status === 'denied').length
+				header: 'Approved days',
+				accessor: 'approvedDays'
 			},
 			{
-				header: 'Pending',
+				header: 'Sick days',
+				accessor: 'sickDays'
+			},
+			{
+				header: 'Pending requests',
 				id: 'pendingRequests',
 				accessor: row =>
 					row.requests.filter(request =>
-						request.status === 'pending').length
-			},
-			{
-				header: 'Total',
-				id: 'totalRequests',
-				accessor: row => row.requests.length
+						request.status === 'pending'
+						&& request.dayOffType !== 'sick'
+					).length
 			}
 		];
 
@@ -79,7 +97,7 @@ export default class RequestsStatsTable extends Component {
 					<div className="stats-requests-sub-component">
 						<div className="panel panel-default">
 							<div className="panel-heading">
-								Requests — {row.name}
+								Days off — {row.name}
 							</div>
 							<div className="panel-body">
 								<ReactTable className="requests-table"
@@ -98,10 +116,10 @@ export default class RequestsStatsTable extends Component {
 												request.requestedDate[0],
 											render: ({row}) =>
 												displayDateRange(row.requestedDate),
-											minWidth: 50
+											minWidth: 75
 										},
 										{
-											header: 'Requested',
+											header: 'Submitted',
 											accessor: 'requestTime',
 											render: ({value}) =>
 												displayDate(value)
@@ -117,7 +135,9 @@ export default class RequestsStatsTable extends Component {
 											accessor: request =>
 												<span className={`label ${statusLabelType(request.status)}`}>
 												{
-													ucfirst(request.status)
+													request.dayOffType === 'sick'
+														? 'Sick day'
+														: ucfirst(request.status)
 												}
 												</span>
 										}
