@@ -41,9 +41,13 @@ export function displayDateRange(dates){
 }
 
 export function displayNameByUsername(username){
-	if(!username)
+	if (!username)
 		return '';
 	const user = Meteor.users.findOne({ username: username });
+
+	if (!user)
+		return username;
+
 	return user.name;
 }
 
