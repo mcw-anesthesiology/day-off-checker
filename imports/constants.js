@@ -83,6 +83,10 @@ export const DAY_OFF_TYPE_COLORS = {
 	'denied': {
 		background: '#d9534f',
 		border: '#d43f3a'
+	},
+	'cancelled': {
+		background: '#b4b4b4',
+		border: '#888888'
 	}
 };
 
