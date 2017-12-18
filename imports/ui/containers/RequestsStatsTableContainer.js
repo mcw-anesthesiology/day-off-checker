@@ -1,12 +1,12 @@
 import { Meteor } from 'meteor/meteor';
-import { createContainer } from 'meteor/react-meteor-data';
+import { withTracker } from 'meteor/react-meteor-data';
 
 import { DayOffRequests } from '../../api/day-off-requests.js';
 import RequestsStatsTable from '../components/RequestsStatsTable.js';
 
 import { isValidDateRange } from '../../utils.js';
 
-const RequestsStatsTableContainer = createContainer(props => {
+const RequestsStatsTableContainer = withTracker(props => {
 	const requestsHandle = Meteor.subscribe('dayOffRequests');
 
 	const {dates, requestDates} = props;

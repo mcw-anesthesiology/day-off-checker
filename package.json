@@ -12,29 +12,30 @@
     "mup-logs-production": "cd .mup/production/ && mup logs"
   },
   "dependencies": {
+    "babel-runtime": "^6.26.0",
     "bootstrap": "^3.3.7",
     "bootstrap-daterangepicker": "^2.1.19",
     "email-validator": "^1.0.4",
     "fullcalendar": "^3.0.0",
     "fuzzysearch": "^1.0.3",
     "lodash": "^4.7.0",
-    "meteor-node-stubs": "~0.2.0",
+    "meteor-node-stubs": "~0.3.2",
     "moment": "^2.12.0",
-    "moment-range": "^2.2.0",
-    "nodep-date-input-polyfill": "^4.0.6",
-    "react": "^15.3.2",
+    "moment-range": "^3.1.0",
+    "nodep-date-input-polyfill": "^5.2.0",
+    "prop-types": "^15.6.0",
+    "react": "^16.2.0",
     "react-addons-pure-render-mixin": "^15.4.2",
-    "react-dom": "^15.3.2",
+    "react-dom": "^16.2.0",
     "react-flatpickr": "^3.1.1",
-    "react-table": "^5.3.4",
+    "react-table": "^6.7.5",
     "twix": "^1.0.0"
   },
   "devDependencies": {
-    "babel-eslint": "^7.1.1",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.23.0",
-    "eslint": "^3.4.0",
-    "eslint-plugin-react": "^6.4.1",
+    "babel-eslint": "^8.0.3",
+    "eslint": "^4.13.1",
+    "eslint-plugin-react": "^7.5.1",
     "mup": "^1.2.0",
-    "styled-jsx": "^0.5.7"
+    "styled-jsx": "^2.2.1"
   }
 }

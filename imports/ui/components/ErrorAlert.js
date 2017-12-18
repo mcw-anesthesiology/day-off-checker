@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 
 const ErrorAlert = props => (
 	<div className="alert alert-danger alert-dismissable error-alert" role="alert">

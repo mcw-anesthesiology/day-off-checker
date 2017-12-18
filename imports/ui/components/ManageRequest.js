@@ -22,9 +22,10 @@ export default class ManageRequest extends Component {
 	}
 
 	render(){
-
-		if(this.state.active)
-			return (
+		console.log(React);
+		
+		return this.state.active
+			? (
 				<div className="manage-request-container">
 		{
 			this.state.error
@@ -53,10 +54,8 @@ export default class ManageRequest extends Component {
 						</button>
 					</div>
 				</div>
-			);
-
-		else
-			return (
+			)
+			: (
 				<a href="#" onClick={this.handleActiveClick}>
 					Manage an existing request
 				</a>
