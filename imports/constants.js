@@ -101,6 +101,12 @@ export const FELLOW_DAY_OFF_TYPES = [
 	DAY_OFF_TYPES.VACATION
 ];
 
+export const REQUESTOR_TYPES = [
+	'resident',
+	'fellow',
+	'intern'
+];
+
 export const USER_ROLES = {
 	ADMIN: 'admin',
 	LOCATION_ADMIN: 'location_admin',

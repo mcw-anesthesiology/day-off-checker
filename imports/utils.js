@@ -83,18 +83,31 @@ export function camelCaseToWords(string){
 	return result;
 }
 
-export function isFellow(connection){
-	let hostname;
-	if(Meteor.isClient)
-		hostname = window.location.host;
-	else
-		hostname = connection.httpHeaders.host;
+export function getRequestorType(connection) {
+	const hostname = Meteor.isClient
+		? window.location.host
+		: connection.httpHeaders.host;
 
-	return hostname.split('.')[0] === 'fellow';
+	return hostname.split('.')[0] || 'resident';
+}
+
+export function isRequestorType(type, connection) {
+	return getRequestorType(connection) === type;
+}
+
+export function isFellow(connection){
+	return isRequestorType('fellow', connection);
+}
+
+export function getRequestRequestorType(request) {
+	return request.requestorType
+		|| request.hasOwnProperty(DAY_OFF_FIELDS.FELLOWSHIP)
+			? 'fellow'
+			: 'resident';
 }
 
 export function isFellowRequest(request){
-	return request.hasOwnProperty(DAY_OFF_FIELDS.FELLOWSHIP);
+	return getRequestRequestorType(request) === 'fellow';
 }
 
 export function article(noun){

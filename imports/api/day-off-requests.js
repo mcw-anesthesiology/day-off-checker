@@ -19,6 +19,7 @@ import {
 	DAY_OFF_TYPES,
 	RESIDENT_DAY_OFF_TYPES,
 	FELLOW_DAY_OFF_TYPES,
+	REQUESTOR_TYPES,
 	DAY_OFF_TYPE_NAMES,
 	USER_ROLES
 } from '../constants.js';
@@ -27,6 +28,7 @@ import {
 	nl2br,
 	isFellow,
 	isFellowRequest,
+	getRequestRequestorType,
 	article,
 	capitalizeFirstLetter,
 	camelCaseToWords
@@ -115,6 +117,11 @@ Meteor.methods({
 				type: String,
 				label: 'Day off type',
 				allowedValues: RESIDENT_DAY_OFF_TYPES
+			},
+			requestorType: {
+				type: String,
+				label: 'Requestor type',
+				allowedValues: REQUESTOR_TYPES
 			},
 			requestorName: {
 				type: String,
@@ -412,32 +419,36 @@ Meteor.methods({
 });
 
 function getUsersToNotify(request){
-	if(isFellowRequest(request)){
-		return Meteor.users.find({
-			$or: [
+	const $or = [
+		{
+			role: USER_ROLES.LOCATION_ADMIN,
+			username: request.requestedLocation.administrator
+		}
+	];
+
+	switch (getRequestRequestorType(request)) {
+		case 'fellow':
+			$or.push(
 				{
 					role: USER_ROLES.FELLOWSHIP_ADMIN,
 					username: request.requestedFellowship.administrator
 				},
-				{ role: USER_ROLES.FELLOWSHIP_COORDINATOR },
-				{
-					role: USER_ROLES.LOCATION_ADMIN,
-					username: request.requestedLocation.administrator
-				}
-			]
-		}).fetch();
+				{ role: USER_ROLES.FELLOWSHIP_COORDINATOR }
+			);
+			break;
+		case 'intern':
+			$or.push({ role: USER_ROLES.INTERN_COORDINATOR });
+			break;
+		case 'resident':
+		default:
+			$or.push(
+				{ role: USER_ROLES.RESIDENCY_COORDINATOR },
+				{ role: USER_ROLES.CHIEF }
+			);
+			break;
 	}
 
-	return Meteor.users.find({
-		$or: [
-			{ role: USER_ROLES.RESIDENCY_COORDINATOR },
-			{ role: USER_ROLES.CHIEF },
-			{
-				role: USER_ROLES.LOCATION_ADMIN,
-				username: request.requestedLocation.administrator
-			}
-		]
-	}).fetch();
+	return Meteor.users.find({ $or }).fetch();
 }
 
 function sendNotifications(request, users = getUsersToNotify(request), sendRequestorNotification = true){
@@ -590,11 +601,23 @@ function sendNotifications(request, users = getUsersToNotify(request), sendReque
 }
 
 function getUsersForConfirmation(request){
-	if(isFellowRequest(request)){
-		return [Accounts.findUserByUsername(request.requestedFellowship.administrator)];
+	switch (getRequestRequestorType(request)) {
+		case 'fellow':
+			return [
+				Accounts.findUserByUsername(
+					request.requestedFellowship.administrator
+				)
+			];
+		case 'intern':
+			return Meteor.users.find({
+				role: USER_ROLES.INTERN_COORDINATOR
+			}).fetch();
+		case 'resident':
+		default:
+			return Meteor.users.find({
+				role: USER_ROLES.CHIEF
+			}).fetch();
 	}
-
-	return Meteor.users.find({ role: 'chief' }).fetch();
 }
 
 function sendConfirmationRequests(request, users = getUsersForConfirmation(request), sendRequestorNotification = true, sendLocationAdminNotification = true){

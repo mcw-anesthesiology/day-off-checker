@@ -10,6 +10,8 @@ import {
 	nl2br,
 	capitalizeFirstLetter,
 	camelCaseToWords,
+	getRequestorType,
+	isRequestorType,
 	isFellow
 } from '../../utils.js';
 
@@ -18,9 +20,7 @@ Template.registerHelper('currentUserAdmin', () => {
 });
 
 Template.registerHelper('displayDate', displayDate);
-
 Template.registerHelper('displayDateRange', displayDateRange);
-
 Template.registerHelper('displayNameByUsername', displayNameByUsername);
 
 Template.registerHelper('routeName', () => {
@@ -32,9 +32,8 @@ Template.registerHelper('routeIs', (routeName) => {
 });
 
 Template.registerHelper('nl2br', nl2br);
-
 Template.registerHelper('capitalizeFirstLetter', capitalizeFirstLetter);
-
 Template.registerHelper('camelCaseToWords', camelCaseToWords);
-
+Template.registerHelper('getRequestorType', getRequestorType);
+Template.registerHelper('isRequestorType', isRequestorType);
 Template.registerHelper('isFellow', isFellow);

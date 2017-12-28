@@ -1,5 +1,5 @@
 <template name="home">
-	<section class="home {{dayOffType}} {{#if isFellow}}fellow{{else}}resident{{/if}}">
+	<section class="home {{dayOffType}} {{getRequestorType}}">
 
 {{#if editable}}
 		<section class="completed-entries">
@@ -95,14 +95,14 @@
 {{#each location in locations}}
 		<option value="{{location._id}}" {{oldValueSelected location}}>{{location.name}}</option>
 {{/each}}
-{{#if isFellow}}
+{{#if isRequestorType 'fellow'}}
 	{{#if isRequest}}
 		<option value="not-assigned-yet">Not assigned yet</option>
 	{{/if}}
 		<option value="other">Other</option>
 {{/if}}
 	</select>
-{{#if isFellow}}
+{{#if isRequestorType 'fellow'}}
 	{{#if otherSelected}}
 	<div class="labelled-input">
 		<label for="other-location">Please specify location</label>
@@ -141,9 +141,13 @@
 				{{location}}: {{number}}
 			</p>
 	{{/if}}
-	{{#if isFellow}}
+	{{#if isRequestorType 'fellow'}}
 			<p>
 				If you are on call, please notify {{fellowshipAdminName}} via text message as soon as possible.
+			</p>
+	{{else if isRequestorType 'intern'}}
+			<p>
+				If you are on call, please notify {{internAdminName}} as soon as possible.
 			</p>
 	{{else}}
 			<p>
