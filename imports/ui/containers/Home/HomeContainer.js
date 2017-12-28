@@ -12,15 +12,15 @@ const HomeContainer = withTracker(props => {
 	const fellowshipsHandle = Meteor.subscribe('fellowships');
 	const locationsHandle = Meteor.subscribe('locations');
 	const chiefUserData = Meteor.subscribe('chiefUserData');
-	
+
 	const fellowships = fellowshipsHandle.ready()
 		? Fellowships.find({}, { sort: { name: 1 } })
 		: [];
-	
-	const getLocations = locationsHandle.ready()
-		? (fellowship: ?string) => 
-		: (fellowship: ?string)
-	
+
+	// const getLocations = locationsHandle.ready()
+	// 	? (fellowship: ?string) =>
+	// 	: (fellowship: ?string)
+
 
 	return {
 		...props,

@@ -1,4 +1,4 @@
-// flow-typed signature: 9b7b9057df6fcdde61c2a2dffba8e5e4
+// flow-typed signature: dd66afd6dc799db7d16619374bfc5cfb
 // flow-typed version: <<STUB>>/react-flatpickr_v^3.1.1/flow_v0.61.0
 
 /**
@@ -30,6 +30,14 @@ declare module 'react-flatpickr/build/index' {
   declare module.exports: any;
 }
 
+declare module 'react-flatpickr/example/index' {
+  declare module.exports: any;
+}
+
+declare module 'react-flatpickr/example/webpack' {
+  declare module.exports: any;
+}
+
 declare module 'react-flatpickr/lib/index' {
   declare module.exports: any;
 }
@@ -40,6 +48,12 @@ declare module 'react-flatpickr/build/example.js' {
 }
 declare module 'react-flatpickr/build/index.js' {
   declare module.exports: $Exports<'react-flatpickr/build/index'>;
+}
+declare module 'react-flatpickr/example/index.js' {
+  declare module.exports: $Exports<'react-flatpickr/example/index'>;
+}
+declare module 'react-flatpickr/example/webpack.js' {
+  declare module.exports: $Exports<'react-flatpickr/example/webpack'>;
 }
 declare module 'react-flatpickr/lib/index.js' {
   declare module.exports: $Exports<'react-flatpickr/lib/index'>;
