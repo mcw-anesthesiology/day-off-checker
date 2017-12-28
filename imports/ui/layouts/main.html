@@ -2,8 +2,11 @@
 	<header class="{{routeName}} {{#if fieldEntries}} field-entries {{/if}}">
 		<h1>
 			<select id="site-header-user-type">
-				<option value="resident">Resident</option>
-				<option value="fellow" {{isFellowSelected}}>Fellow</option>
+			{{#each requestorType in requestorTypes}}
+				<option value="{{requestorType}}"
+						{{isRequestorType requestorType}}>
+					{{capitalizeFirstLetter requestorType}}
+				</option>
 			</select>
 			<a href="/">Day&nbsp;off reporter</a>
 		</h1>

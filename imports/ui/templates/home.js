@@ -10,7 +10,10 @@ import { throwError } from 'meteor/saucecode:rollbar';
 import { Fellowships } from '../../api/fellowships.js';
 import { Locations } from '../../api/locations.js';
 
-import { displayNameByUsername } from '../../utils.js';
+import {
+	displayNameByUsername,
+	getRequestorType
+} from '../../utils.js';
 
 import validator from 'email-validator';
 
@@ -48,7 +51,9 @@ let fields = Object.values(DAY_OFF_FIELDS).filter(field => {
 });
 
 function insertEntries(){
-	let request = {};
+	let request = {
+		requestorType: getRequestorType()
+	};
 	for(let field of fields){
 		let value = Session.get(field);
 		if(!value && fieldShouldBeCompleted(field)){

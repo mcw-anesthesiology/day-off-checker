@@ -1,7 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { AccountsTemplates } from 'meteor/useraccounts:core';
 
-import { DAY_OFF_FIELDS } from '../../constants.js';
+import { DAY_OFF_FIELDS, REQUESTOR_TYPES } from '../../constants.js';
 import { isFellow, userTypeUrl } from '../../utils.js';
 
 import './main.html';
@@ -11,9 +11,8 @@ Template.main.onRendered(function(){
 });
 
 Template.main.helpers({
-	isFellowSelected(){
-		if(isFellow())
-			return 'selected';
+	requestorTypes() {
+		return REQUESTOR_TYPES;
 	},
 	errorAlert(){
 		return Session.get('errorAlert');
