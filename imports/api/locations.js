@@ -1,3 +1,5 @@
+/* @flow */
+
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import { Email } from 'meteor/email';
@@ -11,6 +13,14 @@ import { Fellowships } from './fellowships.js';
 import { APP_ACCOUNTS_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS } from '../constants.js';
 
 import map from 'lodash/map';
+
+export type Location = {
+	_id: string,
+	name: string,
+	number: string,
+	administrator: string,
+	fellowship: string
+};
 
 export const Locations = new Mongo.Collection('locations');
 
