@@ -60,27 +60,27 @@ export default class RequestsStatsTable extends Component {
 
 		const columns = [
 			{
-				header: 'Name',
+				Header: 'Name',
 				accessor: 'name'
 			},
 			{
-				header: 'Email',
+				Header: 'Email',
 				accessor: 'email'
 			},
 			{
-				header: 'Total days off',
+				Header: 'Total days off',
 				accessor: 'totalDays'
 			},
 			{
-				header: 'Approved days',
+				Header: 'Approved days',
 				accessor: 'approvedDays'
 			},
 			{
-				header: 'Sick days',
+				Header: 'Sick days',
 				accessor: 'sickDays'
 			},
 			{
-				header: 'Pending requests',
+				Header: 'Pending requests',
 				id: 'pendingRequests',
 				accessor: row =>
 					row.requests.filter(request =>
@@ -94,64 +94,65 @@ export default class RequestsStatsTable extends Component {
 			<ReactTable className="stats-table"
 				data={rows}
 				columns={columns}
-				SubComponent={({row}) => (
+				SubComponent={({row, original}) => (
 					<div className="stats-requests-sub-component">
 						<div className="panel panel-default">
 							<div className="panel-heading">
 								Days off — {row.name}
 							</div>
 							<div className="panel-body">
+								{console.log(original)}
 								<ReactTable className="requests-table"
-									data={row.requests}
+									data={original.requests}
 									columns={[
 										{
-											header: 'Location',
+											Header: 'Location',
 											id: 'location',
 											accessor: request =>
 												request.requestedLocation.name
 										},
 										{
-											header: 'Dates',
+											Header: 'Dates',
 											id: 'dates',
 											accessor: request =>
 												request.requestedDate[0],
-											render: ({row}) =>
+											Cell: ({row}) =>
 												displayDateRange(row.requestedDate),
 											minWidth: 75
 										},
 										{
-											header: 'Submitted',
+											Header: 'Submitted',
 											accessor: 'requestTime',
-											render: ({value}) =>
+											Cell: ({value}) =>
 												displayDate(value)
 										},
 										{
-											header: 'Reason',
+											Header: 'Reason',
 											accessor: 'requestReason',
 											minWidth: 200
 										},
 										{
-											header: 'Status',
+											Header: 'Status',
 											id: 'status',
-											accessor: request =>
-												<span className={`label ${statusLabelType(request.status)}`}>
+											Cell: ({original}) =>
+												<span className={`label ${statusLabelType(original.status)}`}>
 												{
-													request.dayOffType === 'sick'
+													original.dayOffType === 'sick'
 														? 'Sick day'
-														: ucfirst(request.status)
+														: ucfirst(original.status)
 												}
 												</span>
 										}
 									]}
-									SubComponent={({row}) =>
+									SubComponent={({original}) =>
 										<section className="request-details well well-lg">
 											<RequestDetails
-												request={row}
+												request={original}
 												currentUser={currentUser} />
 										</section>
 									}
 									collapseOnDataChange={false}
-									pageSize={row.requests.length}
+									pageSize={original.requests.length}
 									showPagination={false} />
 							</div>
 						</div>
