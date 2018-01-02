@@ -18,36 +18,19 @@
 		</section>
 {{/if}}
 
-{{#if isFellow}}
-	{{#if fellowRequestDetails}}
-		<h2 id="i-day-details">Request Details</h2>
-		<section class="request-details well well-lg">
-			{{>React component=RequestDetails request=fellowRequestDetails currentUser=currentUser}}
-		</section>
-		<button type="button" class="close-details-button btn btn-default" id="close-i-day-details">Close details</button>
-	{{/if}}
-	{{#if fellowRequestRequests}}
-		<section class="i-day-requests">
-			<h2>Requests</h2>
-			{{>reactiveTable collection=fellowRequestRequests settings=fellowRequestSettings}}
-			<hr />
-		</section>
-	{{/if}}
-{{else}}
-	{{#if iDayDetails}}
-		<h2 id="i-day-details">I-Day Details</h2>
-		<section class="request-details well well-lg">
-			{{>React component=RequestDetails request=iDayDetails currentUser=currentUser}}
-		</section>
-		<button type="button" class="close-details-button btn btn-default" id="close-i-day-details">Close details</button>
-	{{/if}}
-	{{#if iDayRequests}}
-		<section class="i-day-requests">
-			<h2>I-Day Requests</h2>
-			{{>reactiveTable collection=iDayRequests settings=iDaySettings}}
-			<hr />
-		</section>
-	{{/if}}
+{{#if requestDetails}}
+	<h2 id="i-day-details">Request Details</h2>
+	<section class="request-details well well-lg">
+		{{>React component=RequestDetails request=requestDetails currentUser=currentUser}}
+	</section>
+	<button type="button" class="close-details-button btn btn-default" id="close-i-day-details">Close details</button>
+{{/if}}
+{{#if requestRequests}}
+	<section class="i-day-requests">
+		<h2>Requests</h2>
+		{{>reactiveTable collection=requestRequests settings=requestSettings}}
+		<hr />
+	</section>
 {{/if}}
 	</section>
 </template>

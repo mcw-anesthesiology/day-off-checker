@@ -4,7 +4,7 @@ import { throwError } from 'meteor/saucecode:rollbar';
 
 import { DayOffRequests } from '../../api/day-off-requests.js';
 import { ReminderEmails } from '../../api/reminder-emails.js';
-import { isFellow } from '../../../imports/utils.js';
+import { isFellow, getRequestorType } from '../../../imports/utils.js';
 
 import find from 'lodash/find';
 import moment from 'moment';
@@ -52,14 +52,35 @@ Template.requestsList.helpers({
 		return DayOffRequests.findOne(Session.get('sickDayDetailsId'));
 	},
 	sickDayRequests(){
+		let query = { [DAY_OFF_FIELDS.TYPE]: DAY_OFF_TYPES.SICK };
+		switch (getRequestorType()) {
+			case 'fellow':
+				query.$or = [
+					{ [DAY_OFF_FIELDS.REQUESTOR_TYPE]: 'fellow' },
+					{ [DAY_OFF_FIELDS.FELLOWSHIP]: { $exists: true } }
+				];
+				break;
+			case 'intern':
+				query[DAY_OFF_FIELDS.REQUESTOR_TYPE] = 'intern';
+				break;
+			case 'resident':
+			default:
+				query[DAY_OFF_FIELDS.REQUESTOR_TYPE] = {
+					$in: [
+						null,
+						'resident'
+					]
+				};
+				break;
+		}
 		const requests = DayOffRequests.find(
-			{ [DAY_OFF_FIELDS.TYPE]: DAY_OFF_TYPES.SICK },
+			query,
 			{ sort: { createdAt: -1 } }
 		);
-		if(requests.count() > 0)
-			return requests;
-		else
-			return [{}];
+
+		return requests && requests.count() > 0
+			? requests
+			: [{}];
 	},
 	sickDaySettings(){
 		const settings = {
@@ -72,71 +93,94 @@ Template.requestsList.helpers({
 			]
 		};
 
-		if(isFellow())
-			settings.fields.splice(1, 0, { key: 'requestedFellowship.name', label: 'Fellowship' });
+		if (isFellow())
+			settings.fields.splice(1, 0, {
+				key: 'requestedFellowship.name',
+				label: 'Fellowship'
+			});
 
 		return settings;
 	},
-	iDayDetails(){
+	requestDetails(){
 		return DayOffRequests.findOne(Session.get('iDayDetailsId'));
 	},
-	iDayRequests(){
-		const requests = DayOffRequests.find(
-			{ [DAY_OFF_FIELDS.TYPE]: DAY_OFF_TYPES.I_DAY },
-			{ sort: { createdAt: -1 } }
-		);
-		if(requests.count() > 0)
-			return requests;
-		else
-			return [{}];
+	requestRequests() {
+		let requests;
+		switch (getRequestorType()) {
+			case 'fellow':
+				requests = DayOffRequests.find(
+					{
+						[DAY_OFF_FIELDS.TYPE]: {
+							$in: [
+								DAY_OFF_TYPES.MEETING,
+								DAY_OFF_TYPES.VACATION
+							]
+						}
+					},
+					{ sort: { createdAt: -1 } }
+				);
+				break;
+			case 'intern':
+				requests = DayOffRequests.find(
+					{
+						[DAY_OFF_FIELDS.REQUESTOR_TYPE]: 'intern',
+						[DAY_OFF_FIELDS.TYPE]: DAY_OFF_TYPES.I_DAY
+					},
+					{ sort: { createdAt: -1 } }
+				);
+				break;
+			case 'resident':
+			default:
+				requests = DayOffRequests.find(
+					{
+						[DAY_OFF_FIELDS.REQUESTOR_TYPE]: {
+							$in: [
+								null,
+								'resident'
+							]
+						},
+						[DAY_OFF_FIELDS.TYPE]: DAY_OFF_TYPES.I_DAY
+					},
+					{ sort: { createdAt: -1 } }
+				);
+				break;
+		}
+
+		return requests && requests.count() > 0
+			? requests
+			: [{}];
 	},
-	iDaySettings(){
-		return {
-			fields: [
-				{ key: 'requestorName', label: 'Name', sortOrder: 2, sortDirection: 'asc' },
-				{ key: 'requestedLocation.name', label: 'Location' },
-				{ key: 'requestedDate', label: 'I-Days', fn: displaySortableDateRange, sortOrder: 0, sortDirection: 'desc' },
-				{ key: 'requestTime', label: 'Requested', fn: displaySortableDate, sortOrder: 1, sortDirection: 'desc' },
-				{ key: 'requestReason', label: 'Reason' },
-				{ key: 'status', label: 'Status', fn: capitalizeFirstLetter },
-				{ key: 'confirmationRequests', label: '', fn: requestNeedsResponse }
-			]
-		};
-	},
-	fellowRequestDetails(){
-		return DayOffRequests.findOne(Session.get('iDayDetailsId'));
-	},
-	fellowRequestRequests(){
-		const requests = DayOffRequests.find(
-			{
-				[DAY_OFF_FIELDS.TYPE]: {
-					$in: [
-						DAY_OFF_TYPES.MEETING,
-						DAY_OFF_TYPES.VACATION
+	requestSettings() {
+		switch (getRequestorType()) {
+			case 'fellow':
+				return {
+					fields: [
+						{ key: 'requestorName', label: 'Name', sortOrder: 2, sortDirection: 'asc' },
+						{ key: 'requestedFellowship.name', label: 'Fellowship' },
+						{ key: DAY_OFF_FIELDS.TYPE, label: 'Request Type', fn: displayTypeName },
+						{ key: 'requestedLocation.name', label: 'Location' },
+						{ key: 'requestedDate', label: 'Dates', fn: displaySortableDateRange, sortOrder: 0, sortDirection: 'desc' },
+						{ key: 'requestTime', label: 'Requested', fn: displaySortableDate, sortOrder: 1, sortDirection: 'desc' },
+						{ key: 'requestReason', label: 'Reason' },
+						{ key: 'status', label: 'Status', fn: capitalizeFirstLetter },
+						{ key: 'confirmationRequests', label: '', fn: requestNeedsResponse }
 					]
-				}
-			},
-			{ sort: { createdAt: -1 } }
-		);
-		if(requests.count() > 0)
-			return requests;
-		else
-			return [{}];
-	},
-	fellowRequestSettings(){
-		return {
-			fields: [
-				{ key: 'requestorName', label: 'Name', sortOrder: 2, sortDirection: 'asc' },
-				{ key: 'requestedFellowship.name', label: 'Fellowship' },
-				{ key: DAY_OFF_FIELDS.TYPE, label: 'Request Type', fn: displayTypeName },
-				{ key: 'requestedLocation.name', label: 'Location' },
-				{ key: 'requestedDate', label: 'Dates', fn: displaySortableDateRange, sortOrder: 0, sortDirection: 'desc' },
-				{ key: 'requestTime', label: 'Requested', fn: displaySortableDate, sortOrder: 1, sortDirection: 'desc' },
-				{ key: 'requestReason', label: 'Reason' },
-				{ key: 'status', label: 'Status', fn: capitalizeFirstLetter },
-				{ key: 'confirmationRequests', label: '', fn: requestNeedsResponse }
-			]
-		};
+				};
+			case 'intern':
+			case 'resident':
+			default:
+				return {
+					fields: [
+						{ key: 'requestorName', label: 'Name', sortOrder: 2, sortDirection: 'asc' },
+						{ key: 'requestedLocation.name', label: 'Location' },
+						{ key: 'requestedDate', label: 'I-Days', fn: displaySortableDateRange, sortOrder: 0, sortDirection: 'desc' },
+						{ key: 'requestTime', label: 'Requested', fn: displaySortableDate, sortOrder: 1, sortDirection: 'desc' },
+						{ key: 'requestReason', label: 'Reason' },
+						{ key: 'status', label: 'Status', fn: capitalizeFirstLetter },
+						{ key: 'confirmationRequests', label: '', fn: requestNeedsResponse }
+					]
+				};
+		}
 	},
 	RequestDetails(){
 		return RequestDetails;

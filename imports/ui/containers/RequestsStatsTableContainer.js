@@ -34,6 +34,6 @@ const RequestsStatsTableContainer = withTracker(props => {
 		currentUser: Meteor.user(),
 		dayOffRequests
 	};
-}, RequestsStatsTable);
+})(RequestsStatsTable);
 
 export default RequestsStatsTableContainer;

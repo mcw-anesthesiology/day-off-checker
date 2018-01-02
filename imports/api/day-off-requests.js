@@ -40,15 +40,15 @@ import 'twix';
 
 export const DayOffRequests = new Mongo.Collection('dayOffRequests');
 
-if(Meteor.isServer){
-	Meteor.publish('dayOffRequests', function(){
-		if(!this.userId)
+if (Meteor.isServer) {
+	Meteor.publish('dayOffRequests', function() {
+		if (!this.userId)
 			return;
 
 		const user = Meteor.users.findOne(this.userId);
 		const fellow = isFellow(this.connection);
 
-		switch(user.role){
+		switch(user.role) {
 			case USER_ROLES.ADMIN:
 				return DayOffRequests.find({
 					[DAY_OFF_FIELDS.FELLOWSHIP]: {
@@ -56,7 +56,7 @@ if(Meteor.isServer){
 					}
 				});
 			case USER_ROLES.RESIDENCY_COORDINATOR:
-				if(!fellow)
+				if (!fellow)
 					return DayOffRequests.find({
 						[DAY_OFF_FIELDS.FELLOWSHIP]: {
 							$exists: false
@@ -64,7 +64,7 @@ if(Meteor.isServer){
 					});
 				break;
 			case USER_ROLES.FELLOWSHIP_COORDINATOR:
-				if(fellow)
+				if (fellow)
 					return DayOffRequests.find({
 						[DAY_OFF_FIELDS.FELLOWSHIP]: {
 							$exists: true
@@ -90,7 +90,7 @@ if(Meteor.isServer){
 		}
 	});
 
-	Meteor.publish('dayOffRequests_byId', function(requestId){
+	Meteor.publish('dayOffRequests_byId', function(requestId) {
 		check(requestId, String);
 		return [
 			DayOffRequests.find({_id: requestId}),
@@ -99,14 +99,14 @@ if(Meteor.isServer){
 	});
 }
 
-if(Meteor.isClient){
+if (Meteor.isClient) {
 	Meteor.subscribe('basicUserData');
 	Meteor.subscribe('notifyUserData');
 }
 
 Meteor.methods({
-	'dayOffRequests.insert'(request){
-		if(request.requestReason === '(None)')
+	'dayOffRequests.insert'(request) {
+		if (request.requestReason === '(None)')
 			request.requestReason = '';
 
 		const locations = Locations.find({}).fetch();
@@ -166,7 +166,7 @@ Meteor.methods({
 			}
 		};
 
-		if(isFellow(this.connection)){
+		if (isFellow(this.connection)) {
 			const fellowships = Fellowships.find().fetch();
 			const fellowshipAdmins = Meteor.users.find({ role: 'fellowship_admin' }).fetch();
 			let allowedLocationIds = map(locations, '_id');
@@ -272,24 +272,24 @@ Meteor.methods({
 
 		new SimpleSchema(schema).validate(request);
 
-		if(request.dayOffType !== DAY_OFF_TYPES.SICK)
+		if (request.dayOffType !== DAY_OFF_TYPES.SICK)
 			request.status = 'pending';
 
-		if(Meteor.isServer){
+		if (Meteor.isServer) {
 			request.ipAddress = this.connection.clientAddress;
 			request.requestTime = new Date();
 		}
 
 		request._id = DayOffRequests.insert(request);
 
-		if(Meteor.isServer){
-			if(request.dayOffType === DAY_OFF_TYPES.SICK)
+		if (Meteor.isServer) {
+			if (request.dayOffType === DAY_OFF_TYPES.SICK)
 				sendNotifications(request);
 			else
 				sendConfirmationRequests(request);
 		}
 	},
-	'dayOffRequests.approveRequest'(requestId, note){
+	'dayOffRequests.approveRequest'(requestId, note) {
 		new SimpleSchema({
 			note: {
 				type: String,
@@ -310,21 +310,21 @@ Meteor.methods({
 
 		const request = DayOffRequests.findOne(requestId);
 		let allApproved = true;
-		for(let confirmationRequest of request.confirmationRequests){
-			if(confirmationRequest.status !== 'approved')
+		for(let confirmationRequest of request.confirmationRequests) {
+			if (confirmationRequest.status !== 'approved')
 				allApproved = false;
 		}
-		if(allApproved){
+		if (allApproved) {
 			DayOffRequests.update({ _id: requestId }, {
 				$set: {
 					status: 'approved'
 				}
 			});
-			if(Meteor.isServer)
+			if (Meteor.isServer)
 				sendRequestApprovalNotifications(request);
 		}
 	},
-	'dayOffRequests.denyRequest'(requestId, reason){
+	'dayOffRequests.denyRequest'(requestId, reason) {
 		new SimpleSchema({
 			reason: {
 				type: String,
@@ -344,12 +344,12 @@ Meteor.methods({
 			}
 		});
 
-		if(Meteor.isServer){
+		if (Meteor.isServer) {
 			const request = DayOffRequests.findOne(requestId);
 			sendRequestDenialNotifications(request, reason);
 		}
 	},
-	'dayOffRequests.cancelRequest'(requestId, cancelReason){
+	'dayOffRequests.cancelRequest'(requestId, cancelReason) {
 		new SimpleSchema({
 			cancelReason: {
 				type: String,
@@ -366,19 +366,19 @@ Meteor.methods({
 			}
 		});
 
-		if(Meteor.isServer){
+		if (Meteor.isServer) {
 			const request = DayOffRequests.findOne(requestId);
 			sendRequestCancellationNotifications(request, cancelReason);
 		}
 	},
-	'dayOffRequests.resendConfirmationRequests'(requestId, resendUsernames){
-		if(Meteor.user().role !== 'admin')
+	'dayOffRequests.resendConfirmationRequests'(requestId, resendUsernames) {
+		if (Meteor.user().role !== 'admin')
 			throw new Meteor.Error('dayOffRequests.resendConfirmationRequests.unauthorized');
 
 		const request = DayOffRequests.findOne(requestId);
 		let pendingConfirmers = [];
-		for(let confirmationRequest of request.confirmationRequests){
-			if(confirmationRequest.status === 'pending')
+		for(let confirmationRequest of request.confirmationRequests) {
+			if (confirmationRequest.status === 'pending')
 				pendingConfirmers.push(confirmationRequest.confirmer);
 		}
 
@@ -394,11 +394,11 @@ Meteor.methods({
 			$in: resendUsernames
 		}}).fetch();
 
-		if(Meteor.isServer){
+		if (Meteor.isServer) {
 			sendConfirmationRequests(request, resendUsers, false, false);
 		}
 	},
-	'dayOffRequests.editApprovalNote'(requestId, note){
+	'dayOffRequests.editApprovalNote'(requestId, note) {
 		new SimpleSchema({
 			note: {
 				type: String,
@@ -418,7 +418,7 @@ Meteor.methods({
 	}
 });
 
-function getUsersToNotify(request){
+function getUsersToNotify(request) {
 	const $or = [
 		{
 			role: USER_ROLES.LOCATION_ADMIN,
@@ -451,10 +451,10 @@ function getUsersToNotify(request){
 	return Meteor.users.find({ $or }).fetch();
 }
 
-function sendNotifications(request, users = getUsersToNotify(request), sendRequestorNotification = true){
+function sendNotifications(request, users = getUsersToNotify(request), sendRequestorNotification = true) {
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
 	let locationAdmin;
-	if(isFellowRequest(request) && !request.requestedLocation.administrator)
+	if (isFellowRequest(request) && !request.requestedLocation.administrator)
 		locationAdmin = {
 			name: ''
 		};
@@ -462,7 +462,7 @@ function sendNotifications(request, users = getUsersToNotify(request), sendReque
 		locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
 
 	let reasonHtml = '';
-	if(request.requestReason){
+	if (request.requestReason) {
 		reasonHtml = `
 			<blockquote>
 				<p>${nl2br(request.requestReason)}</p>
@@ -470,7 +470,7 @@ function sendNotifications(request, users = getUsersToNotify(request), sendReque
 	}
 
 	let timeout = 0; // FIXME
-	for(let user of users){
+	for(let user of users) {
 		try {
 			timeout += 1000; // FIXME
 			Meteor.setTimeout(() => { // FIXME
@@ -532,13 +532,13 @@ function sendNotifications(request, users = getUsersToNotify(request), sendReque
 				}
 			});
 		}
-		catch(e){
+		catch(e) {
 			console.log('Error sending notification: ' + e);
 			handleError(e);
 		}
 	}
 
-	if(sendRequestorNotification){
+	if (sendRequestorNotification) {
 		try{
 			timeout += 1000; // FIXME
 			Meteor.setTimeout(() => {
@@ -593,14 +593,14 @@ function sendNotifications(request, users = getUsersToNotify(request), sendReque
 				});
 			}, timeout);
 		}
-		catch(e){
+		catch(e) {
 			console.log('Error sending notification: ' + e);
 			handleError(e);
 		}
 	}
 }
 
-function getUsersForConfirmation(request){
+function getUsersForConfirmation(request) {
 	switch (getRequestRequestorType(request)) {
 		case 'fellow':
 			return [
@@ -620,10 +620,10 @@ function getUsersForConfirmation(request){
 	}
 }
 
-function sendConfirmationRequests(request, users = getUsersForConfirmation(request), sendRequestorNotification = true, sendLocationAdminNotification = true){
+function sendConfirmationRequests(request, users = getUsersForConfirmation(request), sendRequestorNotification = true, sendLocationAdminNotification = true) {
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
 	let locationAdmin;
-	if(isFellowRequest(request) && !request.requestedLocation.administrator){
+	if (isFellowRequest(request) && !request.requestedLocation.administrator) {
 		locationAdmin = {
 			name: ''
 		};
@@ -634,21 +634,21 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 	}
 
 	let reasonHtml = '';
-	if(request.requestReason){
+	if (request.requestReason) {
 		reasonHtml = `
 			<blockquote>
 				<p>${nl2br(request.requestReason)}</p>
 			</blockquote>`;
 	}
 	let additionalInfoHtml = '';
-	if(request.additionalFellowshipInfo){
+	if (request.additionalFellowshipInfo) {
 		additionalInfoHtml = `
 			<table class="table">
 				<tbody>`;
 
-		for(let key of Object.keys(request.additionalFellowshipInfo)){
+		for(let key of Object.keys(request.additionalFellowshipInfo)) {
 			let value = request.additionalFellowshipInfo[key];
-			if(typeof value === 'boolean')
+			if (typeof value === 'boolean')
 				value = value ? 'yes' : 'no';
 			additionalInfoHtml += `
 					<tr>
@@ -665,7 +665,7 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 	let typeName = DAY_OFF_TYPE_NAMES[request[DAY_OFF_FIELDS.TYPE]];
 	let typeArticle = article(typeName);
 	let timeout = 0; // FIXME
-	for(let user of users){
+	for(let user of users) {
 		try {
 			let confirmationRequest = {};
 			timeout += 1000; // FIXME
@@ -739,16 +739,16 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 				}
 			});
 		}
-		catch(e){
+		catch(e) {
 			console.log('Error sending confirmation: ' + e);
 			handleError(e);
 		}
 	}
 
-	if(sendLocationAdminNotification){
+	if (sendLocationAdminNotification) {
 		timeout += 1000; // FIXME
 		let confirmerList = '<ul>';
-		for(let confirmer of users){
+		for(let confirmer of users) {
 			confirmerList += `<li>${confirmer.name} &lt;${confirmer.emails[0].address}&gt;</li>`;
 		}
 		confirmerList += '</ul>';
@@ -822,16 +822,16 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 					usersNotified: locationAdmin.username
 				}
 			});
-		} catch(e){
+		} catch(e) {
 			console.log('Error sending request notification to location admin: ' + e);
 			handleError(e);
 		}
 	}
 
-	if(sendRequestorNotification){
+	if (sendRequestorNotification) {
 		let approvers = 'the chiefs';
-		if(isFellowRequest(request)){
-			if(users && users[0] && users[0].name)
+		if (isFellowRequest(request)) {
+			if (users && users[0] && users[0].name)
 				approvers = users[0].name;
 			else
 				approvers = 'the fellowship director';
@@ -897,19 +897,19 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 				});
 			}, timeout);
 		}
-		catch(e){
+		catch(e) {
 			console.log('Error sending notification: ' + e);
 			handleError(e);
 		}
 	}
 }
 
-function sendRequestApprovalNotifications(request){
+function sendRequestApprovalNotifications(request) {
 	const users = getUsersToNotify(request);
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
 	let typeName = DAY_OFF_TYPE_NAMES[request[DAY_OFF_FIELDS.TYPE]];
 	let timeout = 0; // FIXME
-	for(let user of users){
+	for(let user of users) {
 		try {
 			timeout += 1000; // FIXME
 			Meteor.setTimeout(() => {
@@ -936,13 +936,13 @@ function sendRequestApprovalNotifications(request){
 				});
 			}, timeout);
 
-			if(user.role === 'location_admin'){
+			if (user.role === 'location_admin') {
 				let remindTime = moment(request.requestedDate[0]).subtract(DAYS_BEFORE_REQUEST_TO_SEND_REMINDER, 'days').startOf('day');
-				if(moment() < moment(remindTime).subtract(1, 'day'))
+				if (moment() < moment(remindTime).subtract(1, 'day'))
 					scheduleReminder(request, user, remindTime.toDate());
 			}
 		}
-		catch(e){
+		catch(e) {
 			console.log('Error sending approval notification: ' + e);
 			handleError(e);
 		}
@@ -974,18 +974,18 @@ function sendRequestApprovalNotifications(request){
 			});
 		}, timeout);
 	}
-	catch(e){
+	catch(e) {
 		console.log('Error sending approval notification: ' + e);
 		handleError(e);
 	}
 }
 
-function sendRequestDenialNotifications(request, reason){
+function sendRequestDenialNotifications(request, reason) {
 	const users = getUsersToNotify(request);
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
 	let typeName = DAY_OFF_TYPE_NAMES[request[DAY_OFF_FIELDS.TYPE]];
 	let timeout = 0; // FIXME
-	for(let user of users){
+	for(let user of users) {
 		try{
 			timeout += 1000; // FIXME
 			Meteor.setTimeout(() => {
@@ -1018,7 +1018,7 @@ function sendRequestDenialNotifications(request, reason){
 				});
 			}, timeout);
 		}
-		catch(e){
+		catch(e) {
 			console.log('Error sending denial notification: ' + e);
 			handleError(e);
 		}
@@ -1054,18 +1054,18 @@ function sendRequestDenialNotifications(request, reason){
 			});
 		}, timeout);
 	}
-	catch(e){
+	catch(e) {
 		console.log('Error sending denial notification: ' + e);
 		handleError(e);
 	}
 }
 
-function sendRequestCancellationNotifications(request, cancelReason){
+function sendRequestCancellationNotifications(request, cancelReason) {
 	const users = getUsersToNotify(request);
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
 	let typeName = DAY_OFF_TYPE_NAMES[request[DAY_OFF_FIELDS.TYPE]];
 	let timeout = 0; // FIXME
-	for(let user of users){
+	for(let user of users) {
 		try{
 			timeout += 1000; // FIXME
 			Meteor.setTimeout(() => {
@@ -1096,7 +1096,7 @@ function sendRequestCancellationNotifications(request, cancelReason){
 				});
 			}, timeout);
 		}
-		catch(e){
+		catch(e) {
 			console.log('Error sending cancellation notification: ' + e);
 			handleError(e);
 		}
@@ -1132,7 +1132,7 @@ function sendRequestCancellationNotifications(request, cancelReason){
 			});
 		}, timeout);
 	}
-	catch(e){
+	catch(e) {
 		console.log('Error sending cancellation confirmation: ' + e);
 		handleError(e);
 	}

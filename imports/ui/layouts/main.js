@@ -2,7 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { AccountsTemplates } from 'meteor/useraccounts:core';
 
 import { DAY_OFF_FIELDS, REQUESTOR_TYPES } from '../../constants.js';
-import { isFellow, userTypeUrl } from '../../utils.js';
+import { isFellow, userTypeUrl, isRequestorType } from '../../utils.js';
 
 import './main.html';
 
@@ -11,17 +11,17 @@ Template.main.onRendered(function(){
 });
 
 Template.main.helpers({
+	userTypeUrl,
 	requestorTypes() {
 		return REQUESTOR_TYPES;
 	},
+	requestorTypeSelected(type) {
+		return isRequestorType(type)
+			? 'selected'
+			: null;
+	},
 	errorAlert(){
 		return Session.get('errorAlert');
-	},
-	residentUrl(){
-		return userTypeUrl('resident');
-	},
-	fellowUrl(){
-		return userTypeUrl('fellow');
 	},
 	fieldEntries(){
 		let fields = Object.values(DAY_OFF_FIELDS).filter(field => {

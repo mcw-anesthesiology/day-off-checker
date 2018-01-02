@@ -27,6 +27,6 @@ const HomeContainer = withTracker(props => {
 		currentUser: Meteor.user(),
 		fellowships,
 	};
-}, Home);
+})(Home);
 
 export default HomeContainer;

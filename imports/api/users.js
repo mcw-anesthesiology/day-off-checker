@@ -35,6 +35,15 @@ if (Meteor.isServer) {
 		}});
 	});
 
+	Meteor.publish('internCoordinatorUserData', function() {
+		return Meteor.users.find({ role: 'intern_coordinator' }, { fields: {
+			name: 1,
+			username: 1,
+			role: 1,
+			pager: 1
+		}});
+	});
+
 	Meteor.publish('allUserData', function() {
 		return Meteor.users.find({}, { fields: {
 			_id: 1,

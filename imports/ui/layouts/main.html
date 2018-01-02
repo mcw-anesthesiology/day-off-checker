@@ -4,9 +4,10 @@
 			<select id="site-header-user-type">
 			{{#each requestorType in requestorTypes}}
 				<option value="{{requestorType}}"
-						{{isRequestorType requestorType}}>
+						{{requestorTypeSelected requestorType}}>
 					{{capitalizeFirstLetter requestorType}}
 				</option>
+			{{/each}}
 			</select>
 			<a href="/">Day&nbsp;off reporter</a>
 		</h1>
@@ -23,12 +24,18 @@
 		{{> Template.dynamic template=main}}
 	</main>
 	<footer class="{{routeName}}">
-{{#if isFellow}}
-		<a href="{{residentUrl}}">Resident site</a>
-{{else}}
-		<a href="{{fellowUrl}}">Fellowship site</a>
-{{/if}}
-		<nav>
+		<nav class="requestor-type-nav">
+{{#unless isRequestorType 'fellow'}}
+			<a href="{{userTypeUrl 'fellow'}}">Fellowship site</a>
+{{/unless}}
+{{#unless isRequestorType 'intern'}}
+			<a href="{{userTypeUrl 'intern'}}">Intern site</a>
+{{/unless}}
+{{#unless isRequestorType 'resident'}}
+			<a href="{{userTypeUrl 'resident'}}">Resident site</a>
+{{/unless}}
+		</nav>
+		<nav class="site-nav">
 {{#unless routeIs "Home"}}
 			<a href="/">Home</a>
 {{/unless}}

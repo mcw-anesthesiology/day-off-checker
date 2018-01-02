@@ -15,6 +15,7 @@ export const SCREEN_BREAKPOINTS = {
 
 export const DAY_OFF_FIELDS = {
 	TYPE: 'dayOffType',
+	REQUESTOR_TYPE: 'requestorType',
 	NAME: 'requestorName',
 	EMAIL: 'requestorEmail',
 	DATE: 'requestedDate',
@@ -27,6 +28,7 @@ export const DAY_OFF_FIELDS = {
 
 export const DAY_OFF_FIELD_NAMES = {
 	[DAY_OFF_FIELDS.TYPE]: 'Type',
+	[DAY_OFF_FIELDS.REQUESTOR_TYPE]: 'Requestor Type',
 	[DAY_OFF_FIELDS.NAME]: 'Name',
 	[DAY_OFF_FIELDS.EMAIL]: 'Email',
 	[DAY_OFF_FIELDS.DATE]: 'Date',
@@ -113,7 +115,8 @@ export const USER_ROLES = {
 	FELLOWSHIP_ADMIN: 'fellowship_admin',
 	CHIEF: 'chief',
 	RESIDENCY_COORDINATOR: 'residency_coordinator',
-	FELLOWSHIP_COORDINATOR: 'fellowship_coordinator'
+	FELLOWSHIP_COORDINATOR: 'fellowship_coordinator',
+	INTERN_COORDINATOR: 'intern_coordinator'
 };
 
 export const USER_ROLE_NAMES = {
@@ -122,5 +125,6 @@ export const USER_ROLE_NAMES = {
 	[USER_ROLES.FELLOWSHIP_ADMIN]: 'Fellowship Director',
 	[USER_ROLES.CHIEF]: 'Chief Resident',
 	[USER_ROLES.RESIDENCY_COORDINATOR]: 'Residency Coordinator',
-	[USER_ROLES.FELLOWSHIP_COORDINATOR]: 'Fellowship Coordinator'
+	[USER_ROLES.FELLOWSHIP_COORDINATOR]: 'Fellowship Coordinator',
+	[USER_ROLES.INTERN_COORDINATOR]: 'Intern Coordinator'
 };
