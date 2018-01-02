@@ -143,11 +143,13 @@
 	{{/if}}
 	{{#if isRequestorType 'fellow'}}
 			<p>
-				If you are on call, please notify {{fellowshipAdminName}} via text message as soon as possible.
+				If you are on call, please notify your fellowship administrator
+				{{fellowshipAdminName}} via text message as soon as possible.
 			</p>
 	{{else if isRequestorType 'intern'}}
 			<p>
-				If you are on call, please notify {{internAdminName}} as soon as possible.
+				If you are on call, please notify intern coordinator
+				{{internCoordinator.name}} as soon as possible.
 			</p>
 	{{else}}
 			<p>

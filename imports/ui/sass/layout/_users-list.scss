@@ -59,6 +59,11 @@
 					border-color: $fellowship-coordinator-border-color;
 				}
 
+				&.intern_coordinator td.role::before {
+					background-color: $intern-coordinator-role-color;
+					border-color: $intern-coordinator-border-color;
+				}
+
 				&.fellowship_admin td.role::before {
 					background-color: $fellowship-admin-role-color;
 					border-color: $fellowship-admin-border-color;

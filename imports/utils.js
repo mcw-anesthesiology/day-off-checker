@@ -88,7 +88,11 @@ export function getRequestorType(connection) {
 		? window.location.host
 		: connection.httpHeaders.host;
 
-	return hostname.split('.')[0] || 'resident';
+	const pieces = hostname.split('.');
+
+	return pieces.length >= 2
+		? pieces[0]
+		: 'resident';
 }
 
 export function isRequestorType(type, connection) {
@@ -101,7 +105,8 @@ export function isFellow(connection){
 
 export function getRequestRequestorType(request) {
 	return request.requestorType
-		|| request.hasOwnProperty(DAY_OFF_FIELDS.FELLOWSHIP)
+		? request.requestorType
+		: request.hasOwnProperty(DAY_OFF_FIELDS.FELLOWSHIP)
 			? 'fellow'
 			: 'resident';
 }
@@ -127,6 +132,10 @@ export function userTypeUrl(type){
 		case 'fellow':
 			subdomain = 'fellow.';
 			break;
+		case 'intern':
+			subdomain = 'intern.';
+			break;
+		case 'resident':
 		default:
 			subdomain = Meteor.isDevelopment ? '' : 'www.';
 			break;

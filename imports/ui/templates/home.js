@@ -40,57 +40,58 @@ import { isFellow, capitalizeFirstLetter, camelCaseToWords } from '../../utils.j
 import './home.html';
 
 let fields = Object.values(DAY_OFF_FIELDS).filter(field => {
-	if([
+	if ([
 		DAY_OFF_FIELDS.FELLOWSHIP,
 		DAY_OFF_FIELDS.ADDITIONAL_FELLOWSHIP_INFO
-	].includes(field)){
+	].includes(field)) {
 		return isFellow();
 	}
 
 	return true;
 });
 
-function insertEntries(){
-	let request = {
-		requestorType: getRequestorType()
-	};
-	for(let field of fields){
+function insertEntries() {
+	let request = {};
+
+	for (let field of fields) {
 		let value = Session.get(field);
-		if(!value && fieldShouldBeCompleted(field)){
+		if (!value && fieldShouldBeCompleted(field)) {
 			Session.set('errorAlert', 'Please complete all fields');
 			return;
 		}
 		request[field] = value;
 	}
 
+	request.requestorType = getRequestorType();
+
 	Meteor.call('dayOffRequests.insert', request, (err) => {
-		if(err){
-			console.log(err.name + ': ' + err.message);
+		if (err) {
+			console.error(err.name + ': ' + err.message);
 			Session.set('errorAlert', 'Problem creating a request. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
 			throwError(err.message);
-		}
-		else
+		} else {
 			Session.set('submissionConfirmation', true);
+		}
 	});
 }
 
 Template.home.helpers({
 	fields: fields,
-	currentUserAdmin(){
+	currentUserAdmin() {
 		return (Meteor.user().role === 'admin');
 	},
-	dayOffType(){
+	dayOffType() {
 		return Session.get('dayOffType');
 	},
-	editable(){
-		if(!Session.equals('submissionConfirmation', true))
+	editable() {
+		if (!Session.equals('submissionConfirmation', true))
 			return 'editable';
 	},
-	getField(id){
+	getField(id) {
 		const field = Session.get(id);
 
-		if(field){
-			switch(id){
+		if (field) {
+			switch(id) {
 				case DAY_OFF_FIELDS.TYPE:
 					return DAY_OFF_TYPE_NAMES[field];
 				case DAY_OFF_FIELDS.FELLOWSHIP:
@@ -102,9 +103,9 @@ Template.home.helpers({
 					return field;
 				case DAY_OFF_FIELDS.ADDITIONAL_FELLOWSHIP_INFO: {
 					let fieldValue = '';
-					for(let name of Object.keys(field)){
+					for (let name of Object.keys(field)) {
 						let value = field[name];
-						if(typeof value === 'boolean')
+						if (typeof value === 'boolean')
 							value = value ? 'yes' : 'no';
 
 						fieldValue += `${camelCaseToWords(name)}:
@@ -118,7 +119,7 @@ Template.home.helpers({
 			}
 		}
 	},
-	fieldName(field){
+	fieldName(field) {
 		return DAY_OFF_FIELD_NAMES[field];
 	}
 });
@@ -135,20 +136,20 @@ Template.home.events({
 });
 
 Template.dayOffEntry.helpers({
-	nextField(){
-		for(let field of fields){
-			if(!Session.get(field) && fieldShouldBeCompleted(field)){
+	nextField() {
+		for (let field of fields) {
+			if (!Session.get(field) && fieldShouldBeCompleted(field)) {
 				return field;
 			}
 		}
-		if(!Session.get('requestConfirmation'))
+		if (!Session.get('requestConfirmation'))
 			return 'requestConfirmation';
 	}
 });
 
-function fieldShouldBeCompleted(field){
-	if(isFellow()){
-		if([
+function fieldShouldBeCompleted(field) {
+	if (isFellow()) {
+		if ([
 			DAY_OFF_FIELDS.TYPE,
 			DAY_OFF_FIELDS.NAME,
 			DAY_OFF_FIELDS.EMAIL,
@@ -159,16 +160,15 @@ function fieldShouldBeCompleted(field){
 		].includes(field))
 			return true;
 
-		if(field === DAY_OFF_FIELDS.ADDITIONAL_FELLOWSHIP_INFO){
-			if([
+		if (field === DAY_OFF_FIELDS.ADDITIONAL_FELLOWSHIP_INFO) {
+			if ([
 				DAY_OFF_TYPES.SICK,
 				DAY_OFF_TYPES.MEETING
 			].includes(Session.get(DAY_OFF_FIELDS.TYPE)))
 				return true;
 		}
-	}
-	else {
-		if([
+	} else {
+		if ([
 			DAY_OFF_FIELDS.TYPE,
 			DAY_OFF_FIELDS.NAME,
 			DAY_OFF_FIELDS.EMAIL,
@@ -191,7 +191,7 @@ Template.dayOffEntry.events({
 
 		const allowedTypes = isFellow() ? FELLOW_DAY_OFF_TYPES : RESIDENT_DAY_OFF_TYPES;
 
-		if(allowedTypes.indexOf(button.value) !== -1){
+		if (allowedTypes.indexOf(button.value) !== -1) {
 			Session.set(DAY_OFF_FIELDS.TYPE, button.value);
 		}
 	},
@@ -202,23 +202,23 @@ Template.dayOffEntry.events({
 		const input = $(form).find('input[type="hidden"], input:visible, select, textarea')[0];
 
 		let value;
-		switch(input.name){
+		switch(input.name) {
 			case DAY_OFF_FIELDS.TYPE: {
 				const allowedTypes = isFellow() ? FELLOW_DAY_OFF_TYPES : RESIDENT_DAY_OFF_TYPES;
-				if(allowedTypes.indexOf(input.value) !== -1)
+				if (allowedTypes.indexOf(input.value) !== -1)
 					value = input.value;
 				else
 					Session.set('errorAlert', 'Unknown day off type');
 				break;
 			}
 			case DAY_OFF_FIELDS.NAME:
-				if(input.value.trim() === '')
+				if (input.value.trim() === '')
 					Session.set('errorAlert', 'Name looks empty. Please double check your name.');
 				else
 					value = input.value;
 				break;
 			case DAY_OFF_FIELDS.EMAIL:
-				if(validator.validate(input.value))
+				if (validator.validate(input.value))
 					value = input.value;
 				else
 					Session.set('errorAlert', 'Email address seems wrong. Please make sure to enter a valid email address.');
@@ -226,30 +226,27 @@ Template.dayOffEntry.events({
 			case DAY_OFF_FIELDS.DATE: {
 				let isRange = instance.$('#multiple-days').prop('checked');
 				let startDate, endDate;
-				if(instance.$(input).data('endDateElement')){
+				if (instance.$(input).data('endDateElement')) {
 					startDate = moment(input.value, ISO_DATE_FORMAT);
 
-					if(isRange){
+					if (isRange) {
 						let endInput = instance.$(instance.$(input).data('endDateElement'))[0];
 						endDate = moment(endInput.value, ISO_DATE_FORMAT);
-					}
-					else {
+					} else {
 						endDate = moment(startDate);
 					}
-				}
-				else {
-					if(isRange){
+				} else {
+					if (isRange) {
 						[startDate, endDate] = instance.$(input).val().split('to').map(date =>
 							moment(date, ISO_DATE_FORMAT)
 						);
-					}
-					else {
+					} else {
 						startDate = moment(instance.$(input).val(), ISO_DATE_FORMAT);
 						endDate = moment(startDate);
 					}
 				}
 				let range = startDate.twix(endDate, true);
-				if(!range.isValid())
+				if (!range.isValid())
 					Session.set('errorAlert', 'Invalid date range. Please select first the beginning date and then the ending date.');
 				else
 					value = [ startDate.toDate(), endDate.toDate() ];
@@ -259,26 +256,24 @@ Template.dayOffEntry.events({
 				value = Fellowships.findOne(input.value);
 				break;
 			case DAY_OFF_FIELDS.LOCATION:
-				if(isFellow() && input.value === 'other'){
+				if (isFellow() && input.value === 'other') {
 					let otherName = $(form).find('#other-location').val();
 					value = {
 						_id: 'other',
 						name: otherName
 					};
-				}
-				else if(isFellow() && input.value === 'not-assigned-yet'){
+				} else if (isFellow() && input.value === 'not-assigned-yet') {
 					value = {
 						_id: 'not-assigned-yet',
 						name: 'Not assigned yet'
 					};
-				}
-				else {
+				} else {
 					value = Locations.findOne(input.value);
 				}
 				break;
 			case DAY_OFF_FIELDS.REASON:
 				value = input.value.trim();
-				if(!value)
+				if (!value)
 					value = '(None)';
 				break;
 			case DAY_OFF_FIELDS.ADDITIONAL_FELLOWSHIP_INFO:
@@ -293,17 +288,17 @@ Template.dayOffEntry.events({
 				break;
 		}
 
-		if(value){
+		if (value) {
 			Session.set(input.name, value);
 		}
 	}
 });
 
 Template.dayOffType.helpers({
-	dayOffButtons(){
+	dayOffButtons() {
 		let buttons = [];
 		const types = isFellow() ? FELLOW_DAY_OFF_TYPES : RESIDENT_DAY_OFF_TYPES;
-		for(let type of types){
+		for (let type of types) {
 			let button = {
 				value: type,
 				text: DAY_OFF_TYPE_NAMES[type]
@@ -313,37 +308,37 @@ Template.dayOffType.helpers({
 
 		return buttons;
 	},
-	ManageRequest(){
+	ManageRequest() {
 		return ManageRequest;
 	}
 });
 
-Template.requestorName.onRendered(function(){
+Template.requestorName.onRendered(function() {
 	this.$('#name').placeholder();
 	this.$('#name').focus();
 });
 
 Template.requestorName.helpers({
-	oldValue(){
+	oldValue() {
 		return Session.get(`old_${DAY_OFF_FIELDS.NAME}`);
 	}
 });
 
-Template.requestorEmail.onRendered(function(){
+Template.requestorEmail.onRendered(function() {
 	this.$('#email').placeholder();
 	this.$('#email').focus();
 });
 
 Template.requestorEmail.helpers({
-	oldValue(){
+	oldValue() {
 		return Session.get(`old_${DAY_OFF_FIELDS.EMAIL}`);
 	}
 });
 
-Template.requestedDate.onRendered(function(){
+Template.requestedDate.onRendered(function() {
 	this.$('#daterange').placeholder();
 
-	if(Session.get('isRange'))
+	if (Session.get('isRange'))
 		this.$('#daterange').flatpickr({
 			mode: 'range'
 		});
@@ -352,40 +347,40 @@ Template.requestedDate.onRendered(function(){
 });
 
 Template.requestedDate.helpers({
-	isRange(){
+	isRange() {
 		return Session.get('isRange');
 	},
-	oldValue(){
-		if(Session.get(`old_${DAY_OFF_FIELDS.DATE}`)){
+	oldValue() {
+		if (Session.get(`old_${DAY_OFF_FIELDS.DATE}`)) {
 			const dates = Session.get(`old_${DAY_OFF_FIELDS.DATE}`);
 			return dates.map(date => moment(date).format(ISO_DATE_FORMAT))
 				.join(' to ');
 		}
 	},
-	oldStartValue(){
-		if(Session.get(`old_${DAY_OFF_FIELDS.DATE}`)){
+	oldStartValue() {
+		if (Session.get(`old_${DAY_OFF_FIELDS.DATE}`)) {
 			const dates = Session.get(`old_${DAY_OFF_FIELDS.DATE}`);
 			let startDate = moment(dates[0]);
 			return startDate.format(ISO_DATE_FORMAT);
 		}
 	},
-	oldEndValue(){
-		if(Session.get(`old_${DAY_OFF_FIELDS.DATE}`)){
+	oldEndValue() {
+		if (Session.get(`old_${DAY_OFF_FIELDS.DATE}`)) {
 			const dates = Session.get(`old_${DAY_OFF_FIELDS.DATE}`);
 			let startDate = moment(dates[1]);
 			return startDate.format(ISO_DATE_FORMAT);
 		}
 	},
-	oldMultiple(){
-		if(Session.get('isRange'))
+	oldMultiple() {
+		if (Session.get('isRange'))
 			return 'checked';
 	},
-	today(){
+	today() {
 		return moment().format(ISO_DATE_FORMAT);
 	},
-	startDate(){
+	startDate() {
 		let startDate = Session.get('startDate');
-		if(!startDate)
+		if (!startDate)
 			return moment().format(ISO_DATE_FORMAT);
 
 		return startDate;
@@ -393,151 +388,153 @@ Template.requestedDate.helpers({
 });
 
 Template.requestedDate.events({
-	'change #multiple-days'(event, instance){
+	'change #multiple-days'(event, instance) {
 		let checkbox = event.target;
 		Session.set('isRange', checkbox.checked);
-		if(checkbox.checked){
+		if (checkbox.checked) {
 			instance.$('#daterange').flatpickr({
 				mode: 'range'
 			});
 			instance.$('label[for="start-date"]').text('Start date');
-		}
-		else {
+		} else {
 			instance.$('#daterange').flatpickr();
 			instance.$('label[for="start-date"]').text('Date');
 		}
 	},
-	'input #start-date'(event){
+	'input #start-date'(event) {
 		Session.set('startDate', event.target.value);
 	}
 });
 
-Template.requestedFellowship.onCreated(function(){
+Template.requestedFellowship.onCreated(function() {
 	Meteor.subscribe('fellowships');
 });
 
 Template.requestedFellowship.helpers({
-	fellowships(){
+	fellowships() {
 		return Fellowships.find({}, { sort: { name: 1 } });
 	},
-	oldValueSelected(fellowship){
+	oldValueSelected(fellowship) {
 		const oldFellowship = Session.get(`old_${DAY_OFF_FIELDS.FELLOWSHIP}`);
-		if(oldFellowship && oldFellowship._id === fellowship._id)
+		if (oldFellowship && oldFellowship._id === fellowship._id)
 			return 'selected';
 	}
 });
 
-Template.requestedLocation.onCreated(function(){
+Template.requestedLocation.onCreated(function() {
 	Meteor.subscribe('locations');
-	if(isFellow()){
+	if (isFellow()) {
 		this.otherSelected = new ReactiveVar();
 		this.otherSelected.set(false);
 	}
 });
 
 Template.requestedLocation.helpers({
-	locations(){
+	locations() {
 		let queryObject = {
 			fellowship: { $exists: false }
 		};
-		if(isFellow()){
-			if(Session.get(DAY_OFF_FIELDS.FELLOWSHIP)){
+		if (isFellow()) {
+			if (Session.get(DAY_OFF_FIELDS.FELLOWSHIP)) {
 				queryObject = {
 					fellowship: Session.get(DAY_OFF_FIELDS.FELLOWSHIP)._id
 				};
-			}
-			else {
+			} else {
 				Session.set('errorAlert', 'Please select a fellowship');
 				return;
 			}
 		}
 		return Locations.find(queryObject, { sort: { name: 1 } });
 	},
-	isRequest(){
+	isRequest() {
 		return !Session.equals(DAY_OFF_FIELDS.TYPE, DAY_OFF_TYPES.SICK);
 	},
-	oldValueSelected(location){
+	oldValueSelected(location) {
 		const oldLocation = Session.get(`old_${DAY_OFF_FIELDS.LOCATION}`);
-		if(oldLocation && oldLocation._id === location._id)
+		if (oldLocation && oldLocation._id === location._id)
 			return 'selected';
 	},
-	otherSelected(){
+	otherSelected() {
 		return Template.instance().otherSelected.get();
 	}
 });
 
 Template.requestedLocation.events({
-	'change #location'(event, instance){
-		if(isFellow()){
+	'change #location'(event, instance) {
+		if (isFellow()) {
 			instance.otherSelected.set(event.target.value === 'other');
 		}
 	}
 });
 
-Template.requestReason.onRendered(function(){
+Template.requestReason.onRendered(function() {
 	this.$('#reason').placeholder();
 	this.$('#reason').focus();
 });
 
 Template.requestReason.helpers({
-	oldValue(){
+	oldValue() {
 		let oldReason = Session.get(`old_${DAY_OFF_FIELDS.REASON}`);
-		if(oldReason !== '(None)')
+		if (oldReason !== '(None)')
 			return oldReason;
 	}
 });
 
-Template.submissionConfirmation.onCreated(function(){
+Template.submissionConfirmation.onCreated(function() {
 	Meteor.subscribe('chiefUserData');
+	Meteor.subscribe('internCoordinatorUserData');
 });
 
 Template.submissionConfirmation.helpers({
-	sickDay(){
+	sickDay() {
 		return Session.get(DAY_OFF_FIELDS.TYPE) === 'sick';
 	},
-	location(){
+	location() {
 		return Session.get(DAY_OFF_FIELDS.LOCATION).name;
 	},
-	number(){
+	number() {
 		return Session.get(DAY_OFF_FIELDS.LOCATION).number;
 	},
-	chiefs(){
+	chiefs() {
 		return Meteor.users.find({ role: 'chief' }, { pager: 1, name: 1 });
 	},
-	fellowshipAdminName(){
+	fellowshipAdminName() {
 		const username = Session.get(DAY_OFF_FIELDS.FELLOWSHIP).administrator;
 		return displayNameByUsername(username);
+	},
+	internCoordinator() {
+		return Meteor.users.findOne({ role: 'intern_coordinator' }, { name: 1 });
 	}
 });
 
 Template.submissionConfirmation.events({
-	'click #restart'(){
+	'click #restart'() {
 		Session.set('submissionConfirmation', undefined);
 		Session.set('requestConfirmation', undefined);
-		for(let field of fields){
+		for (let field of fields) {
 			Session.set(field, undefined);
 		}
 	}
 });
 
-Template.additionalFellowshipInfo.onCreated(function(){
+Template.additionalFellowshipInfo.onCreated(function() {
 	this.state = new ReactiveDict();
 });
 
 Template.additionalFellowshipInfo.helpers({
 	DAY_OFF_TYPES: DAY_OFF_TYPES,
-	submissionType(type){
+	submissionType(type) {
 		return Session.equals(DAY_OFF_FIELDS.TYPE, type);
 	},
-	alreadyNotified(){
+	alreadyNotified() {
 		return Template.instance().state.get('alreadyNotified');
 	}
 });
 
 Template.additionalFellowshipInfo.events({
-	'change .additional-fellowship-info, input .additional-fellowship-info'(event, instance){
+	'change .additional-fellowship-info, input .additional-fellowship-info'(event, instance) {
 		let value;
-		switch(event.target.name){
+		switch(event.target.name) {
 			case 'alreadyNotified':
 			case 'presenting':
 			case 'cancelRequest':
@@ -549,22 +546,21 @@ Template.additionalFellowshipInfo.events({
 		}
 		instance.state.set(event.target.name, value);
 	},
-	'click #submit-additional-fellowship-info, keypress'(event, instance){
-		if(event.type === 'keypress'){
-			if(event.which === 13){ // Enter key
+	'click #submit-additional-fellowship-info, keypress'(event, instance) {
+		if (event.type === 'keypress') {
+			if (event.which === 13) { // Enter key
 				event.preventDefault();
 				event.stopImmediatePropagation();
-			}
-			else {
+			} else {
 				return;
 			}
 		}
 
-		switch(Session.get(DAY_OFF_FIELDS.TYPE)){
+		switch(Session.get(DAY_OFF_FIELDS.TYPE)) {
 			case DAY_OFF_TYPES.SICK:
 				instance.state.set('alreadyNotified', Boolean(instance.state.get('alreadyNotified')));
-				if(instance.state.get('alreadyNotified')){
-					if(!instance.state.get('notified')){
+				if (instance.state.get('alreadyNotified')) {
+					if (!instance.state.get('notified')) {
 						Session.set('errorAlert', 'Please say who you notified.');
 						return;
 					}

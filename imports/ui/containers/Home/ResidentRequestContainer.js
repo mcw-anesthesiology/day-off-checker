@@ -24,6 +24,6 @@ const HomeContainer = withTracker(props => {
 		locations,
 		chiefs
 	};
-}, ResidentRequest);
+})(ResidentRequest);
 
 export default HomeContainer;

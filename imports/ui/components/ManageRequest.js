@@ -22,8 +22,6 @@ export default class ManageRequest extends Component {
 	}
 
 	render(){
-		console.log(React);
-		
 		return this.state.active
 			? (
 				<div className="manage-request-container">
