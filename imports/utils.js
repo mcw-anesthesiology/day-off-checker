@@ -13,7 +13,7 @@ import {
 } from './constants.js';
 
 
-export function alertAdministrator(){
+export function alertAdministrator() {
 	Email.send({
 		from: APP_ADMIN_EMAIL_ADDRESS,
 		to: ADMIN_EMAIL_ADDRESS,
@@ -22,25 +22,23 @@ export function alertAdministrator(){
 	});
 }
 
-export function displayDate(date){
+export function displayDate(date) {
 	try {
 		return moment(date).calendar();
-	}
-	catch(e){
+	} catch(e) {
 		return '';
 	}
 }
 
-export function displayDateRange(dates){
+export function displayDateRange(dates) {
 	try {
 		return moment(dates[0]).twix(dates[1], true).format();
-	}
-	catch(e){
+	} catch(e) {
 		return '';
 	}
 }
 
-export function displayNameByUsername(username){
+export function displayNameByUsername(username) {
 	if (!username)
 		return '';
 	const user = Meteor.users.findOne({ username: username });
@@ -51,11 +49,11 @@ export function displayNameByUsername(username){
 	return user.name;
 }
 
-export function nl2br(text){
+export function nl2br(text) {
 	return text.replace(/(?:\r\n|\r|\n)/g, '<br />');
 }
 
-export function capitalizeFirstLetter(string){
+export function capitalizeFirstLetter(string) {
 	try {
 		return string.charAt(0).toUpperCase() + string.slice(1);
 	} catch(e) {
@@ -63,20 +61,18 @@ export function capitalizeFirstLetter(string){
 	}
 }
 
-export function ucfirst(string){
+export function ucfirst(string) {
 	return capitalizeFirstLetter(string);
 }
 
-export function camelCaseToWords(string){
+export function camelCaseToWords(string) {
 	let result = '';
-	for(let char of string){
-		if(result === ''){
+	for (let char of string) {
+		if (result === '') {
 			result += char.toUpperCase();
-		}
-		else if(char === char.toUpperCase()){
+		} else if (char === char.toUpperCase()) {
 			result += ' ' + char.toLowerCase();
-		}
-		else {
+		} else {
 			result += char;
 		}
 	}
@@ -99,7 +95,7 @@ export function isRequestorType(type, connection) {
 	return getRequestorType(connection) === type;
 }
 
-export function isFellow(connection){
+export function isFellow(connection) {
 	return isRequestorType('fellow', connection);
 }
 
@@ -111,24 +107,24 @@ export function getRequestRequestorType(request) {
 			: 'resident';
 }
 
-export function isFellowRequest(request){
+export function isFellowRequest(request) {
 	return getRequestRequestorType(request) === 'fellow';
 }
 
-export function article(noun){
+export function article(noun) {
 	const vowels = ['a', 'e', 'i', 'o', 'u'];
-	if(vowels.indexOf(noun.charAt(0).toLowerCase()) !== -1)
+	if (vowels.indexOf(noun.charAt(0).toLowerCase()) !== -1)
 		return 'an';
 	else
 		return 'a';
 }
 
-export function userTypeUrl(type){
+export function userTypeUrl(type) {
 	FlowRouter.watchPathChange();
 	let basename = window.location.host
 		.substring(window.location.host.indexOf('.') + 1);
 	let subdomain;
-	switch(type.toLowerCase()){
+	switch(type.toLowerCase()) {
 		case 'fellow':
 			subdomain = 'fellow.';
 			break;
@@ -144,40 +140,40 @@ export function userTypeUrl(type){
 	return `//${subdomain}${basename}${FlowRouter.current().path}`;
 }
 
-export function escapeNewlines(str){
+export function escapeNewlines(str) {
 	return str.replace(/\s+/g, ' ');
 }
 
-export function sortNumbers(a, b){
+export function sortNumbers(a, b) {
 	return Number(a) - Number(b);
 }
 
-export function sortPropNumbers(prop){
+export function sortPropNumbers(prop) {
 	return (a, b) => sortNumbers(a[prop], b[prop]);
 }
 
-export function sortPropLength(prop){
+export function sortPropLength(prop) {
 	return (a, b) => sortNumbers(a[prop].length, b[prop].length);
 }
 
-export function sortIgnoreCase(a, b){
+export function sortIgnoreCase(a, b) {
 	a = a.toLowerCase();
 	b = b.toLowerCase();
 
-	if(a < b)
+	if (a < b)
 		return -1;
-	if(a > b)
+	if (a > b)
 		return 1;
 
 	return 0;
 }
 
-export function sortPropIgnoreCase(prop){
+export function sortPropIgnoreCase(prop) {
 	return (a, b) => sortIgnoreCase(a[prop], b[prop]);
 }
 
-export function statusLabelType(status){
-	switch(status){
+export function statusLabelType(status) {
+	switch(status) {
 		case 'pending':
 			return 'label-warning';
 		case 'approved':
@@ -191,11 +187,11 @@ export function statusLabelType(status){
 	}
 }
 
-export function isValidDateRange(dates){
+export function isValidDateRange(dates) {
 	return Boolean(dates) && Array.isArray(dates) && dates.length === 2;
 }
 
-export function matchesSearch(request, search){
+export function matchesSearch(request, search) {
 	return fuzzysearch(search, request.requestorName)
 		|| fuzzysearch(search, request.requestorEmail);
 }
