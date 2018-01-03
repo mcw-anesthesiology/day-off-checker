@@ -246,7 +246,7 @@ Template.dayOffEntry.events({
 					}
 				}
 				let range = startDate.twix(endDate, true);
-				if (!range.isValid())
+				if (isRange && !range.isValid())
 					Session.set('errorAlert', 'Invalid date range. Please select first the beginning date and then the ending date.');
 				else
 					value = [ startDate.toDate(), endDate.toDate() ];
