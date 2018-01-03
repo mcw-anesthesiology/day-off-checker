@@ -118,10 +118,9 @@ Meteor.methods({
 });
 
 function notifyNewLocationAdmin(location){
-	let fellowshipStr;
-	if(location.fellowship){
-		fellowshipStr = ` for the <b>${location.fellowship} fellowship</b>`;
-	}
+	const fellowshipStr = location.fellowship
+		? ` for the <b>${location.fellowship} fellowship</b>`
+		: '';
 	try {
 		const user = Accounts.findUserByUsername(location.administrator);
 		Email.send({
