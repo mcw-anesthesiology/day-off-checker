@@ -1,4 +1,4 @@
-/*eslint-env node */
+/* eslint-env node */
 // https://github.com/kadirahq/meteor-up
 
 module.exports = {
@@ -9,7 +9,7 @@ module.exports = {
         }
     },
 
-    meteor: {
+    app: {
         name: 'day-off-checker-testing',
         path: '../../',
         servers: {
@@ -22,7 +22,7 @@ module.exports = {
             MONGO_URL: 'mongodb://localhost/meteor',
             MAIL_URL: 'smtp://40701ebe2b9d2c3ec:18d0ca555fd201@mailtrap.io:2525/'
         },
-		dockerImage: 'abernix/meteord:base'
+		dockerImage: 'abernix/meteord:node-8.4.0-base'
     },
 
     mongo: {

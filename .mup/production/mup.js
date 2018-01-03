@@ -1,4 +1,4 @@
-/*eslint-env node */
+/* eslint-env node */
 // https://github.com/kadirahq/meteor-up
 
 module.exports = {
@@ -9,7 +9,7 @@ module.exports = {
         }
     },
 
-    meteor: {
+    app: {
         name: 'day-off-checker',
         path: '../../',
         servers: {
@@ -25,6 +25,6 @@ module.exports = {
 			ROLLBAR_CLIENT_ACCESS_TOKEN: '3e1208eaf43a4e9c86f74b95fab4d4f0',
 			ROLLBAR_ENVIRONMENT: 'production'
         },
-		dockerImage: 'abernix/meteord:base'
+		dockerImage: 'abernix/meteord:node-8.4.0-base'
     }
 };
