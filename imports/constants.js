@@ -128,3 +128,9 @@ export const USER_ROLE_NAMES = {
 	[USER_ROLES.FELLOWSHIP_COORDINATOR]: 'Fellowship Coordinator',
 	[USER_ROLES.INTERN_COORDINATOR]: 'Intern Coordinator'
 };
+
+export const USER_PERMISSION_NAMES = {
+	VIEW_RESIDENT_REQUESTS: 'View resident requests',
+	VIEW_INTERN_REQUESTS: 'View intern requests',
+	VIEW_FELLOW_REQUESTS: 'View fellow requests'
+};

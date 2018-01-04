@@ -1,3 +1,5 @@
+/* @flow */
+
 import { Meteor } from 'meteor/meteor';
 import { Email } from 'meteor/email';
 import { FlowRouter } from 'meteor/kadira:flow-router';
@@ -11,6 +13,8 @@ import {
 	ADMIN_EMAIL_ADDRESS,
 	DAY_OFF_FIELDS
 } from './constants.js';
+
+import type { User, UserPermission } from './api/users.js';
 
 
 export function alertAdministrator() {
@@ -194,4 +198,47 @@ export function isValidDateRange(dates) {
 export function matchesSearch(request, search) {
 	return fuzzysearch(search, request.requestorName)
 		|| fuzzysearch(search, request.requestorEmail);
+}
+
+export function userHasPermission(user: User, permission: UserPermission): boolean {
+	return (user.permissions && user.permissions.length > 0)
+		? user.permissions.includes(permission)
+		: false;
+}
+
+export function getRequestorTypeQuery(
+	requestorType: string = getRequestorType()
+): Object {
+	const query = {};
+	switch (requestorType) {
+		case 'fellow':
+			query.$or = [
+				{ [DAY_OFF_FIELDS.REQUESTOR_TYPE]: 'fellow' },
+				{ [DAY_OFF_FIELDS.FELLOWSHIP]: { $exists: true } }
+			];
+			break;
+		case 'intern':
+			query[DAY_OFF_FIELDS.REQUESTOR_TYPE] = 'intern';
+			break;
+		case 'resident':
+		default:
+			query.$or = [
+				{ [DAY_OFF_FIELDS.REQUESTOR_TYPE]: 'resident' },
+				{
+					$and: [
+						{
+							[DAY_OFF_FIELDS.REQUESTOR_TYPE]: {
+								$exists: false
+							}
+						},
+						{
+							[DAY_OFF_FIELDS.FELLOWSHIP]: { $exists: false }
+						}
+					]
+				}
+			];
+			break;
+	}
+
+	return query;
 }

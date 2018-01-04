@@ -41,6 +41,19 @@
 {{/each}}
 					</select>
 				</div>
+				<div class="form-group col-lg-3 col-md-3 col-sm-4">
+					<label for="permissions">Additional permissions</label>
+					<select class="form-control"
+							id="permissions"
+							name="permissions"
+							multiple>
+{{#each permission in permissions}}
+						<option value="{{ permission }}" selected="{{ userHasPermission user permission }}">
+							{{ permissionName permission }}
+						</option>
+{{/each}}
+					</select>
+				</div>
 {{#if userIsChief user}}
 				<div class="form-group col-lg-3 col-md-3 col-sm-4">
 					<label for="pager">Pager</label>

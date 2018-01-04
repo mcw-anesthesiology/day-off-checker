@@ -4,9 +4,12 @@ import { Template } from 'meteor/templating';
 import { throwError } from 'meteor/saucecode:rollbar';
 
 import '../../api/users.js';
+
+import { userHasPermission } from '../../utils.js';
 import {
 	ADMIN_EMAIL_ADDRESS,
-	USER_ROLE_NAMES
+	USER_ROLE_NAMES,
+	USER_PERMISSION_NAMES
 } from '../../constants.js';
 
 import './usersList.html';
@@ -17,10 +20,10 @@ Template.usersList.onCreated(() => {
 });
 
 Template.usersList.helpers({
-	users(){
+	users() {
 		return Meteor.users.find({});
 	},
-	usersSettings(){
+	usersSettings() {
 		return {
 			fields: [
 				{ key: 'name', label: 'Name', sortOrder: 1 },
@@ -32,65 +35,72 @@ Template.usersList.helpers({
 			rowClass: user => user.role
 		};
 	},
-	userToEdit(){
+	userToEdit() {
 		return Session.get('userToEdit');
 	}
 });
 
 Template.usersList.events({
-	'click #add-user'(){
+	'click #add-user'() {
 		Session.set('userToEdit', {});
 	},
-	'click .reactive-table tbody tr'(event){
+	'click .reactive-table tbody tr'(event) {
 		event.preventDefault();
 		const user = this;
 		Session.set('userToEdit', user);
 	}
 });
 
-function getFirstEmail(emails){
-	if(emails && emails.length > 0)
+function getFirstEmail(emails) {
+	if (emails && emails.length > 0)
 		return emails[0].address;
 }
 
-function roleName(role){
+function roleName(role) {
 	return USER_ROLE_NAMES[role];
 }
 
 Template.editUser.helpers({
-	editing(user){
+	editing(user) {
 		return user._id;
 	},
 	getFirstEmail: getFirstEmail,
-	roles(){
+	roles() {
 		let roles = [];
-		for(let role in USER_ROLE_NAMES){
+		for (let role in USER_ROLE_NAMES) {
 			roles.push({ id: role, name: USER_ROLE_NAMES[role] });
 		}
 		return roles;
 	},
-	isSelected(user, role){
-		if(user.role === role)
+	isSelected(user, role) {
+		if (user.role === role)
 			return 'selected';
 	},
-	userIsChief(user){
+	userIsChief(user) {
 		return user.role === 'chief';
+	},
+	userHasPermission,
+	permissions() {
+		return Array.from(Object.keys(USER_PERMISSION_NAMES));
+	},
+	permissionName(permission) {
+		return USER_PERMISSION_NAMES[permission];
 	}
 });
 
 Template.editUser.events({
-	'click .close-edit-user'(){
+	'click .close-edit-user'() {
 		Session.set('userToEdit', undefined);
 	},
-	'change #role'(event){
+	'change #role'(event) {
 		let user = Session.get('userToEdit');
 		user.role = event.target.value;
 		Session.set('userToEdit', user);
 	},
-	'click #resend-enrollment-email'(){
+	'click #resend-enrollment-email'() {
 		const userId = Session.get('userToEdit')._id;
 		Meteor.call('resendEnrollmentEmail', userId, (err) => {
-			if(err){
+			if (err) {
 				console.log(err.name + ': ' + err.message);
 				Session.set('errorAlert', 'There was a problem resending the enrollment email. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
 				throwError(err.message);
@@ -99,34 +109,43 @@ Template.editUser.events({
 				Session.set('userToEdit', undefined);
 		});
 	},
-	'submit #edit-user'(event){
+	'submit #edit-user'(event) {
 		event.preventDefault();
 		const form = event.target;
 		const formArray = $(form).serializeArray();
+		console.log(formArray);
 		const userId = Session.get('userToEdit')._id;
+		const arrayProps = ['permissions'];
 		let user = {};
-		for(let i of formArray){
-			user[i.name] = i.value;
+		for (let {name, value} of formArray) {
+			if (arrayProps.includes(name)) {
+				if (!user[name] || !Array.isArray(user[name]))
+					user[name] = [];
+				user[name].push(value);
+			} else {
+				user[name] = value;
+			}
 		}
-		if(userId)
+
+		if (userId)
 			Meteor.call('updateUser', userId, user, (err) => {
-				if(err){
+				if (err) {
 					console.log(err.name + ': ' + err.message);
 					Session.set('errorAlert', 'There was a problem updating the user. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
 					throwError(err.message);
-				}
-				else
+				} else {
 					Session.set('userToEdit', undefined);
+				}
 			});
 		else
 			Meteor.call('addUser', user, (err) => {
-				if(err){
+				if (err) {
 					console.log(err.name + ': ' + err.message);
 					Session.set('errorAlert', 'There was a problem adding the user. Please refresh the page and try again. If this problem continues, please let me know at ' + ADMIN_EMAIL_ADDRESS + '.');
 					throwError(err.message);
-				}
-				else
+				} else {
 					Session.set('userToEdit', undefined);
+				}
 			});
 	}
 });
