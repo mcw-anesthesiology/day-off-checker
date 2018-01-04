@@ -18,7 +18,12 @@ import {
 	DAY_OFF_TYPES,
 	DAY_OFF_TYPE_NAMES
 } from '../../constants.js';
-import { displayDate, displayDateRange, capitalizeFirstLetter } from '../../utils.js';
+import {
+	displayDate,
+	displayDateRange,
+	capitalizeFirstLetter,
+	getRequestorTypeQuery
+} from '../../utils.js';
 
 import './requestsList.html';
 
@@ -52,27 +57,9 @@ Template.requestsList.helpers({
 		return DayOffRequests.findOne(Session.get('sickDayDetailsId'));
 	},
 	sickDayRequests(){
-		let query = { [DAY_OFF_FIELDS.TYPE]: DAY_OFF_TYPES.SICK };
-		switch (getRequestorType()) {
-			case 'fellow':
-				query.$or = [
-					{ [DAY_OFF_FIELDS.REQUESTOR_TYPE]: 'fellow' },
-					{ [DAY_OFF_FIELDS.FELLOWSHIP]: { $exists: true } }
-				];
-				break;
-			case 'intern':
-				query[DAY_OFF_FIELDS.REQUESTOR_TYPE] = 'intern';
-				break;
-			case 'resident':
-			default:
-				query[DAY_OFF_FIELDS.REQUESTOR_TYPE] = {
-					$in: [
-						null,
-						'resident'
-					]
-				};
-				break;
-		}
+		const query = Object.assign(getRequestorTypeQuery(getRequestorType()), {
+			[DAY_OFF_FIELDS.TYPE]: DAY_OFF_TYPES.SICK
+		});
 		const requests = DayOffRequests.find(
 			query,
 			{ sort: { createdAt: -1 } }
@@ -105,46 +92,18 @@ Template.requestsList.helpers({
 		return DayOffRequests.findOne(Session.get('iDayDetailsId'));
 	},
 	requestRequests() {
-		let requests;
-		switch (getRequestorType()) {
-			case 'fellow':
-				requests = DayOffRequests.find(
-					{
-						[DAY_OFF_FIELDS.TYPE]: {
-							$in: [
-								DAY_OFF_TYPES.MEETING,
-								DAY_OFF_TYPES.VACATION
-							]
-						}
-					},
-					{ sort: { createdAt: -1 } }
-				);
-				break;
-			case 'intern':
-				requests = DayOffRequests.find(
-					{
-						[DAY_OFF_FIELDS.REQUESTOR_TYPE]: 'intern',
-						[DAY_OFF_FIELDS.TYPE]: DAY_OFF_TYPES.I_DAY
-					},
-					{ sort: { createdAt: -1 } }
-				);
-				break;
-			case 'resident':
-			default:
-				requests = DayOffRequests.find(
-					{
-						[DAY_OFF_FIELDS.REQUESTOR_TYPE]: {
-							$in: [
-								null,
-								'resident'
-							]
-						},
-						[DAY_OFF_FIELDS.TYPE]: DAY_OFF_TYPES.I_DAY
-					},
-					{ sort: { createdAt: -1 } }
-				);
-				break;
-		}
+		const query = Object.assign(getRequestorTypeQuery(getRequestorType()), {
+			[DAY_OFF_FIELDS.TYPE]: {
+				$in: [
+					DAY_OFF_TYPES.MEETING,
+					DAY_OFF_TYPES.VACATION,
+					DAY_OFF_TYPES.I_DAY
+				]
+			}
+		});
+		const requests = DayOffRequests.find(query, {
+			sort: { createdAt: -1 }
+		});
 
 		return requests && requests.count() > 0
 			? requests

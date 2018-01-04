@@ -3,6 +3,7 @@ import 'fullcalendar/dist/fullcalendar.css';
 
 import { DayOffRequests } from '../../api/day-off-requests.js';
 
+import { getRequestorType, getRequestorTypeQuery } from '../../utils.js';
 import {
 	DAY_OFF_FIELDS,
 	DAY_OFF_TYPES,
@@ -86,11 +87,12 @@ Template.calendar.events({
 });
 
 function fetchDayOffEvents(){
-	const requests = DayOffRequests.find({
+	const query = Object.assign(getRequestorTypeQuery(), {
 		status: {
 			$ne: 'denied'
 		}
 	});
+	const requests = DayOffRequests.find(query);
 
 	let events = requests.map(request => {
 		let backgroundColor, borderColor;

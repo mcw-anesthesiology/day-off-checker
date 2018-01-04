@@ -31,7 +31,8 @@ import {
 	getRequestRequestorType,
 	article,
 	capitalizeFirstLetter,
-	camelCaseToWords
+	camelCaseToWords,
+	userHasPermission
 } from '../utils.js';
 
 import map from 'lodash/map';
@@ -46,48 +47,58 @@ if (Meteor.isServer) {
 			return;
 
 		const user = Meteor.users.findOne(this.userId);
-		const fellow = isFellow(this.connection);
 
-		switch(user.role) {
-			case USER_ROLES.ADMIN:
-				return DayOffRequests.find({
-					[DAY_OFF_FIELDS.FELLOWSHIP]: {
-						$exists: fellow
-					}
-				});
-			case USER_ROLES.RESIDENCY_COORDINATOR:
-				if (!fellow)
-					return DayOffRequests.find({
-						[DAY_OFF_FIELDS.FELLOWSHIP]: {
-							$exists: false
-						}
-					});
-				break;
-			case USER_ROLES.FELLOWSHIP_COORDINATOR:
-				if (fellow)
-					return DayOffRequests.find({
-						[DAY_OFF_FIELDS.FELLOWSHIP]: {
-							$exists: true
-						}
-					});
-				break;
-			default:
-				return DayOffRequests.find({
-					$and: [
-						{
-							[DAY_OFF_FIELDS.FELLOWSHIP]: {
-								$exists: fellow
+		if (!user)
+			return;
+
+		let query = {};
+
+		if (user.role !== USER_ROLES.ADMIN) {
+			query.$or = [
+				{ usersNotified: user.username },
+				{ 'confirmationRequests.confirmer': user.username }
+			];
+
+			if (
+				user.role === USER_ROLES.RESIDENCY_COORDINATOR
+				|| userHasPermission(user, 'VIEW_RESIDENT_REQUESTS')
+			) {
+				query.$or.push(
+					{ [DAY_OFF_FIELDS.REQUESTOR_TYPE]: 'resident' },
+					{
+						$and: [
+							{
+								[DAY_OFF_FIELDS.REQUESTOR_TYPE]: {
+									$exists: false
+								}
+							},
+							{
+								[DAY_OFF_FIELDS.FELLOWSHIP]: { $exists: false }
 							}
-						},
-						{
-							$or: [
-								{ usersNotified: user.username },
-								{ 'confirmationRequests.confirmer': user.username }
-							]
-						}
-					]
-				});
+						]
+					}
+				);
+			}
+
+			if (
+				user.role === USER_ROLES.INTERN_COORDINATOR
+				|| userHasPermission(user, 'VIEW_INTERN_REQUESTS')
+			) {
+				query.$or.push({ [DAY_OFF_FIELDS.REQUESTOR_TYPE]: 'intern' });
+			}
+
+			if (
+				user.role === USER_ROLES.FELLOWSHIP_COORDINATOR
+				|| userHasPermission(user, 'VIEW_FELLOW_REQUESTS')
+			) {
+				query.$or.push(
+					{ [DAY_OFF_FIELDS.REQUESTOR_TYPE]: 'fellow' },
+					{ [DAY_OFF_FIELDS.FELLOWSHIP]: { $exists: true } }
+				);
+			}
 		}
+
+		return DayOffRequests.find(query);
 	});
 
 	Meteor.publish('dayOffRequests_byId', function(requestId) {

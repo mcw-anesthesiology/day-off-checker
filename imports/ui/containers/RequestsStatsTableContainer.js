@@ -4,13 +4,13 @@ import { withTracker } from 'meteor/react-meteor-data';
 import { DayOffRequests } from '../../api/day-off-requests.js';
 import RequestsStatsTable from '../components/RequestsStatsTable.js';
 
-import { isValidDateRange } from '../../utils.js';
+import { isValidDateRange, getRequestorTypeQuery } from '../../utils.js';
 
 const RequestsStatsTableContainer = withTracker(props => {
 	const requestsHandle = Meteor.subscribe('dayOffRequests');
 
 	const {dates, requestDates} = props;
-	const query = isValidDateRange(dates)
+	const dateQuery = isValidDateRange(dates)
 		? {
 			'requestedDate.0': {
 				$lte: dates[1]
@@ -24,6 +24,8 @@ const RequestsStatsTableContainer = withTracker(props => {
 			}
 		}
 		: {};
+
+	const query = Object.assign(getRequestorTypeQuery(), dateQuery);
 
 	const dayOffRequests = requestsHandle.ready()
 		? DayOffRequests.find(query).fetch()

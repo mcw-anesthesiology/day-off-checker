@@ -4,7 +4,12 @@ import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 
-import { USER_ROLES } from '../constants.js';
+import { USER_ROLES, USER_PERMISSION_NAMES } from '../constants.js';
+
+export type UserPermission =
+	| 'VIEW_RESIDENT_REQUESTS'
+	| 'VIEW_INTERN_REQUESTS'
+	| 'VIEW_FELLOW_REQUESTS';
 
 export type User = {
 	_id: string,
@@ -12,7 +17,8 @@ export type User = {
 	name: string,
 	role: string,
 	pager: ?string,
-	emails: Array<string>
+	emails: Array<string>,
+	permissions?: Array<UserPermission>
 };
 
 if (Meteor.isServer) {
@@ -20,7 +26,8 @@ if (Meteor.isServer) {
 		if (this.userId)
 			return Meteor.users.find({_id: this.userId}, { fields: {
 				name: 1,
-				role: 1
+				role: 1,
+				permissions: 1
 			}});
 		else
 			this.ready();
@@ -51,7 +58,8 @@ if (Meteor.isServer) {
 			name: 1,
 			role: 1,
 			pager: 1,
-			emails: 1
+			emails: 1,
+			permissions: 1
 		}});
 	});
 
@@ -106,6 +114,12 @@ const userSchema = new SimpleSchema({
 	pager: {
 		type: String,
 		label: 'Pager',
+		optional: true
+	},
+	permissions: {
+		type: [String],
+		label: 'Permissions',
+		allowedValues: Array.from(Object.keys(USER_PERMISSION_NAMES)),
 		optional: true
 	}
 });
