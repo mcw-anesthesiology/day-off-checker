@@ -14,11 +14,15 @@ const RequestDetailsMain = props => (
 					{displayDateRange(props.request.requestedDate)}
 				</span>
 			</div>
+{
+	props.request.requestedLocation && (
 			<div className="col-md-5 col-md-offset-2">
 				<span className="request-location">
 					{props.request.requestedLocation.name}
 				</span>
 			</div>
+	)
+}
 		</div>
 { props.request.requestReason
 	? (

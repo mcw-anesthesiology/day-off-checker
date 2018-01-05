@@ -35,7 +35,12 @@ import {
 	DAY_OFF_TYPES,
 	ISO_DATE_FORMAT
 } from '../../constants.js';
-import { isFellow, capitalizeFirstLetter, camelCaseToWords } from '../../utils.js';
+import {
+	isFellow,
+	capitalizeFirstLetter,
+	camelCaseToWords,
+	isRequestorType,
+} from '../../utils.js';
 
 import './home.html';
 
@@ -46,6 +51,9 @@ let fields = Object.values(DAY_OFF_FIELDS).filter(field => {
 	].includes(field)) {
 		return isFellow();
 	}
+
+	if (field === DAY_OFF_FIELDS.LOCATION)
+		return !isRequestorType('intern');
 
 	return true;
 });
@@ -173,9 +181,14 @@ function fieldShouldBeCompleted(field) {
 			DAY_OFF_FIELDS.NAME,
 			DAY_OFF_FIELDS.EMAIL,
 			DAY_OFF_FIELDS.DATE,
-			DAY_OFF_FIELDS.LOCATION,
 			DAY_OFF_FIELDS.REASON
 		].includes(field))
+			return true;
+
+		if (
+			isRequestorType('resident')
+			&& field === DAY_OFF_FIELDS.LOCATION
+		)
 			return true;
 	}
 

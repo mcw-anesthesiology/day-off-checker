@@ -27,7 +27,7 @@ import {
 	displayDateRange,
 	nl2br,
 	isFellow,
-	isFellowRequest,
+	isRequestorType,
 	getRequestRequestorType,
 	article,
 	capitalizeFirstLetter,
@@ -149,7 +149,8 @@ Meteor.methods({
 			},
 			requestedLocation: {
 				type: Object,
-				label: 'Location'
+				label: 'Location',
+				optional: isRequestorType('intern', this.connection)
 			},
 			'requestedLocation._id': {
 				type: String,
@@ -321,7 +322,7 @@ Meteor.methods({
 
 		const request = DayOffRequests.findOne(requestId);
 		let allApproved = true;
-		for(let confirmationRequest of request.confirmationRequests) {
+		for (let confirmationRequest of request.confirmationRequests) {
 			if (confirmationRequest.status !== 'approved')
 				allApproved = false;
 		}
@@ -388,7 +389,7 @@ Meteor.methods({
 
 		const request = DayOffRequests.findOne(requestId);
 		let pendingConfirmers = [];
-		for(let confirmationRequest of request.confirmationRequests) {
+		for (let confirmationRequest of request.confirmationRequests) {
 			if (confirmationRequest.status === 'pending')
 				pendingConfirmers.push(confirmationRequest.confirmer);
 		}
@@ -430,12 +431,14 @@ Meteor.methods({
 });
 
 function getUsersToNotify(request) {
-	const $or = [
-		{
+	const $or = [];
+
+	if (request.requestedLocation && request.requestedLocation.administrator) {
+		$or.push({
 			role: USER_ROLES.LOCATION_ADMIN,
 			username: request.requestedLocation.administrator
-		}
-	];
+		});
+	}
 
 	switch (getRequestRequestorType(request)) {
 		case 'fellow':
@@ -464,24 +467,15 @@ function getUsersToNotify(request) {
 
 function sendNotifications(request, users = getUsersToNotify(request), sendRequestorNotification = true) {
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
-	let locationAdmin;
-	if (isFellowRequest(request) && !request.requestedLocation.administrator)
-		locationAdmin = {
-			name: ''
-		};
-	else
-		locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
-
-	let reasonHtml = '';
-	if (request.requestReason) {
-		reasonHtml = `
-			<blockquote>
-				<p>${nl2br(request.requestReason)}</p>
-			</blockquote>`;
-	}
+	const locationAdmin = (
+		request.requestedLocation
+		&& request.requestedLocation.administrator
+	)
+		? Accounts.findUserByUsername(request.requestedLocation.administrator)
+		: null;
 
 	let timeout = 0; // FIXME
-	for(let user of users) {
+	for (let user of users) {
 		try {
 			timeout += 1000; // FIXME
 			Meteor.setTimeout(() => { // FIXME
@@ -512,21 +506,38 @@ function sendNotifications(request, users = getUsersToNotify(request), sendReque
 										<tr>
 											<th>Name</th>
 											<th>Date</th>
-											<th>Location</th>
-											<th>Location administrator</th>
+									${ request.requestedLocation
+                                        ?  '<th>Location</th>'
+										: ''
+									}
+									${ locationAdmin
+										?  '<th>Location administrator</th>'
+										: ''
+									}
 										</tr>
 									</thead>
 									<tbody>
 										<tr>
 											<td>${request.requestorName}</td>
 											<td>${displayDateRange(request.requestedDate)}</td>
-											<td>${request.requestedLocation.name}</td>
-											<td>${locationAdmin.name}</td>
+									${ request.requestedLocation
+										?  `<td>${request.requestedLocation.name}</td>`
+										: ''
+									}
+									${ locationAdmin
+										?  `<td>${locationAdmin.name}</td>`
+										: ''
+									}
 										</tr>
 									</tbody>
 								</table>
 
-								${reasonHtml}
+							${ request.requestReason && `
+								<blockquote>
+									<p>${nl2br(request.requestReason)}</p>
+								</blockquote>
+								`
+							}
 
 								<p><a href="${requestUrl}">View details</a></p>
 
@@ -543,14 +554,14 @@ function sendNotifications(request, users = getUsersToNotify(request), sendReque
 				}
 			});
 		}
-		catch(e) {
+		catch (e) {
 			console.log('Error sending notification: ' + e);
 			handleError(e);
 		}
 	}
 
 	if (sendRequestorNotification) {
-		try{
+		try {
 			timeout += 1000; // FIXME
 			Meteor.setTimeout(() => {
 				Email.send({
@@ -580,21 +591,38 @@ function sendNotifications(request, users = getUsersToNotify(request), sendReque
 										<tr>
 											<th>ID</th>
 											<th>Date</th>
-											<th>Location</th>
-											<th>Location administrator</th>
+									${ request.requestedLocation
+										?  '<th>Location</th>'
+										: ''
+									}
+									${ locationAdmin
+										?  '<th>Location administrator</th>'
+										: ''
+									}
 										</tr>
 									</thead>
 									<tbody>
 										<tr>
 											<td><a href="${requestUrl}">${request._id}</a></td>
 											<td>${displayDateRange(request.requestedDate)}</td>
-											<td>${request.requestedLocation.name}</td>
-											<td>${locationAdmin.name}</td>
+									${ request.requestedLocation
+										?  `<td>${request.requestedLocation.name}</td>`
+										: ''
+									}
+									${ locationAdmin
+										?  `<td>${locationAdmin.name}</td>`
+										: ''
+									}
 										</tr>
 									</tbody>
 								</table>
 
-								${reasonHtml}
+							${ request.requestReason && `
+								<blockquote>
+									<p>${nl2br(request.requestReason)}</p>
+								</blockquote>
+								`
+							}
 
 								<p>If you have any questions or concerns about the system please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
 
@@ -604,7 +632,7 @@ function sendNotifications(request, users = getUsersToNotify(request), sendReque
 				});
 			}, timeout);
 		}
-		catch(e) {
+		catch (e) {
 			console.log('Error sending notification: ' + e);
 			handleError(e);
 		}
@@ -633,31 +661,20 @@ function getUsersForConfirmation(request) {
 
 function sendConfirmationRequests(request, users = getUsersForConfirmation(request), sendRequestorNotification = true, sendLocationAdminNotification = true) {
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
-	let locationAdmin;
-	if (isFellowRequest(request) && !request.requestedLocation.administrator) {
-		locationAdmin = {
-			name: ''
-		};
-		sendLocationAdminNotification = false;
-	}
-	else {
-		locationAdmin = Accounts.findUserByUsername(request.requestedLocation.administrator);
-	}
+	const locationAdmin = (
+		request.requestedLocation
+		&& request.requestedLocation.administrator
+	)
+		? Accounts.findUserByUsername(request.requestedLocation.administrator)
+		: null;
 
-	let reasonHtml = '';
-	if (request.requestReason) {
-		reasonHtml = `
-			<blockquote>
-				<p>${nl2br(request.requestReason)}</p>
-			</blockquote>`;
-	}
 	let additionalInfoHtml = '';
 	if (request.additionalFellowshipInfo) {
 		additionalInfoHtml = `
 			<table class="table">
 				<tbody>`;
 
-		for(let key of Object.keys(request.additionalFellowshipInfo)) {
+		for (let key of Object.keys(request.additionalFellowshipInfo)) {
 			let value = request.additionalFellowshipInfo[key];
 			if (typeof value === 'boolean')
 				value = value ? 'yes' : 'no';
@@ -676,7 +693,7 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 	let typeName = DAY_OFF_TYPE_NAMES[request[DAY_OFF_FIELDS.TYPE]];
 	let typeArticle = article(typeName);
 	let timeout = 0; // FIXME
-	for(let user of users) {
+	for (let user of users) {
 		try {
 			let confirmationRequest = {};
 			timeout += 1000; // FIXME
@@ -716,8 +733,14 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 											<th>Type</th>
 											<th>Name</th>
 											<th>Date</th>
-											<th>Location</th>
-											<th>Location administrator</th>
+									${ request.requestedLocation
+										?  '<th>Location</th>'
+										: ''
+									}
+									${ locationAdmin
+										?  '<th>Location administrator</th>'
+										: ''
+									}
 										</tr>
 									</thead>
 									<tbody>
@@ -725,13 +748,24 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 											<td>${typeName}</td>
 											<td>${request.requestorName}</td>
 											<td>${displayDateRange(request.requestedDate)}</td>
-											<td>${request.requestedLocation.name}</td>
-											<td>${locationAdmin.name}</td>
+									${ request.requestedLocation
+										?  `<td>${request.requestedLocation.name}</td>`
+										: ''
+									}
+									${ locationAdmin
+										?  `<td>${locationAdmin.name}</td>`
+										: ''
+									}
 										</tr>
 									</tbody>
 								</table>
 
-								${reasonHtml}
+							${ request.requestReason && `
+								<blockquote>
+									<p>${nl2br(request.requestReason)}</p>
+								</blockquote>
+								`
+							}
 
 								${additionalInfoHtml}
 
@@ -750,21 +784,21 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 				}
 			});
 		}
-		catch(e) {
+		catch (e) {
 			console.log('Error sending confirmation: ' + e);
 			handleError(e);
 		}
 	}
 
-	if (sendLocationAdminNotification) {
+	if (locationAdmin && sendLocationAdminNotification) {
 		timeout += 1000; // FIXME
 		let confirmerList = '<ul>';
-		for(let confirmer of users) {
+		for (let confirmer of users) {
 			confirmerList += `<li>${confirmer.name} &lt;${confirmer.emails[0].address}&gt;</li>`;
 		}
 		confirmerList += '</ul>';
 
-		try{
+		try {
 			Meteor.setTimeout(() => { // FIXME
 				Email.send({
 					to: locationAdmin.emails[0].address,
@@ -796,8 +830,14 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 											<th>Type</th>
 											<th>Name</th>
 											<th>Date</th>
-											<th>Location</th>
-											<th>Location administrator</th>
+									${ request.requestedLocation
+										?  '<th>Location</th>'
+										: ''
+									}
+									${ locationAdmin
+										?  '<th>Location administrator</th>'
+										: ''
+									}
 										</tr>
 									</thead>
 									<tbody>
@@ -805,13 +845,26 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 											<td>${typeName}</td>
 											<td>${request.requestorName}</td>
 											<td>${displayDateRange(request.requestedDate)}</td>
-											<td>${request.requestedLocation.name}</td>
-											<td>${locationAdmin.name}</td>
+									${ request.requestedLocation
+										?  `<td>${request.requestedLocation.name}</td>`
+										: ''
+									}
+									${ locationAdmin
+										?  `<td>${locationAdmin.name}</td>`
+										: ''
+									}
 										</tr>
 									</tbody>
 								</table>
 
-								${reasonHtml}
+							${ request.requestReason
+								? `
+								<blockquote>
+									<p>${nl2br(request.requestReason)}</p>
+								</blockquote>
+								`
+								: ''
+							}
 
 								<p>
 									If you have a problem with this request, please let one of the approvers know:
@@ -833,22 +886,30 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 					usersNotified: locationAdmin.username
 				}
 			});
-		} catch(e) {
+		} catch (e) {
 			console.log('Error sending request notification to location admin: ' + e);
 			handleError(e);
 		}
 	}
 
 	if (sendRequestorNotification) {
-		let approvers = 'the chiefs';
-		if (isFellowRequest(request)) {
-			if (users && users[0] && users[0].name)
-				approvers = users[0].name;
-			else
-				approvers = 'the fellowship director';
+		let approvers;
+		switch (getRequestRequestorType(request)) {
+			case 'fellow':
+				approvers = (users && users[0] && users[0].name)
+					? users[0].name
+					: 'the fellowship director';
+				break;
+			case 'intern':
+				approvers = 'the intern coordinator';
+				break;
+			case 'resident':
+			default:
+				approvers = 'the chiefs';
+				break;
 		}
 
-		try{
+		try {
 			timeout += 1000; // FIXME
 			Meteor.setTimeout(() => {
 				Email.send({
@@ -879,8 +940,14 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 											<th>ID</th>
 											<th>Name</th>
 											<th>Date</th>
-											<th>Location</th>
-											<th>Location administrator</th>
+									${ request.requestedLocation
+										?  '<th>Location</th>'
+										: ''
+									}
+									${ locationAdmin
+										?  '<th>Location administrator</th>'
+										: ''
+									}
 										</tr>
 									</thead>
 									<tbody>
@@ -888,13 +955,26 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 											<td><a href="${requestUrl}">${request._id}</a></td>
 											<td>${request.requestorName}</td>
 											<td>${displayDateRange(request.requestedDate)}</td>
-											<td>${request.requestedLocation.name}</td>
-											<td>${locationAdmin.name}</td>
+									${ request.requestedLocation
+										?  `<td>${request.requestedLocation.name}</td>`
+										: ''
+									}
+									${ locationAdmin
+										?  `<td>${locationAdmin.name}</td>`
+										: ''
+									}
 										</tr>
 									</tbody>
 								</table>
 
-								${reasonHtml}
+							${ request.requestReason
+								? `
+								<blockquote>
+									<p>${nl2br(request.requestReason)}</p>
+								</blockquote>
+								`
+								: ''
+							}
 
 								<p>Confirmation has been requested by ${approvers}. You will be notified of their response.</p>
 
@@ -908,7 +988,7 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 				});
 			}, timeout);
 		}
-		catch(e) {
+		catch (e) {
 			console.log('Error sending notification: ' + e);
 			handleError(e);
 		}
@@ -920,7 +1000,7 @@ function sendRequestApprovalNotifications(request) {
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
 	let typeName = DAY_OFF_TYPE_NAMES[request[DAY_OFF_FIELDS.TYPE]];
 	let timeout = 0; // FIXME
-	for(let user of users) {
+	for (let user of users) {
 		try {
 			timeout += 1000; // FIXME
 			Meteor.setTimeout(() => {
@@ -953,13 +1033,13 @@ function sendRequestApprovalNotifications(request) {
 					scheduleReminder(request, user, remindTime.toDate());
 			}
 		}
-		catch(e) {
+		catch (e) {
 			console.log('Error sending approval notification: ' + e);
 			handleError(e);
 		}
 	}
 
-	try{
+	try {
 		timeout += 1000; // FIXME
 		Meteor.setTimeout(() => {
 			Email.send({
@@ -985,7 +1065,7 @@ function sendRequestApprovalNotifications(request) {
 			});
 		}, timeout);
 	}
-	catch(e) {
+	catch (e) {
 		console.log('Error sending approval notification: ' + e);
 		handleError(e);
 	}
@@ -996,8 +1076,8 @@ function sendRequestDenialNotifications(request, reason) {
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
 	let typeName = DAY_OFF_TYPE_NAMES[request[DAY_OFF_FIELDS.TYPE]];
 	let timeout = 0; // FIXME
-	for(let user of users) {
-		try{
+	for (let user of users) {
+		try {
 			timeout += 1000; // FIXME
 			Meteor.setTimeout(() => {
 				Email.send({
@@ -1029,13 +1109,13 @@ function sendRequestDenialNotifications(request, reason) {
 				});
 			}, timeout);
 		}
-		catch(e) {
+		catch (e) {
 			console.log('Error sending denial notification: ' + e);
 			handleError(e);
 		}
 	}
 
-	try{
+	try {
 		timeout += 1000; // FIXME
 		Meteor.setTimeout(() => {
 			Email.send({
@@ -1065,7 +1145,7 @@ function sendRequestDenialNotifications(request, reason) {
 			});
 		}, timeout);
 	}
-	catch(e) {
+	catch (e) {
 		console.log('Error sending denial notification: ' + e);
 		handleError(e);
 	}
@@ -1076,8 +1156,8 @@ function sendRequestCancellationNotifications(request, cancelReason) {
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
 	let typeName = DAY_OFF_TYPE_NAMES[request[DAY_OFF_FIELDS.TYPE]];
 	let timeout = 0; // FIXME
-	for(let user of users) {
-		try{
+	for (let user of users) {
+		try {
 			timeout += 1000; // FIXME
 			Meteor.setTimeout(() => {
 				Email.send({
@@ -1107,13 +1187,13 @@ function sendRequestCancellationNotifications(request, cancelReason) {
 				});
 			}, timeout);
 		}
-		catch(e) {
+		catch (e) {
 			console.log('Error sending cancellation notification: ' + e);
 			handleError(e);
 		}
 	}
 
-	try{
+	try {
 		timeout += 1000; // FIXME
 		Meteor.setTimeout(() => {
 			Email.send({
@@ -1143,7 +1223,7 @@ function sendRequestCancellationNotifications(request, cancelReason) {
 			});
 		}, timeout);
 	}
-	catch(e) {
+	catch (e) {
 		console.log('Error sending cancellation confirmation: ' + e);
 		handleError(e);
 	}
