@@ -132,10 +132,17 @@
 	<div class="submission-confirmation-container">
 		<div class="submission-confirmation">
 {{#if sickDay}}
+	{{#if isRequestorType 'intern'}}
+			<p>
+				Please notify your rotation chief resident and the faculty you
+				are assigned to via email as soon as possible.
+			</p>
+	{{else}}
 			<p>
 				Please notify your rotation site charge faculty
 				and the faculty you are assigned directly as soon as possible.
 			</p>
+	{{/if}}
 	{{#if number}}
 			<p class="location-number">
 				{{location}}: {{number}}
@@ -144,12 +151,22 @@
 	{{#if isRequestorType 'fellow'}}
 			<p>
 				If you are on call, please notify your fellowship administrator
-				{{fellowshipAdminName}} via text message as soon as possible.
+				{{fellowshipAdmin.name}} via text message
+		{{#if fellowshipAdmin.phone}}
+				at {{fellowshipAdmin.phone}}
+		{{/if}}
+				as soon as possible.
 			</p>
 	{{else if isRequestorType 'intern'}}
 			<p>
-				If you are on call, please notify intern coordinator
-				{{internCoordinator.name}} as soon as possible.
+				For questions or problems, please notify intern coordinator
+				{{internCoordinator.name}} at
+				<a href="mailto:{{userEmail internCoordinator}}">
+					{{userEmail internCoordinator}}
+				</a>
+		{{#if internCoordinator.phone}}
+				or {{internCoordinator.phone}}
+		{{/if}}
 			</p>
 	{{else}}
 			<p>

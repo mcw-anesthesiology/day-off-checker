@@ -30,7 +30,8 @@ Template.usersList.helpers({
 				{ key: 'username', label: 'Username' },
 				{ key: 'emails', label: 'Email', fn: getFirstEmail },
 				{ key: 'role', label: 'Role', sortOrder: 0, fn: roleName },
-				{ key: 'pager', label: 'Pager' }
+				{ key: 'pager', label: 'Pager' },
+				{ key: 'phone', label: 'Phone' }
 			],
 			rowClass: user => user.role
 		};
@@ -113,7 +114,6 @@ Template.editUser.events({
 		event.preventDefault();
 		const form = event.target;
 		const formArray = $(form).serializeArray();
-		console.log(formArray);
 		const userId = Session.get('userToEdit')._id;
 		const arrayProps = ['permissions'];
 		let user = {};
