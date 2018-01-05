@@ -10,10 +10,7 @@ import { throwError } from 'meteor/saucecode:rollbar';
 import { Fellowships } from '../../api/fellowships.js';
 import { Locations } from '../../api/locations.js';
 
-import {
-	displayNameByUsername,
-	getRequestorType
-} from '../../utils.js';
+import { getRequestorType } from '../../utils.js';
 
 import validator from 'email-validator';
 
@@ -503,20 +500,27 @@ Template.submissionConfirmation.helpers({
 		return Session.get(DAY_OFF_FIELDS.TYPE) === 'sick';
 	},
 	location() {
-		return Session.get(DAY_OFF_FIELDS.LOCATION).name;
+		const location = Session.get(DAY_OFF_FIELDS.LOCATION);
+		return location
+			? location.name
+			: null;
 	},
 	number() {
-		return Session.get(DAY_OFF_FIELDS.LOCATION).number;
+		const location = Session.get(DAY_OFF_FIELDS.LOCATION);
+		return location
+			? location.number
+			: null;
 	},
 	chiefs() {
 		return Meteor.users.find({ role: 'chief' }, { pager: 1, name: 1 });
 	},
-	fellowshipAdminName() {
+	fellowshipAdmin() {
 		const username = Session.get(DAY_OFF_FIELDS.FELLOWSHIP).administrator;
-		return displayNameByUsername(username);
+		return Meteor.users.findOne({ username });
 	},
 	internCoordinator() {
-		return Meteor.users.findOne({ role: 'intern_coordinator' }, { name: 1 });
+		console.log(Meteor.users.findOne({ role: 'intern_coordinator' }));
+		return Meteor.users.findOne({ role: 'intern_coordinator' });
 	}
 });
 

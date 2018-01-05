@@ -37,3 +37,14 @@ Template.registerHelper('camelCaseToWords', camelCaseToWords);
 Template.registerHelper('getRequestorType', getRequestorType);
 Template.registerHelper('isRequestorType', isRequestorType);
 Template.registerHelper('isFellow', isFellow);
+Template.registerHelper('userEmail', user => {
+	console.log(user.emails);
+	return (
+		user
+		&& user.emails
+		&& Array.isArray(user.emails)
+		&& user.emails[0]
+	)
+		? user.emails[0].address
+		: '';
+});

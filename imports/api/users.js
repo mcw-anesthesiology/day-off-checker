@@ -18,6 +18,7 @@ export type User = {
 	role: string,
 	pager: ?string,
 	emails: Array<string>,
+	phone?: ?string,
 	permissions?: Array<UserPermission>
 };
 
@@ -47,7 +48,9 @@ if (Meteor.isServer) {
 			name: 1,
 			username: 1,
 			role: 1,
-			pager: 1
+			pager: 1,
+			emails: 1,
+			phone: 1
 		}});
 	});
 
@@ -59,7 +62,8 @@ if (Meteor.isServer) {
 			role: 1,
 			pager: 1,
 			emails: 1,
-			permissions: 1
+			permissions: 1,
+			phone: 1
 		}});
 	});
 
@@ -68,7 +72,9 @@ if (Meteor.isServer) {
 			_id: 1,
 			username: 1,
 			role: 1,
-			name: 1
+			name: 1,
+			emails: 1,
+			phone: 1
 		}});
 	});
 
@@ -77,7 +83,9 @@ if (Meteor.isServer) {
 			_id: 1,
 			username: 1,
 			role: 1,
-			name: 1
+			name: 1,
+			emails: 1,
+			phone: 1
 		}});
 	});
 
@@ -87,7 +95,9 @@ if (Meteor.isServer) {
 			username: 1,
 			name: 1,
 			role: 1,
-			pager: 1
+			pager: 1,
+			emails: 1,
+			phone: 1
 		}});
 	});
 }
@@ -114,6 +124,11 @@ const userSchema = new SimpleSchema({
 	pager: {
 		type: String,
 		label: 'Pager',
+		optional: true
+	},
+	phone: {
+		type: String,
+		label: 'Phone',
 		optional: true
 	},
 	permissions: {
