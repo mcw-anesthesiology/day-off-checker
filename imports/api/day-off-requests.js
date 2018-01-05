@@ -19,6 +19,7 @@ import {
 	DAY_OFF_TYPES,
 	RESIDENT_DAY_OFF_TYPES,
 	FELLOW_DAY_OFF_TYPES,
+	INTERN_DAY_OFF_TYPES,
 	REQUESTOR_TYPES,
 	DAY_OFF_TYPE_NAMES,
 	USER_ROLES
@@ -28,6 +29,7 @@ import {
 	nl2br,
 	isFellow,
 	isRequestorType,
+	getRequestorType,
 	getRequestRequestorType,
 	article,
 	capitalizeFirstLetter,
@@ -123,11 +125,25 @@ Meteor.methods({
 		const locations = Locations.find({}).fetch();
 		const locationAdmins = Meteor.users.find({ role: 'location_admin' }).fetch();
 
+		let allowedDayOffTypes;
+		switch (getRequestorType(this.connection)) {
+			case 'fellow':
+				allowedDayOffTypes = FELLOW_DAY_OFF_TYPES;
+				break;
+			case 'intern':
+				allowedDayOffTypes = INTERN_DAY_OFF_TYPES;
+				break;
+			case 'resident':
+			default:
+				allowedDayOffTypes = RESIDENT_DAY_OFF_TYPES;
+				break;
+		}
+
 		let schema = {
 			dayOffType: {
 				type: String,
 				label: 'Day off type',
-				allowedValues: RESIDENT_DAY_OFF_TYPES
+				allowedValues: allowedDayOffTypes
 			},
 			requestorType: {
 				type: String,
@@ -186,11 +202,6 @@ Meteor.methods({
 			allowedLocationIds.push('not-assigned-yet');
 
 			let fellowSchema = {
-				dayOffType: {
-					type: String,
-					label: 'Day off type',
-					allowedValues: FELLOW_DAY_OFF_TYPES
-				},
 				'requestedLocation._id': {
 					type: String,
 					label: 'Location ID',

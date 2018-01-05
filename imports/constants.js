@@ -103,6 +103,10 @@ export const FELLOW_DAY_OFF_TYPES = [
 	DAY_OFF_TYPES.VACATION
 ];
 
+export const INTERN_DAY_OFF_TYPES = [
+	DAY_OFF_TYPES.SICK
+];
+
 export const REQUESTOR_TYPES = [
 	'resident',
 	'fellow',

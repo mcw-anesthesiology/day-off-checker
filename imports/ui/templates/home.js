@@ -27,6 +27,7 @@ import {
 	DAY_OFF_TYPE_NAMES,
 	RESIDENT_DAY_OFF_TYPES,
 	FELLOW_DAY_OFF_TYPES,
+	INTERN_DAY_OFF_TYPES,
 	DAY_OFF_FIELDS,
 	DAY_OFF_FIELD_NAMES,
 	DAY_OFF_TYPES,
@@ -306,17 +307,23 @@ Template.dayOffEntry.events({
 
 Template.dayOffType.helpers({
 	dayOffButtons() {
-		let buttons = [];
-		const types = isFellow() ? FELLOW_DAY_OFF_TYPES : RESIDENT_DAY_OFF_TYPES;
-		for (let type of types) {
-			let button = {
-				value: type,
-				text: DAY_OFF_TYPE_NAMES[type]
-			};
-			buttons.push(button);
+		let types;
+		switch (getRequestorType()) {
+			case 'fellow':
+				types = FELLOW_DAY_OFF_TYPES;
+				break;
+			case 'intern':
+				types = INTERN_DAY_OFF_TYPES;
+				break;
+			case 'resident':
+			default:
+				types = RESIDENT_DAY_OFF_TYPES;
+				break;
 		}
-
-		return buttons;
+		return types.map(type => ({
+			value: type,
+			text: DAY_OFF_TYPE_NAMES[type]
+		}));
 	},
 	ManageRequest() {
 		return ManageRequest;
