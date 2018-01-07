@@ -11,7 +11,8 @@ import 'twix';
 import {
 	APP_ADMIN_EMAIL_ADDRESS,
 	ADMIN_EMAIL_ADDRESS,
-	DAY_OFF_FIELDS
+	DAY_OFF_FIELDS,
+	REQUESTOR_TYPES
 } from './constants.js';
 
 import type { User, UserPermission } from './api/users.js';
@@ -89,8 +90,8 @@ export function getRequestorType(connection) {
 		: connection.httpHeaders.host;
 
 	const pieces = hostname.split('.');
-
-	return pieces.length >= 2
+	
+	return pieces.length >= 2 && REQUESTOR_TYPES.includes(pieces[0])
 		? pieces[0]
 		: 'resident';
 }
