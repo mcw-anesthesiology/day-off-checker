@@ -27,15 +27,15 @@ Template.usersList.helpers({
 	usersSettings() {
 		return {
 			fields: [
-				{ key: 'inactive', label: 'Inactive', fn: inactive =>
+				{ key: 'inactive', label: 'Inactive', sortOrder: 0, fn: inactive =>
 					inactive
 						? Spacebars.SafeString('<span class="inactive-badge" aria-label="Inactive"></span>')
 						: ''
 				},
-				{ key: 'name', label: 'Name', sortOrder: 1 },
+				{ key: 'name', label: 'Name', sortOrder: 2 },
 				{ key: 'username', label: 'Username' },
 				{ key: 'emails', label: 'Email', fn: getFirstEmail },
-				{ key: 'role', label: 'Role', sortOrder: 0, fn: role => USER_ROLE_NAMES[role] },
+				{ key: 'role', label: 'Role', sortOrder: 1, fn: role => USER_ROLE_NAMES[role] },
 				{ key: 'pager', label: 'Pager' },
 				{ key: 'phone', label: 'Phone' }
 			],
