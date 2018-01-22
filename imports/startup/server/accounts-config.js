@@ -15,6 +15,16 @@ Accounts.onCreateUser((options, user) => {
 	return user;
 });
 
+Accounts.validateLoginAttempt(attempt => {
+	if (!attempt.allowed)
+		return false;
+
+	if (attempt.user.inactive)
+		return false;
+
+	return true;
+});
+
 Accounts.emailTemplates.from = APP_ACCOUNTS_EMAIL_ADDRESS;
 Accounts.emailTemplates.siteName = APP_SITE_NAME;
 

@@ -130,6 +130,12 @@ Template.editUser.events({
 			}
 		}
 
+		for (const booleanProp of booleanProps) {
+			if (!(booleanProp in user)) {
+				user[booleanProp] = false;
+			}
+		}
+
 		if (userId)
 			Meteor.call('updateUser', userId, user, (err) => {
 				if (err) {
