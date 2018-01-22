@@ -19,7 +19,8 @@ export type User = {
 	pager: ?string,
 	emails: Array<string>,
 	phone?: ?string,
-	permissions?: Array<UserPermission>
+	permissions?: Array<UserPermission>,
+	inactive: ?boolean
 };
 
 if (Meteor.isServer) {
@@ -28,30 +29,49 @@ if (Meteor.isServer) {
 			return Meteor.users.find({_id: this.userId}, { fields: {
 				name: 1,
 				role: 1,
-				permissions: 1
+				permissions: 1,
+				inactive: 1
 			}});
 		else
 			this.ready();
 	});
 
 	Meteor.publish('chiefUserData', function() {
-		return Meteor.users.find({ role: 'chief' }, { fields: {
-			name: 1,
-			username: 1,
-			role: 1,
-			pager: 1
-		}});
+		return Meteor.users.find({
+			role: 'chief',
+			inactive: [
+				null,
+				false
+			]
+		}, {
+			fields: {
+				name: 1,
+				username: 1,
+				role: 1,
+				pager: 1,
+				inactive: 1
+			}
+		});
 	});
 
 	Meteor.publish('internCoordinatorUserData', function() {
-		return Meteor.users.find({ role: 'intern_coordinator' }, { fields: {
-			name: 1,
-			username: 1,
-			role: 1,
-			pager: 1,
-			emails: 1,
-			phone: 1
-		}});
+		return Meteor.users.find({
+			role: 'intern_coordinator',
+			inactive: [
+				null,
+				false
+			]
+		}, {
+			fields: {
+				name: 1,
+				username: 1,
+				role: 1,
+				pager: 1,
+				emails: 1,
+				phone: 1,
+				inactive: 1
+			}
+		});
 	});
 
 	Meteor.publish('allUserData', function() {
@@ -63,42 +83,70 @@ if (Meteor.isServer) {
 			pager: 1,
 			emails: 1,
 			permissions: 1,
-			phone: 1
+			phone: 1,
+			inactive: 1
 		}});
 	});
 
 	Meteor.publish('locationAdminUserData', function() {
-		return Meteor.users.find({ role: 'location_admin' }, { fields: {
-			_id: 1,
-			username: 1,
-			role: 1,
-			name: 1,
-			emails: 1,
-			phone: 1
-		}});
+		return Meteor.users.find({
+			role: 'location_admin',
+			inactive: [
+				null,
+				false
+			]
+		}, {
+			fields: {
+				_id: 1,
+				username: 1,
+				role: 1,
+				name: 1,
+				emails: 1,
+				phone: 1,
+				inactive: 1
+			}
+		});
 	});
 
 	Meteor.publish('fellowshipAdminUserData', function() {
-		return Meteor.users.find({ role: 'fellowship_admin' }, { fields: {
-			_id: 1,
-			username: 1,
-			role: 1,
-			name: 1,
-			emails: 1,
-			phone: 1
-		}});
+		return Meteor.users.find({
+			role: 'fellowship_admin',
+			inactive: [
+				null,
+				false
+			]
+		}, {
+			fields: {
+				_id: 1,
+				username: 1,
+				role: 1,
+				name: 1,
+				emails: 1,
+				phone: 1,
+				inactive: 1
+			}
+		});
 	});
 
 	Meteor.publish('basicUserData', function() {
-		return Meteor.users.find({}, { fields: {
-			_id: 1,
-			username: 1,
-			name: 1,
-			role: 1,
-			pager: 1,
-			emails: 1,
-			phone: 1
-		}});
+		return Meteor.users.find({
+			inactive: [
+				null,
+				false
+			]
+		},
+		{
+			fields: {
+				_id: 1,
+				username: 1,
+				name: 1,
+				role: 1,
+				pager: 1,
+				emails: 1,
+				phone: 1,
+				inactive: 1
+			}
+		});
 	});
 }
 
@@ -135,6 +183,11 @@ const userSchema = new SimpleSchema({
 		type: [String],
 		label: 'Permissions',
 		allowedValues: Array.from(Object.keys(USER_PERMISSION_NAMES)),
+		optional: true
+	},
+	inactive: {
+		type: Boolean,
+		label: 'Inactive',
 		optional: true
 	}
 });

@@ -473,7 +473,15 @@ function getUsersToNotify(request) {
 			break;
 	}
 
-	return Meteor.users.find({ $or }).fetch();
+	return Meteor.users.find({
+		$or,
+		inactive: {
+			$in: [
+				null,
+				false
+			]
+		}
+	}).fetch();
 }
 
 function sendNotifications(request, users = getUsersToNotify(request), sendRequestorNotification = true) {
@@ -654,18 +662,31 @@ function getUsersForConfirmation(request) {
 	switch (getRequestRequestorType(request)) {
 		case 'fellow':
 			return [
+				// FIXME: Will still return inactive users
 				Accounts.findUserByUsername(
 					request.requestedFellowship.administrator
 				)
 			];
 		case 'intern':
 			return Meteor.users.find({
-				role: USER_ROLES.INTERN_COORDINATOR
+				role: USER_ROLES.INTERN_COORDINATOR,
+				inactive: {
+					$in: [
+						null,
+						false
+					]
+				}
 			}).fetch();
 		case 'resident':
 		default:
 			return Meteor.users.find({
-				role: USER_ROLES.CHIEF
+				role: USER_ROLES.CHIEF,
+				inactive: {
+					$in: [
+						null,
+						false
+					]
+				}
 			}).fetch();
 	}
 }

@@ -69,6 +69,12 @@
 					<input type="tel" class="form-control" id="pager" name="pager" value="{{user.pager}}" placeholder="Pager" required />
 				</div>
 {{/if}}
+				<div class="form-group col-lg-1 col-md-2 col-sm-3">
+					<label for="inactive">Inactive</label>
+					<input type="checkbox" id="inactive"
+						name="inactive"
+						checked="{{user.inactive}}" />
+				</div>
 			</div>
 			<div class="row button-row">
 				{{!-- TODO: Delete/disable user --}}

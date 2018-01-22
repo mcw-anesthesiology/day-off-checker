@@ -116,12 +116,15 @@ Template.editUser.events({
 		const formArray = $(form).serializeArray();
 		const userId = Session.get('userToEdit')._id;
 		const arrayProps = ['permissions'];
+		const booleanProps = ['inactive'];
 		let user = {};
 		for (let {name, value} of formArray) {
 			if (arrayProps.includes(name)) {
 				if (!user[name] || !Array.isArray(user[name]))
 					user[name] = [];
 				user[name].push(value);
+			} else if(booleanProps.includes(name)) {
+				user[name] = Boolean(value);
 			} else {
 				user[name] = value;
 			}
