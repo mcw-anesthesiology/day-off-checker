@@ -519,7 +519,20 @@ Template.submissionConfirmation.helpers({
 			: null;
 	},
 	chiefs() {
-		return Meteor.users.find({ role: 'chief' }, { pager: 1, name: 1 });
+		return Meteor.users.find(
+			{
+				role: 'chief',
+				inactive: {
+					$in: [
+						null,
+						false
+					]
+				}
+			},
+			{
+				pager: 1, name: 1
+			}
+		);
 	},
 	fellowshipAdmin() {
 		const username = Session.get(DAY_OFF_FIELDS.FELLOWSHIP).administrator;

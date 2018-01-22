@@ -661,12 +661,15 @@ function sendNotifications(request, users = getUsersToNotify(request), sendReque
 function getUsersForConfirmation(request) {
 	switch (getRequestRequestorType(request)) {
 		case 'fellow':
-			return [
-				// FIXME: Will still return inactive users
-				Accounts.findUserByUsername(
-					request.requestedFellowship.administrator
-				)
-			];
+			return Meteor.users.find({
+				username: request.requestedFellowship.administrator,
+				inactive: {
+					$in: [
+						null,
+						false
+					]
+				}
+			}).fetch();
 		case 'intern':
 			return Meteor.users.find({
 				role: USER_ROLES.INTERN_COORDINATOR,

@@ -23,7 +23,15 @@ Meteor.methods({
 		if(Meteor.user().role !== 'admin')
 			throw new Meteor.Error('addFellowship.unauthorized');
 
-		const fellowshipAdmins = Meteor.users.find({ role: 'fellowship_admin' }).fetch();
+		const fellowshipAdmins = Meteor.users.find({
+			role: 'fellowship_admin',
+			inactive: {
+				$in: [
+					null,
+					false
+				]
+			}
+		}).fetch();
 
 		new SimpleSchema({
 			_id: {
@@ -54,7 +62,15 @@ Meteor.methods({
 		if(Meteor.user().role !== 'admin')
 			throw new Meteor.Error('updateFellowship.unauthorized');
 
-		const fellowshipAdmins = Meteor.users.find({ role: 'fellowship_admin' }).fetch();
+		const fellowshipAdmins = Meteor.users.find({
+			role: 'fellowship_admin',
+			inactive: {
+				$in: [
+					null,
+					false
+				]
+			}
+		}).fetch();
 
 		new SimpleSchema({
 			_id: {

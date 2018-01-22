@@ -78,7 +78,15 @@ Template.locationsList.helpers({
 		return EditLocation;
 	},
 	siteAdmins(){
-		return Meteor.users.find({ role: 'location_admin' }).fetch();
+		return Meteor.users.find({
+			role: 'location_admin',
+			inactive: {
+				$in: [
+					null,
+					false
+				]
+			}
+		}).fetch();
 	},
 	handleLocationSubmit(fellowshipId){
 		const instance = Template.instance();
@@ -143,7 +151,15 @@ Template.locationsList.events({
 
 Template.editLocation.helpers({
 	siteAdmins(){
-		return Meteor.users.find({ role: 'location_admin' }).fetch();
+		return Meteor.users.find({
+			role: 'location_admin',
+			inactive: {
+				$in: [
+					null,
+					false
+				]
+			}
+		}).fetch();
 	},
 	isSiteAdmin(location, siteAdmin){
 		if(location.administrator === siteAdmin.username)

@@ -50,7 +50,15 @@ Template.fellowshipsList.events({
 
 Template.editFellowship.helpers({
 	fellowshipAdmins(){
-		return Meteor.users.find({ role: 'fellowship_admin' }).fetch();
+		return Meteor.users.find({
+			role: 'fellowship_admin',
+			inactive: {
+				$in: [
+					null,
+					false
+				]
+			}
+		}).fetch();
 	},
 	isFellowshipAdmin(fellowship, fellowshipAdmin){
 		if(fellowship.administrator === fellowshipAdmin.username)

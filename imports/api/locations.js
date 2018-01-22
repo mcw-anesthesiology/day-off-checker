@@ -39,7 +39,15 @@ Meteor.methods({
 		if(Meteor.user().role !== 'admin')
 			throw new Meteor.Error('addLocation.unauthorized');
 
-		const locationAdmins = Meteor.users.find({ role: 'location_admin' }).fetch();
+		const locationAdmins = Meteor.users.find({
+			role: 'location_admin',
+			inactive: {
+				$in: [
+					null,
+					false
+				]
+			}
+		}).fetch();
 		const fellowships = Fellowships.find({}).fetch();
 
 		new SimpleSchema({
@@ -78,7 +86,15 @@ Meteor.methods({
 		if(Meteor.user().role !== 'admin')
 			throw new Meteor.Error('updateLocation.unauthorized');
 
-		const locationAdmins = Meteor.users.find({ role: 'location_admin' }).fetch();
+		const locationAdmins = Meteor.users.find({
+			role: 'location_admin',
+			inactive: {
+				$in: [
+					null,
+					false
+				]
+			}
+		}).fetch();
 		const fellowships = Fellowships.find({}).fetch();
 
 		new SimpleSchema({

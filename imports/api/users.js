@@ -39,10 +39,12 @@ if (Meteor.isServer) {
 	Meteor.publish('chiefUserData', function() {
 		return Meteor.users.find({
 			role: 'chief',
-			inactive: [
-				null,
-				false
-			]
+			inactive: {
+				$in: [
+					null,
+					false
+				]
+			}
 		}, {
 			fields: {
 				name: 1,
@@ -57,10 +59,12 @@ if (Meteor.isServer) {
 	Meteor.publish('internCoordinatorUserData', function() {
 		return Meteor.users.find({
 			role: 'intern_coordinator',
-			inactive: [
-				null,
-				false
-			]
+			inactive: {
+				$in: [
+					null,
+					false
+				]
+			}
 		}, {
 			fields: {
 				name: 1,
@@ -91,10 +95,12 @@ if (Meteor.isServer) {
 	Meteor.publish('locationAdminUserData', function() {
 		return Meteor.users.find({
 			role: 'location_admin',
-			inactive: [
-				null,
-				false
-			]
+			inactive: {
+				$in: [
+					null,
+					false
+				]
+			}
 		}, {
 			fields: {
 				_id: 1,
@@ -111,10 +117,12 @@ if (Meteor.isServer) {
 	Meteor.publish('fellowshipAdminUserData', function() {
 		return Meteor.users.find({
 			role: 'fellowship_admin',
-			inactive: [
-				null,
-				false
-			]
+			inactive: {
+				$in: [
+					null,
+					false
+				]
+			}
 		}, {
 			fields: {
 				_id: 1,
@@ -130,10 +138,12 @@ if (Meteor.isServer) {
 
 	Meteor.publish('basicUserData', function() {
 		return Meteor.users.find({
-			inactive: [
-				null,
-				false
-			]
+			inactive: {
+				$in: [
+					null,
+					false
+				]
+			}
 		},
 		{
 			fields: {
