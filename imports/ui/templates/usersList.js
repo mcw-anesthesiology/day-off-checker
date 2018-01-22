@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
+import { Spacebars } from 'meteor/spacebars';
 
 import { throwError } from 'meteor/saucecode:rollbar';
 
@@ -26,10 +27,15 @@ Template.usersList.helpers({
 	usersSettings() {
 		return {
 			fields: [
+				{ key: 'inactive', label: 'Inactive', fn: inactive =>
+					inactive
+						? Spacebars.SafeString('<span class="inactive-badge" aria-label="Inactive"></span>')
+						: ''
+				},
 				{ key: 'name', label: 'Name', sortOrder: 1 },
 				{ key: 'username', label: 'Username' },
 				{ key: 'emails', label: 'Email', fn: getFirstEmail },
-				{ key: 'role', label: 'Role', sortOrder: 0, fn: roleName },
+				{ key: 'role', label: 'Role', sortOrder: 0, fn: role => USER_ROLE_NAMES[role] },
 				{ key: 'pager', label: 'Pager' },
 				{ key: 'phone', label: 'Phone' }
 			],
@@ -55,10 +61,6 @@ Template.usersList.events({
 function getFirstEmail(emails) {
 	if (emails && emails.length > 0)
 		return emails[0].address;
-}
-
-function roleName(role) {
-	return USER_ROLE_NAMES[role];
 }
 
 Template.editUser.helpers({
