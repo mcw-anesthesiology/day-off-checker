@@ -3,7 +3,8 @@ import 'fullcalendar/dist/fullcalendar.css';
 
 import { DayOffRequests } from '../../api/day-off-requests.js';
 
-import { getRequestorType, getRequestorTypeQuery } from '../../utils.js';
+import RequestDetails from '../components/RequestDetails.js';
+import { getRequestorTypeQuery } from '../../utils.js';
 import {
 	DAY_OFF_FIELDS,
 	DAY_OFF_TYPES,
@@ -70,6 +71,9 @@ function showEventDetails(event){
 }
 
 Template.calendar.helpers({
+	RequestDetails() {
+		return RequestDetails;
+	},
 	eventDetails(){
 		return DayOffRequests.findOne(Session.get('eventDetails'));
 	},
