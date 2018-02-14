@@ -237,6 +237,12 @@ Template.dayOffEntry.events({
 			case DAY_OFF_FIELDS.DATE: {
 				let isRange = instance.$('#multiple-days').prop('checked');
 				let startDate, endDate;
+
+				if (!input.value) {
+					Session.set('errorAlert', 'Please select a date');
+					return;
+				}
+
 				if (instance.$(input).data('endDateElement')) {
 					startDate = moment(input.value, ISO_DATE_FORMAT);
 
@@ -252,15 +258,21 @@ Template.dayOffEntry.events({
 							moment(date, ISO_DATE_FORMAT)
 						);
 					} else {
-						startDate = moment(instance.$(input).val(), ISO_DATE_FORMAT);
+						startDate = moment(input.value, ISO_DATE_FORMAT);
 						endDate = moment(startDate);
 					}
 				}
-				let range = startDate.twix(endDate, true);
-				if (isRange && !range.isValid())
-					Session.set('errorAlert', 'Invalid date range. Please select first the beginning date and then the ending date.');
-				else
+
+				if (!startDate.isValid() || !endDate.isValid()) {
+					Session.set('errorAlert', 'Please select a date');
+				} else if (isRange && !startDate.twix(endDate, true).isValid()) {
+					Session.set(
+						'errorAlert',
+						'Invalid date range. Please select first the beginning date and then the ending date.'
+					);
+				} else {
 					value = [ startDate.toDate(), endDate.toDate() ];
+				}
 				break;
 			}
 			case DAY_OFF_FIELDS.FELLOWSHIP:
@@ -391,9 +403,6 @@ Template.requestedDate.helpers({
 	oldMultiple() {
 		if (Session.get('isRange'))
 			return 'checked';
-	},
-	today() {
-		return moment().format(ISO_DATE_FORMAT);
 	},
 	startDate() {
 		let startDate = Session.get('startDate');

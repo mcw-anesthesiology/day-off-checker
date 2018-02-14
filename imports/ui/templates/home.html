@@ -66,7 +66,7 @@
 	</div>
 	<div class="on-mobile">
 		<label for="start-date">Date</label>
-		<input type="date" name="requestedDate" id="start-date" data-end-date-element="#end-date" min="{{today}}" value="{{oldStartValue}}" placeholder="YYYY-MM-DD" autocomplete="off" />
+		<input type="date" name="requestedDate" id="start-date" data-end-date-element="#end-date" value="{{oldStartValue}}" placeholder="YYYY-MM-DD" autocomplete="off" />
 {{#if isRange}}
 		<label for="end-date">End date</label>
 		<input type="date" name="requestedEndDate" id="end-date" placeholder="YYYY-MM-DD" value="{{oldEndValue}}" min="{{startDate}}" autocomplete="off" />
