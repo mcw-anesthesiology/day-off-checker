@@ -22,6 +22,7 @@
 		"no-spaced-func": "warn",
 		"comma-style": "warn",
 		"comma-spacing": "warn",
-		"key-spacing": "warn"
+		"key-spacing": "warn",
+		"no-unused-vars": ["error", {"argsIgnorePattern": "^_"}]
 	}
 }

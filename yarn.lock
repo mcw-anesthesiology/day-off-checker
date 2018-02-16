@@ -1155,6 +1155,10 @@ form-data@~2.3.1:
     combined-stream "1.0.6"
     mime-types "^2.1.12"
 
+formdata-polyfill@^3.0.9:
+  version "3.0.9"
+  resolved "https://registry.yarnpkg.com/formdata-polyfill/-/formdata-polyfill-3.0.9.tgz#9cdcbd90e31378f5a1e65bc5f68e0db28606a5ed"
+
 fs-extra@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-5.0.0.tgz#414d0110cdd06705734d055652c5411260c31abd"

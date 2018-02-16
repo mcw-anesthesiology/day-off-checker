@@ -14,15 +14,17 @@ import { getRequestorType } from '../../utils.js';
 
 import validator from 'email-validator';
 
+import debounce from 'lodash/debounce';
 import moment from 'moment';
 import 'twix';
 
-import 'flatpickr';
+import Flatpickr from 'react-flatpickr';
 import 'flatpickr/dist/flatpickr.css';
 
 import ManageRequest from '../components/ManageRequest.js';
 
 import {
+	SCREEN_BREAKPOINTS,
 	ADMIN_EMAIL_ADDRESS,
 	DAY_OFF_TYPE_NAMES,
 	RESIDENT_DAY_OFF_TYPES,
@@ -210,55 +212,56 @@ Template.dayOffEntry.events({
 		event.preventDefault();
 
 		const form = event.target;
-		const input = $(form).find('input[type="hidden"], input:visible, select, textarea')[0];
+		const data = new FormData(form);
+		const input = instance.$(form).find('input[type="hidden"], input:visible, select, textarea')[0];
+		let [name, inputValue] = Array.from(data.entries())
+			.find(([_, v]) => Boolean(v));
 
 		let value;
-		switch(input.name) {
+		switch(name) {
 			case DAY_OFF_FIELDS.TYPE: {
 				const allowedTypes = isFellow() ? FELLOW_DAY_OFF_TYPES : RESIDENT_DAY_OFF_TYPES;
-				if (allowedTypes.indexOf(input.value) !== -1)
-					value = input.value;
+				if (allowedTypes.indexOf(inputValue) !== -1)
+					value = inputValue;
 				else
 					Session.set('errorAlert', 'Unknown day off type');
 				break;
 			}
 			case DAY_OFF_FIELDS.NAME:
-				if (input.value.trim() === '')
+				if (inputValue.trim() === '')
 					Session.set('errorAlert', 'Name looks empty. Please double check your name.');
 				else
-					value = input.value;
+					value = inputValue;
 				break;
 			case DAY_OFF_FIELDS.EMAIL:
-				if (validator.validate(input.value))
-					value = input.value;
+				if (validator.validate(inputValue))
+					value = inputValue;
 				else
 					Session.set('errorAlert', 'Email address seems wrong. Please make sure to enter a valid email address.');
 				break;
 			case DAY_OFF_FIELDS.DATE: {
-				let isRange = instance.$('#multiple-days').prop('checked');
+				let isRange = data.has('multipleDays');
 				let startDate, endDate;
 
-				if (!input.value) {
+				if (!inputValue) {
 					Session.set('errorAlert', 'Please select a date');
 					return;
 				}
 
-				if (instance.$(input).data('endDateElement')) {
-					startDate = moment(input.value, ISO_DATE_FORMAT);
+				if (data.has('requestedEndDate')) {
+					startDate = moment(inputValue, ISO_DATE_FORMAT);
 
 					if (isRange) {
-						let endInput = instance.$(instance.$(input).data('endDateElement'))[0];
-						endDate = moment(endInput.value, ISO_DATE_FORMAT);
+						endDate = moment(data.get('requestedEndDate'), ISO_DATE_FORMAT);
 					} else {
 						endDate = moment(startDate);
 					}
 				} else {
 					if (isRange) {
-						[startDate, endDate] = instance.$(input).val().split('to').map(date =>
-							moment(date, ISO_DATE_FORMAT)
-						);
+						[startDate, endDate] = inputValue.split('to')
+							.map(date => moment(date, ISO_DATE_FORMAT));
 					} else {
-						startDate = moment(input.value, ISO_DATE_FORMAT);
+						startDate = moment(inputValue, ISO_DATE_FORMAT);
 						endDate = moment(startDate);
 					}
 				}
@@ -276,26 +279,26 @@ Template.dayOffEntry.events({
 				break;
 			}
 			case DAY_OFF_FIELDS.FELLOWSHIP:
-				value = Fellowships.findOne(input.value);
+				value = Fellowships.findOne(inputValue);
 				break;
 			case DAY_OFF_FIELDS.LOCATION:
-				if (isFellow() && input.value === 'other') {
-					let otherName = $(form).find('#other-location').val();
+				if (isFellow() && inputValue === 'other') {
+					let otherName = instance.$(form).find('#other-location').val();
 					value = {
 						_id: 'other',
 						name: otherName
 					};
-				} else if (isFellow() && input.value === 'not-assigned-yet') {
+				} else if (isFellow() && inputValue === 'not-assigned-yet') {
 					value = {
 						_id: 'not-assigned-yet',
 						name: 'Not assigned yet'
 					};
 				} else {
-					value = Locations.findOne(input.value);
+					value = Locations.findOne(inputValue);
 				}
 				break;
 			case DAY_OFF_FIELDS.REASON:
-				value = input.value.trim();
+				value = inputValue.trim();
 				if (!value)
 					value = '(None)';
 				break;
@@ -304,7 +307,7 @@ Template.dayOffEntry.events({
 				break;
 			case 'requestConfirmation':
 				insertEntries();
-				value = input.value;
+				value = inputValue;
 				break;
 			default:
 				Session.set('errorAlert', 'Unknown attribute name');
@@ -364,18 +367,35 @@ Template.requestorEmail.helpers({
 	}
 });
 
+const dateResizeHandler = debounce(() => {
+	Session.set('onMobile', window.innerWidth < SCREEN_BREAKPOINTS.ON_DESKTOP);
+}, 100);
+
 Template.requestedDate.onRendered(function() {
 	this.$('#daterange').placeholder();
 
-	if (Session.get('isRange'))
-		this.$('#daterange').flatpickr({
-			mode: 'range'
-		});
-	else
-		this.$('#daterange').flatpickr();
+	dateResizeHandler();
+	window.addEventListener('resize', dateResizeHandler);
+});
+
+Template.requestedDate.onDestroyed(function() {
+	window.removeEventListener('resize', dateResizeHandler);
 });
 
 Template.requestedDate.helpers({
+	Flatpickr() {
+		return Flatpickr;
+	},
+	flatpickrConfig() {
+		return {
+			mode: Session.get('isRange')
+				? 'range'
+				: 'single'
+		};
+	},
+	onMobile() {
+		return Session.get('onMobile');
+	},
 	isRange() {
 		return Session.get('isRange');
 	},
@@ -401,31 +421,31 @@ Template.requestedDate.helpers({
 		}
 	},
 	oldMultiple() {
-		if (Session.get('isRange'))
-			return 'checked';
+		return Boolean(Session.get('isRange'));
+	},
+	startDateLabel() {
+		return Session.get('isRange')
+			? 'Start date'
+			: 'Date';
 	},
 	startDate() {
 		let startDate = Session.get('startDate');
+		if (!startDate) {
+			const dates = Session.get(`old_${DAY_OFF_FIELDS.DATE}`);
+			if (dates)
+				startDate = moment(dates[0]).format(ISO_DATE_FORMAT);
+		}
 		if (!startDate)
-			return moment().format(ISO_DATE_FORMAT);
+			startDate = moment().format(ISO_DATE_FORMAT);
 
 		return startDate;
 	}
 });
 
 Template.requestedDate.events({
-	'change #multiple-days'(event, instance) {
+	'change #multiple-days'(event) {
 		let checkbox = event.target;
 		Session.set('isRange', checkbox.checked);
-		if (checkbox.checked) {
-			instance.$('#daterange').flatpickr({
-				mode: 'range'
-			});
-			instance.$('label[for="start-date"]').text('Start date');
-		} else {
-			instance.$('#daterange').flatpickr();
-			instance.$('label[for="start-date"]').text('Date');
-		}
 	},
 	'input #start-date'(event) {
 		Session.set('startDate', event.target.value);
