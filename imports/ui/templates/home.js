@@ -213,9 +213,7 @@ Template.dayOffEntry.events({
 
 		const form = event.target;
 		const data = new FormData(form);
-		const input = instance.$(form).find('input[type="hidden"], input:visible, select, textarea')[0];
-		let [name, inputValue] = Array.from(data.entries())
-			.find(([_, v]) => Boolean(v));
+		let {value: [name, inputValue]} = data.entries().next();
 
 		let value;
 		switch(name) {
@@ -315,7 +313,7 @@ Template.dayOffEntry.events({
 		}
 
 		if (value) {
-			Session.set(input.name, value);
+			Session.set(name, value);
 		}
 	}
 });
