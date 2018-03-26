@@ -2,7 +2,7 @@
   "name": "day-off-checker",
   "private": true,
   "scripts": {
-    "start": "MAIL_URL=smtp://40701ebe2b9d2c3ec:18d0ca555fd201@mailtrap.io:2525/ meteor run --settings settings.json",
+    "start": "MAIL_URL=smtp://40701ebe2b9d2c3ec:18d0ca555fd201@smtp.mailtrap.io:2525/ meteor run --settings settings.json",
     "setup:testing": "cd .mup/testing/ && mup setup",
     "setup:production": "cd .mup/production/ && mup setup",
     "deploy:testing": "cd .mup/testing/ && mup deploy",
