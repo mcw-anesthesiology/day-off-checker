@@ -63,6 +63,7 @@ if (Meteor.isServer) {
 
 			if (
 				user.role === USER_ROLES.RESIDENCY_COORDINATOR
+				|| user.role === USER_ROLES.CHIEF
 				|| userHasPermission(user, 'VIEW_RESIDENT_REQUESTS')
 			) {
 				query.$or.push(
