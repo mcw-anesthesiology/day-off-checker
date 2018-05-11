@@ -19,18 +19,25 @@
 {{/if}}
 
 {{#if requestDetails}}
-	<h2 id="i-day-details">Request Details</h2>
-	<section class="request-details well well-lg">
-		{{>React component=RequestDetails request=requestDetails currentUser=currentUser}}
-	</section>
-	<button type="button" class="close-details-button btn btn-default" id="close-i-day-details">Close details</button>
+		<h2 id="i-day-details">Request Details</h2>
+		<section class="request-details well well-lg">
+			{{>React component=RequestDetails request=requestDetails currentUser=currentUser}}
+		</section>
+		<button type="button" class="close-details-button btn btn-default" id="close-i-day-details">Close details</button>
 {{/if}}
 {{#if requestRequests}}
-	<section class="i-day-requests">
-		<h2>Requests</h2>
-		{{>reactiveTable collection=requestRequests settings=requestSettings}}
-		<hr />
-	</section>
+		<section class="i-day-requests">
+			<h2>Requests</h2>
+			{{>reactiveTable collection=requestRequests settings=requestSettings}}
+	{{#if currentUserAdmin}}
+			<div class="text-right">
+				<button type="button" class="btn btn-warning" id="transfer-requests">
+					Transfer pending requests
+				</button>
+			</div>
+	{{/if}}
+			<hr />
+		</section>
 {{/if}}
 	</section>
 </template>

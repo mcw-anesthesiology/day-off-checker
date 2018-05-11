@@ -439,6 +439,50 @@ Meteor.methods({
 				'confirmationRequests.$.note': note
 			}
 		});
+	},
+	'dayOffRequests.updateConfirmers'(requestorType) {
+		if (Meteor.user().role !== 'admin')
+			throw new Error('Only administrators may do this.');
+
+		const confirmers = getTypeConfirmers(requestorType);
+
+		const query = {
+			[DAY_OFF_FIELDS.TYPE]: requestorType === 'fellow'
+				? {
+					$in: [
+						DAY_OFF_TYPES.MEETING,
+						DAY_OFF_TYPES.VACATION
+					]
+				}
+				: DAY_OFF_TYPES.I_DAY,
+			status: 'pending'
+		};
+
+		DayOffRequests.update(
+			query,
+			{
+				$pull: {
+					confirmationRequests: {
+						status: 'pending'
+					}
+				}
+			},
+			{ multi: true }
+		);
+		DayOffRequests.update(
+			query,
+			{
+				$push: {
+					confirmationRequests: {
+						$each: confirmers.map(c => ({
+							confirmer: c.username,
+							status: 'pending'
+						}))
+					}
+				}
+			},
+			{ multi: true }
+		);
 	}
 });
 
@@ -660,10 +704,28 @@ function sendNotifications(request, users = getUsersToNotify(request), sendReque
 }
 
 function getUsersForConfirmation(request) {
-	switch (getRequestRequestorType(request)) {
+	const requestType = getRequestRequestorType(request);
+
+	// FIXME: This shouldn't have this special case but idc right now
+	if (requestType === 'fellow')
+		return Meteor.users.find({
+			username: request.requestedFellowship.administrator,
+			inactive: {
+				$in: [
+					null,
+					false
+				]
+			}
+		}).fetch();
+
+	return getTypeConfirmers(requestType);
+}
+
+export function getTypeConfirmers(requestType) {
+	switch (requestType) {
 		case 'fellow':
 			return Meteor.users.find({
-				username: request.requestedFellowship.administrator,
+				role: USER_ROLES.FELLOWSHIP_COORDINATOR,
 				inactive: {
 					$in: [
 						null,

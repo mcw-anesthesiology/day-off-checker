@@ -90,7 +90,7 @@ export function getRequestorType(connection) {
 		: connection.httpHeaders.host;
 
 	const pieces = hostname.split('.');
-	
+
 	return pieces.length >= 2 && REQUESTOR_TYPES.includes(pieces[0])
 		? pieces[0]
 		: 'resident';

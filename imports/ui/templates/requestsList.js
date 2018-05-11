@@ -1,8 +1,8 @@
 import { Meteor } from 'meteor/meteor';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 
-import { DayOffRequests } from '../../api/day-off-requests.js';
-import { isFellow, getRequestorType } from '../../../imports/utils.js';
+import { DayOffRequests, getTypeConfirmers } from '../../api/day-off-requests.js';
+import { isFellow, getRequestorType } from '../../utils.js';
 
 import find from 'lodash/find';
 
@@ -168,6 +168,18 @@ Template.requestsList.events({
 	},
 	'click .i-day-requests tr'(){
 		Session.set('iDayDetailsId', this._id);
+	},
+	'click #transfer-requests'() {
+		if (Meteor.user().role !== 'admin')
+			return;
+
+		const requestorType = getRequestorType();
+		Meteor.call('dayOffRequests.updateConfirmers', requestorType, err => {
+			if (err) {
+				console.error(err);
+				Session.set('errorAlert', 'There was a problem transferring the requests to the new confirmers.');
+			}
+		});
 	}
 });
 
