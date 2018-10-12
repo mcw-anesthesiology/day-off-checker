@@ -34,7 +34,8 @@ import {
 	article,
 	capitalizeFirstLetter,
 	camelCaseToWords,
-	userHasPermission
+	userHasPermission,
+	getCoordinators
 } from '../utils.js';
 
 import map from 'lodash/map';
@@ -757,7 +758,7 @@ export function getTypeConfirmers(requestType) {
 	}
 }
 
-function sendConfirmationRequests(request, users = getUsersForConfirmation(request), sendRequestorNotification = true, sendLocationAdminNotification = true) {
+function sendConfirmationRequests(request, users = getUsersForConfirmation(request), sendRequestorNotification = true, sendLocationAdminNotification = true, sendCoordinatorNotification = true) {
 	const requestUrl = Meteor.absoluteUrl('request/' + request._id);
 	const locationAdmin = (
 		request.requestedLocation
@@ -888,21 +889,36 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 		}
 	}
 
-	if (locationAdmin && sendLocationAdminNotification) {
-		timeout += 1000; // FIXME
+	const usersToNotify = [];
+
+	if (sendLocationAdminNotification && locationAdmin) {
+		usersToNotify.push(locationAdmin);
+	}
+
+	if (sendCoordinatorNotification) {
+		const coordinators = getCoordinators(request);
+		if (coordinators.length > 0) {
+			usersToNotify.push(...coordinators);
+		}
+	}
+
+	if (usersToNotify.length > 0) {
 		let confirmerList = '<ul>';
 		for (let confirmer of users) {
 			confirmerList += `<li>${confirmer.name} &lt;${confirmer.emails[0].address}&gt;</li>`;
 		}
 		confirmerList += '</ul>';
 
-		try {
-			Meteor.setTimeout(() => { // FIXME
-				Email.send({
-					to: locationAdmin.emails[0].address,
-					from: APP_NOTIFICATION_EMAIL_ADDRESS,
-					subject: `${typeName} requested`,
-					html: `
+		for (const userToNotify of usersToNotify) {
+			timeout += 1000; // FIXME
+
+			try {
+				Meteor.setTimeout(() => { // FIXME
+					Email.send({
+						to: userToNotify.emails[0].address,
+						from: APP_NOTIFICATION_EMAIL_ADDRESS,
+						subject: `${typeName} requested`,
+						html: `
 						<html>
 							<head>
 								<style>
@@ -916,7 +932,7 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 								</style>
 							</head>
 							<body>
-								<h1>Hello ${locationAdmin.name}</h1>
+								<h1>Hello ${userToNotify.name}</h1>
 
 								<p>${request.requestorName} made ${typeArticle} ${typeName} request for ${displayDateRange(request.requestedDate)}.</p>
 
@@ -932,7 +948,7 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 										?  '<th>Location</th>'
 										: ''
 									}
-									${ locationAdmin
+									${ userToNotify
 										?  '<th>Location administrator</th>'
 										: ''
 									}
@@ -947,8 +963,8 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 										?  `<td>${request.requestedLocation.name}</td>`
 										: ''
 									}
-									${ locationAdmin
-										?  `<td>${locationAdmin.name}</td>`
+									${ userToNotify
+										?  `<td>${userToNotify.name}</td>`
 										: ''
 									}
 										</tr>
@@ -978,15 +994,16 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 							</body>
 						</html>`
 				});
-			}, timeout);
-			DayOffRequests.update(request, {
-				$addToSet: {
-					usersNotified: locationAdmin.username
-				}
-			});
-		} catch (e) {
-			console.log('Error sending request notification to location admin: ' + e);
-			handleError(e);
+				}, timeout);
+				DayOffRequests.update(request, {
+					$addToSet: {
+						usersNotified: userToNotify.username
+					}
+				});
+			} catch (e) {
+				console.log('Error sending request notification ', e);
+				handleError(e);
+			}
 		}
 	}
 

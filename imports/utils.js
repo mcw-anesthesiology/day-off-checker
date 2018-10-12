@@ -12,7 +12,8 @@ import {
 	APP_ADMIN_EMAIL_ADDRESS,
 	ADMIN_EMAIL_ADDRESS,
 	DAY_OFF_FIELDS,
-	REQUESTOR_TYPES
+	REQUESTOR_TYPES,
+	USER_ROLES
 } from './constants.js';
 
 import type { User, UserPermission } from './api/users.js';
@@ -114,6 +115,31 @@ export function getRequestRequestorType(request) {
 
 export function isFellowRequest(request) {
 	return getRequestRequestorType(request) === 'fellow';
+}
+
+export function getCoordinators(request) {
+	let role;
+	switch (getRequestRequestorType(request)) {
+		case 'fellow':
+			role = USER_ROLES.FELLOWSHIP_COORDINATOR;
+			break;
+		case 'intern':
+			role = USER_ROLES.INTERN_COORDINATOR;
+			break;
+		case 'resident':
+		default:
+			role = USER_ROLES.RESIDENCY_COORDINATOR;
+			break;
+	}
+	return Meteor.users.find({
+		role,
+		inactive: {
+			$in: [
+				null,
+				false
+			]
+		}
+	}).fetch();
 }
 
 export function article(noun) {
