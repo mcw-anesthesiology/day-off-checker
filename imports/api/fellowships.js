@@ -46,8 +46,8 @@ Meteor.methods({
 				type: String,
 				label: 'Fellowship number' // TODO: restrict this to actual numbers?
 			},
-			administrator: {
-				type: String,
+			administrators: {
+				type: [String],
 				label: 'Fellowship administrator username',
 				allowedValues: map(fellowshipAdmins, 'username')
 			}
@@ -55,8 +55,9 @@ Meteor.methods({
 
 		Fellowships.insert(fellowship);
 
-		if(Meteor.isServer)
-			notifyNewFellowshipAdmin(fellowship);
+		if(Meteor.isServer) {
+			notifyNewFellowshipAdmins(fellowship.administrators, fellowship);
+		}
 	},
 	'updateFellowship'(fellowshipId, fellowship){
 		if(Meteor.user().role !== 'admin')
@@ -85,9 +86,9 @@ Meteor.methods({
 				type: String,
 				label: 'Fellowship number' // TODO: restrict this to actual numbers?
 			},
-			administrator: {
-				type: String,
-				label: 'Fellowship administrator username',
+			administrators: {
+				type: [String],
+				label: 'Fellowship administrator usernames',
 				allowedValues: map(fellowshipAdmins, 'username')
 			}
 		}).validate(fellowship);
@@ -96,19 +97,22 @@ Meteor.methods({
 
 		Fellowships.update(fellowshipId, fellowship);
 
-		if(Meteor.isServer && oldFellowship.administrator !== fellowship.administrator)
-			notifyNewFellowshipAdmin(fellowship);
+		if (Meteor.isServer) {
+			const newAdministrators = fellowship.administrators.filter(a => !oldFellowship.administrators.includes(a));
+			notifyNewFellowshipAdmins(newAdministrators, fellowship);
+		}
 	}
 });
 
-function notifyNewFellowshipAdmin(fellowship){
-	try {
-		const user = Accounts.findUserByUsername(fellowship.administrator);
-		Email.send({
-			from: APP_ACCOUNTS_EMAIL_ADDRESS,
-			to: user.emails[0].address,
-			subject: 'New fellowship administrator',
-			html: `
+function notifyNewFellowshipAdmins(newAdministrators, fellowship){
+	for (const username of newAdministrators) {
+		try {
+			const user = Accounts.findUserByUsername(username);
+			Email.send({
+				from: APP_ACCOUNTS_EMAIL_ADDRESS,
+				to: user.emails[0].address,
+				subject: 'New fellowship administrator',
+				html: `
 				<html>
 					<body>
 						<h1>Hello ${user.name}</h1>
@@ -127,8 +131,9 @@ function notifyNewFellowshipAdmin(fellowship){
 					</body>
 				</html>`
 		});
-	} catch(e){
-		console.log('Error notifying new fellowship admin: ' + e);
-		handleError(e);
+		} catch(e){
+			console.log('Error notifying new fellowship admin: ' + e);
+			handleError(e);
+		}
 	}
 }

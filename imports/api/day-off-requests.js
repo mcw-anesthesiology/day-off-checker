@@ -31,6 +31,7 @@ import {
 	isRequestorType,
 	getRequestorType,
 	getRequestRequestorType,
+	isFellowRequest,
 	article,
 	capitalizeFirstLetter,
 	camelCaseToWords,
@@ -251,9 +252,9 @@ Meteor.methods({
 					label: 'Fellowship number',
 					allowedValues: map(fellowships, 'number')
 				},
-				'requestedFellowship.administrator': {
-					type: String,
-					label: 'Fellowship administrator',
+				'requestedFellowship.administrators': {
+					type: [String],
+					label: 'Fellowship administrators',
 					allowedValues: map(fellowshipAdmins, 'username')
 				},
 				additionalFellowshipInfo: {
@@ -339,7 +340,7 @@ Meteor.methods({
 			if (confirmationRequest.status !== 'approved')
 				allApproved = false;
 		}
-		if (allApproved) {
+		if (allApproved || isFellowRequest(request)) {
 			DayOffRequests.update({ _id: requestId }, {
 				$set: {
 					status: 'approved'
@@ -502,7 +503,9 @@ function getUsersToNotify(request) {
 			$or.push(
 				{
 					role: USER_ROLES.FELLOWSHIP_ADMIN,
-					username: request.requestedFellowship.administrator
+					username: {
+						$in: request.requestedFellowship.administrators
+					}
 				},
 				{ role: USER_ROLES.FELLOWSHIP_COORDINATOR }
 			);
@@ -710,7 +713,9 @@ function getUsersForConfirmation(request) {
 	// FIXME: This shouldn't have this special case but idc right now
 	if (requestType === 'fellow')
 		return Meteor.users.find({
-			username: request.requestedFellowship.administrator,
+			username: {
+				$in: request.requestedFellowship.administrators,
+			},
 			inactive: {
 				$in: [
 					null,
@@ -1009,19 +1014,28 @@ function sendConfirmationRequests(request, users = getUsersForConfirmation(reque
 
 	if (sendRequestorNotification) {
 		let approvers;
-		switch (getRequestRequestorType(request)) {
-			case 'fellow':
-				approvers = (users && users[0] && users[0].name)
-					? users[0].name
-					: 'the fellowship director';
-				break;
-			case 'intern':
-				approvers = 'the intern coordinator';
-				break;
-			case 'resident':
-			default:
-				approvers = 'the chiefs';
-				break;
+
+		try {
+			const userNames = users.map(u => u.name);
+			userNames[userNames.length - 1] = 'and ' + userNames[userNames.length - 1];
+			approvers = userNames.join(', ');
+		} catch (err) {
+			console.error(err);
+		}
+
+		if (!approvers) {
+			switch (getRequestRequestorType(request)) {
+				case 'fellow':
+					approvers = 'the fellowship director(s)';
+					break;
+				case 'intern':
+					approvers = 'the intern coordinator';
+					break;
+				case 'resident':
+				default:
+					approvers = 'the chiefs';
+					break;
+			}
 		}
 
 		try {

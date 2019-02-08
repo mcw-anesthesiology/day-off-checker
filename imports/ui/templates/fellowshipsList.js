@@ -33,7 +33,11 @@ Template.fellowshipsList.helpers({
 				{ key: '_id', label: 'ID' },
 				{ key: 'name', label: 'Name' },
 				{ key: 'number', label: 'Number' },
-				{ key: 'administrator', label: 'Director', fn: displayNameByUsername }
+				{ key: 'administrators', label: 'Directors',
+					fn(administrators) {
+						return administrators.map(displayNameByUsername).join(', ');
+					}
+				}
 			]
 		};
 	}
@@ -61,7 +65,7 @@ Template.editFellowship.helpers({
 		}).fetch();
 	},
 	isFellowshipAdmin(fellowship, fellowshipAdmin){
-		if(fellowship.administrator === fellowshipAdmin.username)
+		if(fellowship.administrators.includes(fellowshipAdmin.username))
 			return 'selected';
 	}
 });
@@ -74,10 +78,17 @@ Template.editFellowship.events({
 		event.preventDefault();
 		const form = event.target;
 		const formArray = $(form).serializeArray();
+
 		const fellowshipId = Session.get('fellowshipToEdit')._id;
-		let fellowship = {};
+		let fellowship = {
+			administrators: []
+		};
 		for(let i of formArray){
-			fellowship[i.name] = i.value;
+			if (i.name === 'administrators') {
+				fellowship.administrators.push(i.value);
+			} else {
+				fellowship[i.name] = i.value;
+			}
 		}
 		if(fellowshipId)
 			Meteor.call('updateFellowship', fellowshipId, fellowship, (err) => {

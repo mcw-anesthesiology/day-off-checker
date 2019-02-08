@@ -33,8 +33,8 @@
 					<input type="text" class="form-control" id="number" name="number" value="{{fellowship.number}}" placeholder="Number" required />
 				</div>
 				<div class="form-group col-lg-3">
-					<label for="administrator">Administrator</label>
-					<select class="form-control" id="administrator" name="administrator" required>
+					<label for="administrators">Administrators</label>
+					<select class="form-control" id="administrators" name="administrators" multiple required>
 						<option value="" selected disabled hidden>Select an administrator</option>
 {{#each fellowshipAdmin in fellowshipAdmins}}
 						<option value="{{fellowshipAdmin.username}}" {{isFellowshipAdmin fellowship fellowshipAdmin}}>{{fellowshipAdmin.name}}</option>
