@@ -52,12 +52,12 @@ Accounts.emailTemplates.enrollAccount.html = (user, url) => {
 			roleDescription = 'As an administrator, you have full access to create and manage accounts and locations, and view all day off requests.';
 			break;
 		case USER_ROLES.CHIEF:
-			roleDescription = 'As a chief, you have full access to view all day off requests, and must approve or deny all I-Day requests. '
-				+ 'You will be notified for all sick day submissions and I-Day requests.';
+			roleDescription = `As a chief, you have full access to view all day off requests, and must approve or deny all ${DAY_OFF_TYPE_NAMES[DAY_OFF_TYPES.I_DAY]} requests. `
+				+ `You will be notified for all sick day submissions and ${DAY_OFF_TYPE_NAMES[DAY_OFF_TYPES.I_DAY]} requests.`;
 			break;
 		case USER_ROLES.LOCATION_ADMIN:
 			roleDescription = 'As a location administrator, you have full access to view all day off requests for the site under your administration. '
-				+ 'You will be notified for all sick day submissions and all I-Day requests for your location.';
+				+ `You will be notified for all sick day submissions and all ${DAY_OFF_TYPE_NAMES[DAY_OFF_TYPES.I_DAY]} requests for your location.`;
 			break;
 		case USER_ROLES.FELLOWSHIP_ADMIN:
 			roleDescription = 'As a fellowship director, you have full access to view all requests for your fellowship, and must approve or deny all meeting or vacation requests. '

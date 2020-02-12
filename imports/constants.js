@@ -52,7 +52,7 @@ export const DAY_OFF_TYPES = {
 
 export const DAY_OFF_TYPE_NAMES = {
 	[DAY_OFF_TYPES.SICK]: 'Sick day',
-	[DAY_OFF_TYPES.I_DAY]: 'I-Day',
+	[DAY_OFF_TYPES.I_DAY]: 'Meeting day',
 	[DAY_OFF_TYPES.MEETING]: 'Meeting',
 	[DAY_OFF_TYPES.VACATION]: 'Vacation'
 };

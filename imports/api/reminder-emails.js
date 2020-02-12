@@ -4,7 +4,7 @@ import { Mongo } from 'meteor/mongo';
 
 import { handleError } from 'meteor/saucecode:rollbar';
 
-import { ADMIN_EMAIL_ADDRESS, APP_NOTIFICATION_EMAIL_ADDRESS } from '../constants.js';
+import { APP_ACCOUNTS_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS, DAY_OFF_TYPES, DAY_OFF_TYPE_NAMES } from '../constants.js';
 import { displayDateRange } from '../utils.js';
 
 
@@ -42,7 +42,7 @@ export function scheduleReminder(request, user, remindTime){
 		email: {
 			to: user.emails[0].address,
 			from: APP_NOTIFICATION_EMAIL_ADDRESS,
-			subject: 'I-Day Request Approval Reminder',
+			subject: `${DAY_OFF_TYPE_NAMES[DAY_OFF_TYPES.I_DAY]} Request Approval Reminder`,
 			html: `
 				<html>
 					<body>
@@ -50,7 +50,7 @@ export function scheduleReminder(request, user, remindTime){
 
 						<p>
 							This email is reminding you that <a href="${requestUrl}">
-							${request.requestorName}'s I-Day request for ${displayDateRange(request.requestedDate)}</a>
+							${request.requestorName}'s ${DAY_OFF_TYPE_NAMES[DAY_OFF_TYPES.I_DAY]} request for ${displayDateRange(request.requestedDate)}</a>
 							has been approved.
 						</p>
 

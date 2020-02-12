@@ -10,7 +10,7 @@ import { handleError } from 'meteor/saucecode:rollbar';
 
 import { Fellowships } from './fellowships.js';
 
-import { APP_ACCOUNTS_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS } from '../constants.js';
+import { APP_ACCOUNTS_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS, DAY_OFF_TYPES, DAY_OFF_TYPE_NAMES } from '../constants.js';
 
 import map from 'lodash/map';
 
@@ -153,7 +153,7 @@ function notifyNewLocationAdmin(location){
 						</p>
 						<p>
 							You will be notified when anyone from this location requests a day off, and you will have to login
-							to approve or deny their I-Day requests. You can do this via the link sent to you in the email,
+							to approve or deny their ${DAY_OFF_TYPE_NAMES[DAY_OFF_TYPES.I_DAY]} requests. You can do this via the link sent to you in the email,
 							or via the <a href="${Meteor.absoluteUrl('list')}">requests list</a> by clicking on the request in the table.
 						</p>
 						<p>If you have any questions or concerns please contact me at <a href="mailto:${ADMIN_EMAIL_ADDRESS}">${ADMIN_EMAIL_ADDRESS}</a>.</p>
