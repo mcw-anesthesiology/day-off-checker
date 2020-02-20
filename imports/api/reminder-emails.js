@@ -4,7 +4,7 @@ import { Mongo } from 'meteor/mongo';
 
 import { handleError } from 'meteor/saucecode:rollbar';
 
-import { APP_ACCOUNTS_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS, DAY_OFF_TYPES, DAY_OFF_TYPE_NAMES } from '../constants.js';
+import { APP_ACCOUNTS_EMAIL_ADDRESS, APP_NOTIFICATION_EMAIL_ADDRESS, ADMIN_EMAIL_ADDRESS, DAY_OFF_TYPES, DAY_OFF_TYPE_NAMES } from '../constants.js';
 import { displayDateRange } from '../utils.js';
 
 
