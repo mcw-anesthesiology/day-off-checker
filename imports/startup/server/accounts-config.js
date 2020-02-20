@@ -4,7 +4,9 @@ import {
 	APP_SITE_NAME,
 	APP_ACCOUNTS_EMAIL_ADDRESS,
 	ADMIN_EMAIL_ADDRESS,
-	USER_ROLES
+	USER_ROLES,
+	DAY_OFF_TYPE_NAMES,
+	DAY_OFF_TYPES
 } from '../../constants.js';
 
 Accounts.onCreateUser((options, user) => {
