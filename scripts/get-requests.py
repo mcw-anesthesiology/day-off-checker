@@ -8,10 +8,21 @@ def main():
     client = MongoClient(os.getenv("MONGO_URL"))
     db = client["day-off-checker"]
     dor = db["dayOffRequests"]
-    approved = dor.find({"dayOffType": "iDay"})
+
+    arg = sys.argv[1]
+    if arg == "iday":
+        get_idays(dor)
+    elif arg == "sick":
+        get_sick(dor)
+    else:
+        print("Pass day type as first argument (sick, iday)", file=sys.stderr)
+
+
+def get_idays(dor):
+    requests = dor.find({"dayOffType": "iDay"})
 
     residents = {}
-    for request in approved:
+    for request in requests:
         email = request["requestorEmail"].lower()
         if email not in residents:
             residents[email] = []
@@ -52,6 +63,37 @@ def main():
                     request["requestReason"],
                     request["status"],
                     "\n\n".join(denial_reasons),
+                ]
+            )
+
+
+def get_sick(dor):
+    requests = dor.find({"dayOffType": "sick"})
+
+    residents = {}
+    for request in requests:
+        email = request["requestorEmail"].lower()
+        if email not in residents:
+            residents[email] = []
+
+        residents[email].append(request)
+
+    writer = csv.writer(sys.stdout)
+    writer.writerow(
+        ["Email", "Name", "Request start", "Request end", "Request reason",]
+    )
+
+    l = sorted(list(residents.items()), key=lambda p: p[0])
+    for email, requests in l:
+        for request in requests:
+
+            writer.writerow(
+                [
+                    email,
+                    request["requestorName"],
+                    request["requestedDate"][0],
+                    request["requestedDate"][1],
+                    request["requestReason"],
                 ]
             )
 
