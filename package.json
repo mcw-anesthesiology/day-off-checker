@@ -3,10 +3,10 @@
   "private": true,
   "scripts": {
     "start": "MAIL_URL=smtp://40701ebe2b9d2c3ec:18d0ca555fd201@smtp.mailtrap.io:2525/ meteor run --settings settings.json",
-    "setup:testing": "cd .mup/testing/ && mup setup",
-    "setup:production": "cd .mup/production/ && mup setup",
-    "deploy:testing": "cd .mup/testing/ && mup deploy",
-    "deploy:production": "cd .mup/production/ && mup deploy",
+    "setup:testing": "cd .mup/testing/ && ../../node_modules/node/bin/node ../../node_modules/.bin/mup setup",
+    "setup:production": "cd .mup/production/ && ../../node_modules/node/bin/node ../../node_modules/.bin/mup setup",
+    "deploy:testing": "cd .mup/testing/ &&  ../../node_modules/node/bin/node ../../node_modules/.bin/mup deploy",
+    "deploy:production": "cd .mup/production/ && ../../node_modules/node/bin/node ../../node_modules/.bin/mup deploy",
     "logs:testing": "cd .mup/testing/ && mup logs",
     "logs:production": "cd .mup/production/ && mup logs"
   },
@@ -42,7 +42,8 @@
     "eslint-plugin-react": "^7.5.1",
     "flow-bin": "^0.65.0",
     "flow-typed": "^2.2.3",
-    "mup": "^1.2.0",
+    "mup": "^1.5.2",
+    "node": "^12.0.0",
     "styled-jsx": "^2.2.1"
   }
 }
