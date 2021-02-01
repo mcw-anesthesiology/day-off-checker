@@ -122,9 +122,6 @@ if (Meteor.isClient) {
 
 Meteor.methods({
 	'dayOffRequests.insert'(request) {
-		if (request.requestReason === '(None)')
-			request.requestReason = '';
-
 		const locations = Locations.find({}).fetch();
 		const locationAdmins = Meteor.users.find({ role: 'location_admin' }).fetch();
 
@@ -193,7 +190,8 @@ Meteor.methods({
 			},
 			requestReason: {
 				type: String,
-				label: 'Reason'
+				label: 'Reason',
+				min: 1 // Not empty
 			}
 		};
 

@@ -295,11 +295,18 @@ Template.dayOffEntry.events({
 					value = Locations.findOne(inputValue);
 				}
 				break;
-			case DAY_OFF_FIELDS.REASON:
-				value = inputValue.trim();
-				if (!value)
-					value = '(None)';
+			case DAY_OFF_FIELDS.REASON: {
+				const input = inputValue.trim();
+				if (input) {
+					value = input;
+				} else {
+					Session.set(
+						'errorAlert',
+						'Please enter a reason'
+					);
+				}
 				break;
+			}
 			case DAY_OFF_FIELDS.ADDITIONAL_FELLOWSHIP_INFO:
 				// Handled in template
 				break;
