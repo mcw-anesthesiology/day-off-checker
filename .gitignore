@@ -1,3 +1,6 @@
 node_modules/
 *.pem
 .venv/
+.mup/
+.server-utils/backup-mongodb.sh
+settings.json
