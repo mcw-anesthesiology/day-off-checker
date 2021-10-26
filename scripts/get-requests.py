@@ -32,6 +32,7 @@ def get_idays(dor):
     writer = csv.writer(sys.stdout)
     writer.writerow(
         [
+            "Request ID",
             "Email",
             "Name",
             "Request start",
@@ -47,15 +48,15 @@ def get_idays(dor):
         for request in requests:
             denial_reasons = []
             if request["status"] == "denied":
-                print(request, file=sys.stderr)
                 denial_reasons = [
-                    r["reason"]
+                    r.get("reason", "")
                     for r in request["confirmationRequests"]
                     if r["status"] == "denied"
                 ]
 
             writer.writerow(
                 [
+                    request["_id"],
                     email,
                     request["requestorName"],
                     request["requestedDate"][0],
@@ -80,7 +81,14 @@ def get_sick(dor):
 
     writer = csv.writer(sys.stdout)
     writer.writerow(
-        ["Email", "Name", "Request start", "Request end", "Request reason",]
+        [
+            "Request ID",
+            "Email",
+            "Name",
+            "Request start",
+            "Request end",
+            "Request reason",
+        ]
     )
 
     l = sorted(list(residents.items()), key=lambda p: p[0])
@@ -89,6 +97,7 @@ def get_sick(dor):
 
             writer.writerow(
                 [
+                    request["_id"],
                     email,
                     request["requestorName"],
                     request["requestedDate"][0],
